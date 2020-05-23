@@ -32,7 +32,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	user := authenticator.UserFactory().NewUser(param.UserID)
 
-	ticket, err := user.NewTicket(now, param.Path)
+	ticket, err := user.NewTicket(param.Path, now)
 	if err != nil {
 		return nil, ErrUserAccessDenied
 	}

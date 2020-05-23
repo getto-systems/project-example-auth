@@ -65,7 +65,7 @@ func (ticket Ticket) IsRenewRequired(now time.Time) bool {
 	return now.Before(ticket.Expires().Add(renewThreshold))
 }
 
-func (user User) NewTicket(now time.Time, path Path) (Ticket, error) {
+func (user User) NewTicket(path Path, now time.Time) (Ticket, error) {
 	userID := user.userID
 	roles := user.db.UserRoles(userID)
 

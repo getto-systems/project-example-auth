@@ -32,7 +32,7 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 	if ticket.IsRenewRequired(now) {
 		user := authenticator.UserFactory().NewUser(ticket.UserID())
 
-		ticket, err := user.NewTicket(now, param.Path)
+		ticket, err := user.NewTicket(param.Path, now)
 		if err != nil {
 			return nil, ErrUserAccessDenied
 		}
