@@ -15,9 +15,7 @@ import (
 	"github.com/getto-systems/project-example-id/infra/serializer"
 
 	"github.com/getto-systems/project-example-id/http_handler"
-
-	auth_password "github.com/getto-systems/project-example-id/http_handler/auth/password"
-	auth_renew "github.com/getto-systems/project-example-id/http_handler/auth/renew"
+	"github.com/getto-systems/project-example-id/http_handler/auth"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
@@ -60,14 +58,14 @@ func main() {
 		handler,
 	))
 }
-func authRenewHandler(server *server) auth_renew.Handler {
-	return auth_renew.Handler{
+func authRenewHandler(server *server) auth.RenewHandler {
+	return auth.RenewHandler{
 		CookieDomain:  server.cookieDomain,
 		Authenticator: server,
 	}
 }
-func authPasswordHandler(server *server) auth_password.Handler {
-	return auth_password.Handler{
+func authPasswordHandler(server *server) auth.PasswordHandler {
+	return auth.PasswordHandler{
 		CookieDomain:  server.cookieDomain,
 		Authenticator: server,
 	}
@@ -130,12 +128,12 @@ func initDB() (memory.MemoryStore, error) {
 }
 
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
-func (server *server) UserRepository() user.UserRepository {
-	return server.db
+func (server *server) UserFactory() user.UserFactory {
+	return user.NewUserFactory(server.db)
 }
 
-func (server *server) UserPasswordRepository() user.UserPasswordRepository {
-	return server.db
+func (server *server) UserPasswordFactory() user.UserPasswordFactory {
+	return user.NewUserPasswordFactory(server.db)
 }
 
 func (server *server) TicketSerializer() token.TicketSerializer {

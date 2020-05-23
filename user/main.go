@@ -5,12 +5,13 @@ import (
 	"time"
 )
 
-var renewThreshold = time.Duration(5 * 1_000_000_000)
 var expireDuration = time.Duration(30 * 1_000_000_000)
+var renewThreshold = time.Duration(5 * 1_000_000_000)
 
 type User struct {
+	db UserRepository
+
 	userID UserID
-	roles  Roles
 }
 
 type UserRepository interface {
@@ -19,27 +20,41 @@ type UserRepository interface {
 
 type UserID string
 type Roles []string
+type Path string
 
 func (user User) UserID() UserID {
 	return user.userID
 }
 
-func (user User) Roles() Roles {
-	return user.roles
+type UserFactory struct {
+	db UserRepository
 }
 
-func (user User) NewTicket(now time.Time) Ticket {
-	expires := now.Add(expireDuration)
-	return Ticket{user, expires}
+func NewUserFactory(db UserRepository) UserFactory {
+	return UserFactory{db}
+}
+
+func (f UserFactory) NewUser(userID UserID) User {
+	return User{f.db, userID}
 }
 
 type Ticket struct {
-	user    User
-	expires time.Time
+	userID     UserID
+	roles      Roles
+	authorized time.Time
+	expires    time.Time
 }
 
-func (ticket Ticket) User() User {
-	return ticket.user
+func (ticket Ticket) UserID() UserID {
+	return ticket.userID
+}
+
+func (ticket Ticket) Roles() Roles {
+	return ticket.roles
+}
+
+func (ticket Ticket) Authorized() time.Time {
+	return ticket.authorized
 }
 
 func (ticket Ticket) Expires() time.Time {
@@ -50,16 +65,43 @@ func (ticket Ticket) IsRenewRequired(now time.Time) bool {
 	return now.Before(ticket.Expires().Add(renewThreshold))
 }
 
-func NewUser(userID UserID, roles Roles, path Path) (User, error) {
-	if !roles.isAccessible(path) {
-		return User{}, fmt.Errorf("%s is not accessible in role: [%v]", path, roles)
-	}
+func (user User) NewTicket(now time.Time, path Path) (Ticket, error) {
+	userID := user.userID
+	roles := user.db.UserRoles(userID)
 
-	return User{userID, roles}, nil
+	authorized := now
+	expires := now.Add(expireDuration)
+
+	return RestrictTicket(path, TicketData{
+		userID,
+		roles,
+		authorized,
+		expires,
+	})
 }
 
-type Path string
+func RestrictTicket(path Path, data TicketData) (Ticket, error) {
+	var nullTicket Ticket
+
+	if !data.Roles.isAccessible(path) {
+		return nullTicket, fmt.Errorf("%s is not accessible as role: [%v]", path, data.Roles)
+	}
+
+	return Ticket{
+		data.UserID,
+		data.Roles,
+		data.Authorized,
+		data.Expires,
+	}, nil
+}
 
 func (roles Roles) isAccessible(path Path) bool {
 	return true // TODO fix: accessible check
+}
+
+type TicketData struct {
+	UserID     UserID
+	Roles      Roles
+	Authorized time.Time
+	Expires    time.Time
 }

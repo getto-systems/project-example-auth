@@ -14,9 +14,10 @@ type TicketJsonSerializer struct {
 }
 
 type TicketTokenJson struct {
-	UserID  string   `json:"user_id"`
-	Roles   []string `json:"roles"`
-	Expires int64    `json:"expires"`
+	UserID     string   `json:"user_id"`
+	Roles      []string `json:"roles"`
+	Authorized int64    `json:"authorized"`
+	Expires    int64    `json:"expires"`
 }
 
 type TicketInfoJson struct {
@@ -43,23 +44,20 @@ func (TicketJsonSerializer) Parse(raw token.TicketToken, path user.Path) (user.T
 		return nullTicket, err
 	}
 
-	user, err := user.NewUser(
-		user.UserID(data.UserID),
-		user.Roles(data.Roles),
-		path,
-	)
-	if err != nil {
-		return nullTicket, err
-	}
-
-	return user.NewTicket(time.Unix(data.Expires, 0)), nil
+	return user.RestrictTicket(path, user.TicketData{
+		UserID:     user.UserID(data.UserID),
+		Roles:      data.Roles,
+		Authorized: time.Unix(data.Authorized, 0),
+		Expires:    time.Unix(data.Expires, 0),
+	})
 }
 
 func (TicketJsonSerializer) Token(ticket user.Ticket) (token.TicketToken, error) {
 	data, err := json.Marshal(TicketTokenJson{
-		UserID:  string(ticket.User().UserID()),
-		Roles:   []string(ticket.User().Roles()),
-		Expires: ticket.Expires().Unix(),
+		UserID:     string(ticket.UserID()),
+		Roles:      []string(ticket.Roles()),
+		Authorized: ticket.Authorized().Unix(),
+		Expires:    ticket.Expires().Unix(),
 	})
 	if err != nil {
 		return nil, err
@@ -75,8 +73,8 @@ func (serializer TicketJsonSerializer) Info(ticket user.Ticket) (token.TicketInf
 	}
 
 	data, err := json.Marshal(TicketInfoJson{
-		UserID: string(ticket.User().UserID()),
-		Roles:  []string(ticket.User().Roles()),
+		UserID: string(ticket.UserID()),
+		Roles:  []string(ticket.Roles()),
 		Token:  string(token),
 	})
 	if err != nil {

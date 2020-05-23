@@ -15,6 +15,6 @@ func (store MemoryStore) UserRoles(userID user.UserID) user.Roles {
 	return nil // TODO fetch store data
 }
 
-func (store MemoryStore) MatchUserPassword(userID user.UserID, password user.UserPassword) bool {
+func (store MemoryStore) MatchUserPassword(userID user.UserID, password user.Password) bool {
 	return true // TODO match store data
 }
