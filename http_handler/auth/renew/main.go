@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/getto-systems/project-example-id/http_handler"
 	auth_handler "github.com/getto-systems/project-example-id/http_handler/auth"
@@ -76,7 +75,6 @@ func param(r *http.Request) (auth_renew.RenewParam, error) {
 	return auth_renew.RenewParam{
 		TicketToken: ticketToken,
 		Path:        user.Path(input.Path),
-		Now:         time.Now().UTC(),
 	}, nil
 }
 

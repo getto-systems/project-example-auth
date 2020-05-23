@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -144,4 +145,8 @@ func (server *server) TicketSerializer() token.TicketSerializer {
 
 func (server *server) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
 	return server.awsCloudFrontSerializer
+}
+
+func (server *server) Now() time.Time {
+	return time.Now().UTC()
 }

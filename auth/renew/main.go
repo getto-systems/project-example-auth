@@ -12,12 +12,12 @@ type Authenticator interface {
 	UserRepository() user.UserRepository
 	TicketSerializer() token.TicketSerializer
 	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
+	Now() time.Time
 }
 
 type RenewParam struct {
 	TicketToken token.TicketToken
 	Path        user.Path
-	Now         time.Time
 }
 
 func Renew(authenticator Authenticator, param RenewParam, handler auth.TokenHandler) (token.TicketInfo, error) {
@@ -26,13 +26,15 @@ func Renew(authenticator Authenticator, param RenewParam, handler auth.TokenHand
 		return nil, auth.ErrTicketTokenParseFailed
 	}
 
-	if ticket.IsRenewRequired(param.Now) {
+	now := authenticator.Now()
+
+	if ticket.IsRenewRequired(now) {
 		user, err := newUser(authenticator, ticket.User().UserID(), param.Path)
 		if err != nil {
 			return nil, auth.ErrUserAccessDenied
 		}
 
-		ticket = user.NewTicket(param.Now)
+		ticket = user.NewTicket(now)
 
 		ticketToken, err := ticketToken(authenticator, ticket)
 		if err != nil {

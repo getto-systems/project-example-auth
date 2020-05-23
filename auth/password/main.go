@@ -14,13 +14,13 @@ type Authenticator interface {
 	UserPasswordRepository() user_password.UserPasswordRepository
 	TicketSerializer() token.TicketSerializer
 	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
+	Now() time.Time
 }
 
 type AuthParam struct {
 	UserID       user.UserID
 	UserPassword user_password.UserPassword
 	Path         user.Path
-	Now          time.Time
 }
 
 func Auth(authenticator Authenticator, param AuthParam, handler auth.TokenHandler) (token.TicketInfo, error) {
@@ -33,7 +33,7 @@ func Auth(authenticator Authenticator, param AuthParam, handler auth.TokenHandle
 		return nil, auth.ErrUserAccessDenied
 	}
 
-	ticket := user.NewTicket(param.Now)
+	ticket := user.NewTicket(authenticator.Now())
 
 	ticketToken, err := ticketToken(authenticator, ticket)
 	if err != nil {

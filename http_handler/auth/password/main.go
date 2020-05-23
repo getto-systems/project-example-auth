@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/getto-systems/project-example-id/http_handler"
 	auth_handler "github.com/getto-systems/project-example-id/http_handler/auth"
@@ -74,7 +73,6 @@ func param(r *http.Request) (auth_password.AuthParam, error) {
 		UserID:       user.UserID(input.UserID),
 		UserPassword: user_password.UserPassword(input.UserPassword),
 		Path:         user.Path(input.Path),
-		Now:          time.Now().UTC(),
 	}, nil
 }
 
