@@ -13,7 +13,6 @@ import (
 	auth_password "github.com/getto-systems/project-example-id/auth/password"
 
 	"github.com/getto-systems/project-example-id/user"
-	user_password "github.com/getto-systems/project-example-id/user/password"
 )
 
 type Handler struct {
@@ -71,7 +70,7 @@ func param(r *http.Request) (auth_password.AuthParam, error) {
 
 	return auth_password.AuthParam{
 		UserID:       user.UserID(input.UserID),
-		UserPassword: user_password.UserPassword(input.UserPassword),
+		UserPassword: user.UserPassword(input.UserPassword),
 		Path:         user.Path(input.Path),
 	}, nil
 }

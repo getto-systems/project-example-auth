@@ -6,12 +6,11 @@ import (
 	"github.com/getto-systems/project-example-id/auth"
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
-	user_password "github.com/getto-systems/project-example-id/user/password"
 )
 
 type Authenticator interface {
 	UserRepository() user.UserRepository
-	UserPasswordRepository() user_password.UserPasswordRepository
+	UserPasswordRepository() user.UserPasswordRepository
 	TicketSerializer() token.TicketSerializer
 	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 	Now() time.Time
@@ -19,7 +18,7 @@ type Authenticator interface {
 
 type AuthParam struct {
 	UserID       user.UserID
-	UserPassword user_password.UserPassword
+	UserPassword user.UserPassword
 	Path         user.Path
 }
 
@@ -58,7 +57,7 @@ func Auth(authenticator Authenticator, param AuthParam, handler auth.TokenHandle
 	return info, nil
 }
 
-func matchUserPassword(authenticator Authenticator, userID user.UserID, userPassword user_password.UserPassword) bool {
+func matchUserPassword(authenticator Authenticator, userID user.UserID, userPassword user.UserPassword) bool {
 	return authenticator.UserPasswordRepository().MatchUserPassword(userID, userPassword)
 }
 

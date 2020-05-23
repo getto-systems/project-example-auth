@@ -21,7 +21,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
-	user_password "github.com/getto-systems/project-example-id/user/password"
 )
 
 type server struct {
@@ -135,7 +134,7 @@ func (server *server) UserRepository() user.UserRepository {
 	return server.db
 }
 
-func (server *server) UserPasswordRepository() user_password.UserPasswordRepository {
+func (server *server) UserPasswordRepository() user.UserPasswordRepository {
 	return server.db
 }
 
