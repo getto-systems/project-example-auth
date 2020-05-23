@@ -9,12 +9,12 @@ var renewThreshold = time.Duration(5 * 1_000_000_000)
 var expireDuration = time.Duration(30 * 1_000_000_000)
 
 type Tokener interface {
-	Parse(Credential, Path) (*Ticket, error)
-	Credential(*Ticket) (Credential, error)
-	Token(*Ticket) ([]byte, error)
+	Parse(TicketToken, Path) (*Ticket, error)
+	TicketToken(*Ticket) (TicketToken, error)
+	FullToken(*Ticket) ([]byte, error)
 }
 
-type Credential string
+type TicketToken string
 
 type Ticket struct {
 	user    *User

@@ -17,8 +17,8 @@ type Handler struct {
 	tokener    auth.Tokener
 	cloudfront signature.CloudFrontSigner
 
-	userRepository  auth.UserRepository
-	credentialStore password.CredentialStore
+	userRepository         auth.UserRepository
+	userPasswordRepository password.UserPasswordRepository
 }
 
 func (h Handler) Domain() handler.Domain {
@@ -33,13 +33,13 @@ func (h Handler) CloudFrontSigner() signature.CloudFrontSigner {
 	return h.cloudfront
 }
 
-func NewHandler(domain handler.Domain, tokener auth.Tokener, cloudfront signature.CloudFrontSigner, userRepository auth.UserRepository, credentialStore password.CredentialStore) Handler {
+func NewHandler(domain handler.Domain, tokener auth.Tokener, cloudfront signature.CloudFrontSigner, userRepository auth.UserRepository, userPasswordRepository password.UserPasswordRepository) Handler {
 	return Handler{
 		domain,
 		tokener,
 		cloudfront,
 		userRepository,
-		credentialStore,
+		userPasswordRepository,
 	}
 }
 
@@ -65,10 +65,10 @@ func (h Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := auth.UserID(input.UserID)
-	credential := password.NewCredential(h.credentialStore, userID)
+	userPassword := password.NewUserPassword(h.userPasswordRepository, userID)
 	path := auth.Path(input.Path)
 
-	if !credential.Match(password.Password(input.Password)) {
+	if !userPassword.Match(password.Password(input.Password)) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -87,7 +87,7 @@ func (h Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.tokener.Token(ticket)
+	response, err := h.tokener.FullToken(ticket)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

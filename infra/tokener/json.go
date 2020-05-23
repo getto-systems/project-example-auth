@@ -12,13 +12,13 @@ import (
 type JsonTokener struct {
 }
 
-type JsonCredential struct {
+type TicketTokenJson struct {
 	UserID  string   `json:"user_id"`
 	Roles   []string `json:"roles"`
 	Expires int64    `json:"expires"`
 }
 
-type JsonToken struct {
+type FullTokenJson struct {
 	UserID string   `json:"user_id"`
 	Roles  []string `json:"roles"`
 	Token  string   `json:"token"`
@@ -28,13 +28,13 @@ func NewJsonTokener() JsonTokener {
 	return JsonTokener{}
 }
 
-func (JsonTokener) Parse(raw auth.Credential, path auth.Path) (*auth.Ticket, error) {
+func (JsonTokener) Parse(raw auth.TicketToken, path auth.Path) (*auth.Ticket, error) {
 	decoded, err := base64.StdEncoding.DecodeString(string(raw))
 	if err != nil {
 		return nil, err
 	}
 
-	var data JsonCredential
+	var data TicketTokenJson
 	err = json.NewDecoder(strings.NewReader(string(decoded))).Decode(&data)
 	if err != nil {
 		return nil, err
@@ -52,26 +52,26 @@ func (JsonTokener) Parse(raw auth.Credential, path auth.Path) (*auth.Ticket, err
 	return user.NewTicket(time.Unix(data.Expires, 0)), nil
 }
 
-func (JsonTokener) Credential(ticket *auth.Ticket) (auth.Credential, error) {
-	data, err := json.Marshal(JsonCredential{
+func (JsonTokener) TicketToken(ticket *auth.Ticket) (auth.TicketToken, error) {
+	data, err := json.Marshal(TicketTokenJson{
 		UserID:  string(ticket.User().UserID()),
 		Roles:   []string(ticket.User().Roles()),
 		Expires: ticket.Expires().Unix(),
 	})
 	if err != nil {
-		return auth.Credential(""), err
+		return auth.TicketToken(""), err
 	}
 
-	return auth.Credential(base64.StdEncoding.EncodeToString(data)), nil
+	return auth.TicketToken(base64.StdEncoding.EncodeToString(data)), nil
 }
 
-func (tokener JsonTokener) Token(ticket *auth.Ticket) ([]byte, error) {
-	token, err := tokener.Credential(ticket)
+func (tokener JsonTokener) FullToken(ticket *auth.Ticket) ([]byte, error) {
+	token, err := tokener.FullToken(ticket)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := json.Marshal(JsonToken{
+	data, err := json.Marshal(FullTokenJson{
 		UserID: string(ticket.User().UserID()),
 		Roles:  []string(ticket.User().Roles()),
 		Token:  string(token),

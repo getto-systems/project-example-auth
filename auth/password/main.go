@@ -4,21 +4,21 @@ import (
 	"github.com/getto-systems/project-example-id/auth"
 )
 
-type Credential struct {
-	db     CredentialStore
+type UserPassword struct {
+	db     UserPasswordRepository
 	userID auth.UserID
 }
 
 type Password string
 
-type CredentialStore interface {
-	MatchPassword(auth.UserID, Password) bool
+type UserPasswordRepository interface {
+	MatchUserPassword(auth.UserID, Password) bool
 }
 
-func NewCredential(db CredentialStore, userID auth.UserID) Credential {
-	return Credential{db, userID}
+func NewUserPassword(db UserPasswordRepository, userID auth.UserID) UserPassword {
+	return UserPassword{db, userID}
 }
 
-func (credential Credential) Match(password Password) bool {
-	return credential.db.MatchPassword(credential.userID, password)
+func (userPassword UserPassword) Match(password Password) bool {
+	return userPassword.db.MatchUserPassword(userPassword.userID, password)
 }

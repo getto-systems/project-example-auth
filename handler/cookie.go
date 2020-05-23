@@ -12,7 +12,7 @@ type Domain string
 type CookieHandler interface {
 	Domain() Domain
 }
-type CredentialHandler interface {
+type AuthHandler interface {
 	CookieHandler
 	Tokener() auth.Tokener
 	CloudFrontSigner() signature.CloudFrontSigner
@@ -37,8 +37,8 @@ func SetCookie(h CookieHandler, w http.ResponseWriter, ticket *auth.Ticket, cook
 	})
 }
 
-func SetAuthCookie(h CredentialHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
-	err := SetCredentialCookie(h, w, ticket)
+func SetAuthCookie(h AuthHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
+	err := SetTicketCookie(h, w, ticket)
 	if err != nil {
 		return err
 	}

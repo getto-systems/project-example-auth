@@ -6,7 +6,7 @@ import (
 	"github.com/getto-systems/project-example-id/auth"
 )
 
-func SetCloudFrontCookie(h CredentialHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
+func SetCloudFrontCookie(h AuthHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
 	token, err := h.CloudFrontSigner().Sign(ticket.Expires())
 	if err != nil {
 		return err

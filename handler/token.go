@@ -8,17 +8,17 @@ import (
 
 const COOKIE_AUTH_TOKEN = "Getto-Example-Auth-Token"
 
-func ParseCookieToken(h CredentialHandler, r *http.Request, path auth.Path) (*auth.Ticket, error) {
+func ParseCookieToken(h AuthHandler, r *http.Request, path auth.Path) (*auth.Ticket, error) {
 	cookie, err := r.Cookie(COOKIE_AUTH_TOKEN)
 	if err != nil {
 		return nil, err
 	}
 
-	return h.Tokener().Parse(auth.Credential(cookie.Value), path)
+	return h.Tokener().Parse(auth.TicketToken(cookie.Value), path)
 }
 
-func SetCredentialCookie(h CredentialHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
-	value, err := h.Tokener().Credential(ticket)
+func SetTicketCookie(h AuthHandler, w http.ResponseWriter, ticket *auth.Ticket) error {
+	value, err := h.Tokener().TicketToken(ticket)
 	if err != nil {
 		return err
 	}

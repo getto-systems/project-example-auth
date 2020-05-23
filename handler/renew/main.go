@@ -85,7 +85,7 @@ func (h Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response, err := h.tokener.Token(ticket)
+	response, err := h.tokener.FullToken(ticket)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
