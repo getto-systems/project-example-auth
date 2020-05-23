@@ -14,7 +14,6 @@ import (
 	"github.com/getto-systems/project-example-id/infra/db/memory"
 	"github.com/getto-systems/project-example-id/infra/serializer"
 
-	"github.com/getto-systems/project-example-id/http_handler"
 	"github.com/getto-systems/project-example-id/http_handler/auth"
 
 	"github.com/getto-systems/project-example-id/token"
@@ -22,7 +21,7 @@ import (
 )
 
 type server struct {
-	cookieDomain http_handler.CookieDomain
+	cookieDomain auth.CookieDomain
 
 	cors cors.Options
 	tls  tls
@@ -88,7 +87,7 @@ func initServer() (*server, error) {
 	}
 
 	return &server{
-		cookieDomain: http_handler.CookieDomain(os.Getenv("DOMAIN")),
+		cookieDomain: auth.CookieDomain(os.Getenv("DOMAIN")),
 
 		cors: cors.Options{
 			AllowedOrigins:   []string{os.Getenv("ORIGIN")},

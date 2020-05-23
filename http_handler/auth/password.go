@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/http_handler"
-
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/user"
 )
 
 type PasswordHandler struct {
-	CookieDomain  http_handler.CookieDomain
+	CookieDomain  CookieDomain
 	Authenticator auth.PasswordAuthenticator
 }
 
@@ -27,12 +25,12 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	info, err := auth.Password(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
-		setter := http_handler.CookieSetter{
+		setter := CookieSetter{
 			ResponseWriter: w,
 			CookieDomain:   h.CookieDomain,
 			Ticket:         ticket,
 		}
-		SetAuthTokenCookie(setter, token)
+		setter.setAuthTokenCookie(token)
 	})
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))

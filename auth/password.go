@@ -8,10 +8,9 @@ import (
 )
 
 type PasswordAuthenticator interface {
+	Authenticator
 	UserFactory() user.UserFactory
 	UserPasswordFactory() user.UserPasswordFactory
-	TicketSerializer() token.TicketSerializer
-	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 	Now() time.Time
 }
 
@@ -37,24 +36,12 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 		return nil, ErrUserAccessDenied
 	}
 
-	ticketSerializer := authenticator.TicketSerializer()
-
-	ticketToken, err := ticketSerializer.Token(ticket)
+	err = handleTicketToken(authenticator, ticket, handler)
 	if err != nil {
-		return nil, ErrTicketTokenSerializeFailed
+		return nil, err
 	}
 
-	awsCloudFrontToken, err := authenticator.AwsCloudFrontSerializer().Token(ticket)
-	if err != nil {
-		return nil, ErrAwsCloudFrontTokenSerializeFailed
-	}
-
-	handler(ticket, Token{
-		TicketToken:        ticketToken,
-		AwsCloudFrontToken: awsCloudFrontToken,
-	})
-
-	info, err := ticketSerializer.Info(ticket)
+	info, err := authenticator.TicketSerializer().Info(ticket)
 	if err != nil {
 		return nil, ErrTicketInfoSerializeFailed
 	}

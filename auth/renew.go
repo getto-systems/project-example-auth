@@ -8,9 +8,8 @@ import (
 )
 
 type RenewAuthenticator interface {
+	Authenticator
 	UserFactory() user.UserFactory
-	TicketSerializer() token.TicketSerializer
-	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 	Now() time.Time
 }
 
@@ -37,20 +36,10 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 			return nil, ErrUserAccessDenied
 		}
 
-		ticketToken, err := ticketSerializer.Token(ticket)
+		err = handleTicketToken(authenticator, ticket, handler)
 		if err != nil {
-			return nil, ErrTicketTokenSerializeFailed
+			return nil, err
 		}
-
-		awsCloudFrontToken, err := authenticator.AwsCloudFrontSerializer().Token(ticket)
-		if err != nil {
-			return nil, ErrAwsCloudFrontTokenSerializeFailed
-		}
-
-		handler(ticket, Token{
-			TicketToken:        ticketToken,
-			AwsCloudFrontToken: awsCloudFrontToken,
-		})
 	}
 
 	info, err := ticketSerializer.Info(ticket)
