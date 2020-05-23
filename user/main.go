@@ -65,6 +65,16 @@ func (ticket Ticket) IsRenewRequired(now time.Time) bool {
 	return now.Before(ticket.Expires().Add(renewThreshold))
 }
 
+func (ticket Ticket) String() string {
+	return fmt.Sprintf(
+		"Ticket{userID:%s, roles:%s, authorized:%s, expires:%s}",
+		ticket.userID,
+		ticket.roles,
+		ticket.authorized.String(),
+		ticket.expires.String(),
+	)
+}
+
 func (user User) NewTicket(path Path, now time.Time) (Ticket, error) {
 	userID := user.userID
 	roles := user.db.UserRoles(userID)

@@ -13,8 +13,11 @@ import (
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
 	"github.com/getto-systems/project-example-id/infra/serializer"
+	"github.com/getto-systems/project-example-id/infra/simple_logger"
 
 	"github.com/getto-systems/project-example-id/http_handler/auth"
+
+	"github.com/getto-systems/project-example-id/logger"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
@@ -30,6 +33,8 @@ type server struct {
 	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 
 	db memory.MemoryStore
+
+	logger logger.Logger
 }
 
 type tls struct {
@@ -103,6 +108,8 @@ func initServer() (*server, error) {
 		awsCloudFrontSerializer: awsCloudFrontSerializer,
 
 		db: db,
+
+		logger: initLogger(),
 	}, nil
 }
 func initTicketSerializer() (serializer.TicketJsonSerializer, error) {
@@ -125,14 +132,22 @@ func initAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 func initDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
-
-// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
-func (server *server) UserFactory() user.UserFactory {
-	return user.NewUserFactory(server.db)
+func initLogger() logger.Logger {
+	switch os.Getenv("LOG_LEVEL") {
+	case "WARNING":
+		return simple_logger.NewWarningLogger()
+	case "INFO":
+		return simple_logger.NewInfoLogger()
+	case "DEBUG":
+		return simple_logger.NewDebugLogger()
+	default:
+		return simple_logger.NewErrorLogger()
+	}
 }
 
-func (server *server) UserPasswordFactory() user.UserPasswordFactory {
-	return user.NewUserPasswordFactory(server.db)
+// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
+func (server *server) Logger() logger.Logger {
+	return server.logger
 }
 
 func (server *server) TicketSerializer() token.TicketSerializer {
@@ -141,6 +156,14 @@ func (server *server) TicketSerializer() token.TicketSerializer {
 
 func (server *server) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
 	return server.awsCloudFrontSerializer
+}
+
+func (server *server) UserFactory() user.UserFactory {
+	return user.NewUserFactory(server.db)
+}
+
+func (server *server) UserPasswordFactory() user.UserPasswordFactory {
+	return user.NewUserPasswordFactory(server.db)
 }
 
 func (server *server) Now() time.Time {

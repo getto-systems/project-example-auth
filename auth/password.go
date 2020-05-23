@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/getto-systems/project-example-id/token"
@@ -20,10 +21,23 @@ type PasswordParam struct {
 	Path     user.Path
 }
 
+func (param PasswordParam) String() string {
+	return fmt.Sprintf(
+		"PasswordParam{UserID:%s, Password:[MASKED], Path:%s}",
+		param.UserID,
+		param.Path,
+	)
+}
+
 func Password(authenticator PasswordAuthenticator, param PasswordParam, handler TokenHandler) (token.TicketInfo, error) {
+	logger := authenticator.Logger()
+
+	logger.Debugf("password auth: %v", param)
+
 	userPassword := authenticator.UserPasswordFactory().NewUserPassword(param.UserID)
 
 	if !userPassword.Match(param.Password) {
+		logger.Auditf("password did not match: %s", param.UserID)
 		return nil, ErrUserPasswordDidNotMatch
 	}
 
@@ -31,8 +45,11 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	user := authenticator.UserFactory().NewUser(param.UserID)
 
+	logger.Debugf("new ticket: %v", param)
+
 	ticket, err := user.NewTicket(param.Path, now)
 	if err != nil {
+		logger.Auditf("access denied: %s; %v", err, param)
 		return nil, ErrUserAccessDenied
 	}
 
@@ -41,8 +58,11 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 		return nil, err
 	}
 
+	logger.Debugf("serialize ticket info: %v", ticket)
+
 	info, err := authenticator.TicketSerializer().Info(ticket)
 	if err != nil {
+		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
 		return nil, ErrTicketInfoSerializeFailed
 	}
 
