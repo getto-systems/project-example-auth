@@ -10,24 +10,29 @@ import (
 
 	"github.com/rs/cors"
 
-	"github.com/getto-systems/project-example-id/handler"
-	"github.com/getto-systems/project-example-id/handler/auth/password"
-	"github.com/getto-systems/project-example-id/handler/renew"
 	"github.com/getto-systems/project-example-id/infra/repository/memory"
-	"github.com/getto-systems/project-example-id/infra/signature/cloudfront"
 	"github.com/getto-systems/project-example-id/infra/tokener"
-	"github.com/getto-systems/project-example-id/signature"
+
+	"github.com/getto-systems/project-example-id/http_handler"
+
+	auth_password "github.com/getto-systems/project-example-id/http_handler/auth/password"
+	auth_renew "github.com/getto-systems/project-example-id/http_handler/auth/renew"
+
+	"github.com/getto-systems/project-example-id/token"
+	"github.com/getto-systems/project-example-id/user"
+	user_password "github.com/getto-systems/project-example-id/user/password"
 )
 
 type server struct {
-	domain      handler.Domain
-	allowOrigin []string
+	cookieDomain http_handler.CookieDomain
 
-	tls tls
+	cors cors.Options
+	tls  tls
 
-	db         memory.MemoryStore
-	tokener    tokener.JsonTokener
-	cloudfront *cloudfront.Signer
+	ticketTokener        tokener.TicketJsonTokener
+	awsCloudFrontTokener tokener.AwsCloudFrontTokener
+
+	db memory.MemoryStore
 }
 
 type tls struct {
@@ -36,42 +41,33 @@ type tls struct {
 }
 
 func main() {
-	config, err := initServer()
+	server, err := initServer()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/renew", renewHandler(config).Handle).Methods("POST")
-	router.HandleFunc("/auth/password", authPasswordHandler(config).Handle).Methods("POST")
+	router.HandleFunc("/renew", renewHandler(server).Handle).Methods("POST")
+	router.HandleFunc("/auth/password", authPasswordHandler(server).Handle).Methods("POST")
 
-	corsOptions := cors.New(cors.Options{
-		AllowedOrigins:   config.allowOrigin,
-		AllowedMethods:   []string{"POST"},
-		AllowCredentials: true,
-	})
+	corsOptions := cors.New(server.cors)
 
 	handler := corsOptions.Handler(router)
 
-	log.Fatal(http.ListenAndServeTLS(":8080", config.tls.cert, config.tls.key, handler))
+	log.Fatal(http.ListenAndServeTLS(":8080", server.tls.cert, server.tls.key, handler))
 }
-func renewHandler(config *server) renew.Handler {
-	return renew.NewHandler(
-		config.domain,
-		config.tokener,
-		config.cloudfront,
-		config.db,
-	)
+func renewHandler(server *server) auth_renew.Handler {
+	return auth_renew.Handler{
+		CookieDomain:  server.cookieDomain,
+		Authenticator: server,
+	}
 }
-func authPasswordHandler(config *server) password.Handler {
-	return password.NewHandler(
-		config.domain,
-		config.tokener,
-		config.cloudfront,
-		config.db,
-		config.db,
-	)
+func authPasswordHandler(server *server) auth_password.Handler {
+	return auth_password.Handler{
+		CookieDomain:  server.cookieDomain,
+		Authenticator: server,
+	}
 }
 
 func initServer() (*server, error) {
@@ -81,21 +77,41 @@ func initServer() (*server, error) {
 	}
 
 	return &server{
-		domain:      handler.Domain(os.Getenv("DOMAIN")),
-		allowOrigin: []string{os.Getenv("ORIGIN")},
+		cookieDomain: http_handler.CookieDomain(os.Getenv("DOMAIN")),
 
-		cloudfront: cloudfront.NewSigner(
-			cloudfront.Pem(cloudfrontPem),
-			cloudfront.BaseURL(os.Getenv("CLOUDFRONT_BASE_URL")),
-			signature.CloudFrontKeyPairID(os.Getenv("CLOUDFRONT_KEY_PAIR_ID")),
-		),
-
+		cors: cors.Options{
+			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
+			AllowedMethods:   []string{"POST"},
+			AllowCredentials: true,
+		},
 		tls: tls{
 			cert: os.Getenv("TLS_CERT"),
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		db:      memory.NewMemoryStore(),
-		tokener: tokener.NewJsonTokener(),
+		ticketTokener: tokener.NewTicketJsonTokener(),
+		awsCloudFrontTokener: tokener.NewAwsCloudFrontTokener(
+			tokener.AwsCloudFrontPem(cloudfrontPem),
+			tokener.AwsCloudFrontBaseURL(os.Getenv("CLOUDFRONT_BASE_URL")),
+			token.AwsCloudFrontKeyPairID(os.Getenv("CLOUDFRONT_KEY_PAIR_ID")),
+		),
+
+		db: memory.NewMemoryStore(),
 	}, nil
+}
+
+func (server *server) UserRepository() user.UserRepository {
+	return server.db
+}
+
+func (server *server) UserPasswordRepository() user_password.UserPasswordRepository {
+	return server.db
+}
+
+func (server *server) TicketTokener() token.TicketTokener {
+	return server.ticketTokener
+}
+
+func (server *server) AwsCloudFrontTokener() token.AwsCloudFrontTokener {
+	return server.awsCloudFrontTokener
 }

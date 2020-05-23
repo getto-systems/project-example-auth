@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getto-systems/project-example-id/auth"
+	"github.com/getto-systems/project-example-id/token"
+	"github.com/getto-systems/project-example-id/user"
 )
 
-type JsonTokener struct {
+type TicketJsonTokener struct {
 }
 
 type TicketTokenJson struct {
@@ -18,60 +19,62 @@ type TicketTokenJson struct {
 	Expires int64    `json:"expires"`
 }
 
-type FullTokenJson struct {
+type TicketInfoJson struct {
 	UserID string   `json:"user_id"`
 	Roles  []string `json:"roles"`
 	Token  string   `json:"token"`
 }
 
-func NewJsonTokener() JsonTokener {
-	return JsonTokener{}
+func NewTicketJsonTokener() TicketJsonTokener {
+	return TicketJsonTokener{}
 }
 
-func (JsonTokener) Parse(raw auth.TicketToken, path auth.Path) (*auth.Ticket, error) {
+func (TicketJsonTokener) Parse(raw token.TicketToken, path user.Path) (user.Ticket, error) {
+	var nullTicket user.Ticket
+
 	decoded, err := base64.StdEncoding.DecodeString(string(raw))
 	if err != nil {
-		return nil, err
+		return nullTicket, err
 	}
 
 	var data TicketTokenJson
 	err = json.NewDecoder(strings.NewReader(string(decoded))).Decode(&data)
 	if err != nil {
-		return nil, err
+		return nullTicket, err
 	}
 
-	user, err := auth.NewUser(
-		auth.UserID(data.UserID),
-		auth.Roles(data.Roles),
+	user, err := user.NewUser(
+		user.UserID(data.UserID),
+		user.Roles(data.Roles),
 		path,
 	)
 	if err != nil {
-		return nil, err
+		return nullTicket, err
 	}
 
 	return user.NewTicket(time.Unix(data.Expires, 0)), nil
 }
 
-func (JsonTokener) TicketToken(ticket *auth.Ticket) (auth.TicketToken, error) {
+func (TicketJsonTokener) Token(ticket user.Ticket) (token.TicketToken, error) {
 	data, err := json.Marshal(TicketTokenJson{
 		UserID:  string(ticket.User().UserID()),
 		Roles:   []string(ticket.User().Roles()),
 		Expires: ticket.Expires().Unix(),
 	})
 	if err != nil {
-		return auth.TicketToken(""), err
+		return nil, err
 	}
 
-	return auth.TicketToken(base64.StdEncoding.EncodeToString(data)), nil
+	return token.TicketToken(base64.StdEncoding.EncodeToString(data)), nil
 }
 
-func (tokener JsonTokener) FullToken(ticket *auth.Ticket) ([]byte, error) {
-	token, err := tokener.FullToken(ticket)
+func (tokener TicketJsonTokener) Info(ticket user.Ticket) (token.TicketInfo, error) {
+	token, err := tokener.Token(ticket)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := json.Marshal(FullTokenJson{
+	data, err := json.Marshal(TicketInfoJson{
 		UserID: string(ticket.User().UserID()),
 		Roles:  []string(ticket.User().Roles()),
 		Token:  string(token),
