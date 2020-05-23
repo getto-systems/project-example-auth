@@ -129,6 +129,7 @@ func initDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
 
+// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
 func (server *server) UserRepository() user.UserRepository {
 	return server.db
 }
