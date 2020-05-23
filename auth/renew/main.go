@@ -50,7 +50,7 @@ func Renew(authenticator Authenticator, param RenewParam, handler auth.TokenHand
 		})
 	}
 
-	info, err := info(authenticator, ticket)
+	info, err := ticketInfo(authenticator, ticket)
 	if err != nil {
 		return nil, auth.ErrTicketInfoSerializeFailed
 	}
@@ -78,6 +78,6 @@ func awsCloudFrontToken(authenticator Authenticator, ticket user.Ticket) (token.
 	return authenticator.AwsCloudFrontSerializer().Token(ticket)
 }
 
-func info(authenticator Authenticator, ticket user.Ticket) (token.TicketInfo, error) {
+func ticketInfo(authenticator Authenticator, ticket user.Ticket) (token.TicketInfo, error) {
 	return authenticator.TicketSerializer().Info(ticket)
 }
