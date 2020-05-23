@@ -4,7 +4,7 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-type AwsCloudFrontTokener interface {
+type AwsCloudFrontSerializer interface {
 	Token(user.Ticket) (AwsCloudFrontToken, error)
 }
 

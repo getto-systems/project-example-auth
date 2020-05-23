@@ -10,8 +10,8 @@ import (
 
 type Authenticator interface {
 	UserRepository() user.UserRepository
-	TicketTokener() token.TicketTokener
-	AwsCloudFrontTokener() token.AwsCloudFrontTokener
+	TicketSerializer() token.TicketSerializer
+	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 }
 
 type RenewParam struct {
@@ -36,12 +36,12 @@ func Renew(authenticator Authenticator, param RenewParam, handler auth.TokenHand
 
 		ticketToken, err := ticketToken(authenticator, ticket)
 		if err != nil {
-			return nil, auth.ErrTicketTokenEncodeFailed
+			return nil, auth.ErrTicketTokenSerializeFailed
 		}
 
 		awsCloudFrontToken, err := awsCloudFrontToken(authenticator, ticket)
 		if err != nil {
-			return nil, auth.ErrAwsCloudFrontTokenEncodeFailed
+			return nil, auth.ErrAwsCloudFrontTokenSerializeFailed
 		}
 
 		handler(ticket, auth.Token{
@@ -52,14 +52,14 @@ func Renew(authenticator Authenticator, param RenewParam, handler auth.TokenHand
 
 	info, err := info(authenticator, ticket)
 	if err != nil {
-		return nil, auth.ErrInfoEncodeFailed
+		return nil, auth.ErrTicketInfoSerializeFailed
 	}
 
 	return info, nil
 }
 
 func parseTicketToken(authenticator Authenticator, ticketToken token.TicketToken, path user.Path) (user.Ticket, error) {
-	return authenticator.TicketTokener().Parse(ticketToken, path)
+	return authenticator.TicketSerializer().Parse(ticketToken, path)
 }
 
 func newUser(authenticator Authenticator, userID user.UserID, path user.Path) (user.User, error) {
@@ -71,13 +71,13 @@ func newUser(authenticator Authenticator, userID user.UserID, path user.Path) (u
 }
 
 func ticketToken(authenticator Authenticator, ticket user.Ticket) (token.TicketToken, error) {
-	return authenticator.TicketTokener().Token(ticket)
+	return authenticator.TicketSerializer().Token(ticket)
 }
 
 func awsCloudFrontToken(authenticator Authenticator, ticket user.Ticket) (token.AwsCloudFrontToken, error) {
-	return authenticator.AwsCloudFrontTokener().Token(ticket)
+	return authenticator.AwsCloudFrontSerializer().Token(ticket)
 }
 
 func info(authenticator Authenticator, ticket user.Ticket) (token.TicketInfo, error) {
-	return authenticator.TicketTokener().Info(ticket)
+	return authenticator.TicketSerializer().Info(ticket)
 }

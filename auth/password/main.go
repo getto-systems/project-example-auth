@@ -12,8 +12,8 @@ import (
 type Authenticator interface {
 	UserRepository() user.UserRepository
 	UserPasswordRepository() password.UserPasswordRepository
-	TicketTokener() token.TicketTokener
-	AwsCloudFrontTokener() token.AwsCloudFrontTokener
+	TicketSerializer() token.TicketSerializer
+	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 }
 
 type AuthParam struct {
@@ -37,12 +37,12 @@ func Auth(authenticator Authenticator, param AuthParam, handler auth.TokenHandle
 
 	ticketToken, err := ticketToken(authenticator, ticket)
 	if err != nil {
-		return nil, auth.ErrTicketTokenEncodeFailed
+		return nil, auth.ErrTicketTokenSerializeFailed
 	}
 
 	awsCloudFrontToken, err := awsCloudFrontToken(authenticator, ticket)
 	if err != nil {
-		return nil, auth.ErrAwsCloudFrontTokenEncodeFailed
+		return nil, auth.ErrAwsCloudFrontTokenSerializeFailed
 	}
 
 	handler(ticket, auth.Token{
@@ -52,7 +52,7 @@ func Auth(authenticator Authenticator, param AuthParam, handler auth.TokenHandle
 
 	info, err := info(authenticator, ticket)
 	if err != nil {
-		return nil, auth.ErrInfoEncodeFailed
+		return nil, auth.ErrTicketInfoSerializeFailed
 	}
 
 	return info, nil
@@ -71,13 +71,13 @@ func newUser(authenticator Authenticator, userID user.UserID, path user.Path) (u
 }
 
 func ticketToken(authenticator Authenticator, ticket user.Ticket) (token.TicketToken, error) {
-	return authenticator.TicketTokener().Token(ticket)
+	return authenticator.TicketSerializer().Token(ticket)
 }
 
 func awsCloudFrontToken(authenticator Authenticator, ticket user.Ticket) (token.AwsCloudFrontToken, error) {
-	return authenticator.AwsCloudFrontTokener().Token(ticket)
+	return authenticator.AwsCloudFrontSerializer().Token(ticket)
 }
 
 func info(authenticator Authenticator, ticket user.Ticket) (token.TicketInfo, error) {
-	return authenticator.TicketTokener().Info(ticket)
+	return authenticator.TicketSerializer().Info(ticket)
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-type TicketTokener interface {
+type TicketSerializer interface {
 	Parse(TicketToken, user.Path) (user.Ticket, error)
 	Token(user.Ticket) (TicketToken, error)
 	Info(user.Ticket) (TicketInfo, error)

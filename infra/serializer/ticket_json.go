@@ -1,4 +1,4 @@
-package tokener
+package serializer
 
 import (
 	"encoding/base64"
@@ -10,7 +10,7 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-type TicketJsonTokener struct {
+type TicketJsonSerializer struct {
 }
 
 type TicketTokenJson struct {
@@ -25,11 +25,11 @@ type TicketInfoJson struct {
 	Token  string   `json:"token"`
 }
 
-func NewTicketJsonTokener() TicketJsonTokener {
-	return TicketJsonTokener{}
+func NewTicketJsonSerializer() TicketJsonSerializer {
+	return TicketJsonSerializer{}
 }
 
-func (TicketJsonTokener) Parse(raw token.TicketToken, path user.Path) (user.Ticket, error) {
+func (TicketJsonSerializer) Parse(raw token.TicketToken, path user.Path) (user.Ticket, error) {
 	var nullTicket user.Ticket
 
 	decoded, err := base64.StdEncoding.DecodeString(string(raw))
@@ -55,7 +55,7 @@ func (TicketJsonTokener) Parse(raw token.TicketToken, path user.Path) (user.Tick
 	return user.NewTicket(time.Unix(data.Expires, 0)), nil
 }
 
-func (TicketJsonTokener) Token(ticket user.Ticket) (token.TicketToken, error) {
+func (TicketJsonSerializer) Token(ticket user.Ticket) (token.TicketToken, error) {
 	data, err := json.Marshal(TicketTokenJson{
 		UserID:  string(ticket.User().UserID()),
 		Roles:   []string(ticket.User().Roles()),
@@ -68,8 +68,8 @@ func (TicketJsonTokener) Token(ticket user.Ticket) (token.TicketToken, error) {
 	return token.TicketToken(base64.StdEncoding.EncodeToString(data)), nil
 }
 
-func (tokener TicketJsonTokener) Info(ticket user.Ticket) (token.TicketInfo, error) {
-	token, err := tokener.Token(ticket)
+func (serializer TicketJsonSerializer) Info(ticket user.Ticket) (token.TicketInfo, error) {
+	token, err := serializer.Token(ticket)
 	if err != nil {
 		return nil, err
 	}

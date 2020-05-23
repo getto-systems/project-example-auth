@@ -11,7 +11,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
-	"github.com/getto-systems/project-example-id/infra/tokener"
+	"github.com/getto-systems/project-example-id/infra/serializer"
 
 	"github.com/getto-systems/project-example-id/http_handler"
 
@@ -29,8 +29,8 @@ type server struct {
 	cors cors.Options
 	tls  tls
 
-	ticketTokener        tokener.TicketJsonTokener
-	awsCloudFrontTokener tokener.AwsCloudFrontTokener
+	ticketSerializer        serializer.TicketJsonSerializer
+	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 
 	db memory.MemoryStore
 }
@@ -74,12 +74,12 @@ func authPasswordHandler(server *server) auth_password.Handler {
 }
 
 func initServer() (*server, error) {
-	ticketTokener, err := initTicketTokener()
+	ticketSerializer, err := initTicketSerializer()
 	if err != nil {
 		return nil, err
 	}
 
-	awsCloudFrontTokener, err := initAwsCloudFrontTokener()
+	awsCloudFrontSerializer, err := initAwsCloudFrontSerializer()
 	if err != nil {
 		return nil, err
 	}
@@ -102,26 +102,26 @@ func initServer() (*server, error) {
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		ticketTokener:        ticketTokener,
-		awsCloudFrontTokener: awsCloudFrontTokener,
+		ticketSerializer:        ticketSerializer,
+		awsCloudFrontSerializer: awsCloudFrontSerializer,
 
 		db: db,
 	}, nil
 }
-func initTicketTokener() (tokener.TicketJsonTokener, error) {
-	return tokener.NewTicketJsonTokener(), nil
+func initTicketSerializer() (serializer.TicketJsonSerializer, error) {
+	return serializer.NewTicketJsonSerializer(), nil
 }
-func initAwsCloudFrontTokener() (tokener.AwsCloudFrontTokener, error) {
-	var nullTokener tokener.AwsCloudFrontTokener
+func initAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
+	var nullSerializer serializer.AwsCloudFrontSerializer
 
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
-		return nullTokener, err
+		return nullSerializer, err
 	}
 
-	return tokener.NewAwsCloudFrontTokener(
-		tokener.AwsCloudFrontPem(pem),
-		tokener.AwsCloudFrontBaseURL(os.Getenv("AWS_CLOUDFRONT_BASE_URL")),
+	return serializer.NewAwsCloudFrontSerializer(
+		serializer.AwsCloudFrontPem(pem),
+		serializer.AwsCloudFrontBaseURL(os.Getenv("AWS_CLOUDFRONT_BASE_URL")),
 		token.AwsCloudFrontKeyPairID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 	), nil
 }
@@ -137,10 +137,10 @@ func (server *server) UserPasswordRepository() user_password.UserPasswordReposit
 	return server.db
 }
 
-func (server *server) TicketTokener() token.TicketTokener {
-	return server.ticketTokener
+func (server *server) TicketSerializer() token.TicketSerializer {
+	return server.ticketSerializer
 }
 
-func (server *server) AwsCloudFrontTokener() token.AwsCloudFrontTokener {
-	return server.awsCloudFrontTokener
+func (server *server) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
+	return server.awsCloudFrontSerializer
 }
