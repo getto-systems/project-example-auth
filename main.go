@@ -10,7 +10,7 @@ import (
 
 	"github.com/rs/cors"
 
-	"github.com/getto-systems/project-example-id/infra/repository/memory"
+	"github.com/getto-systems/project-example-id/infra/db/memory"
 	"github.com/getto-systems/project-example-id/infra/tokener"
 
 	"github.com/getto-systems/project-example-id/http_handler"
@@ -48,16 +48,19 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/renew", renewHandler(server).Handle).Methods("POST")
+	router.HandleFunc("/auth/renew", authRenewHandler(server).Handle).Methods("POST")
 	router.HandleFunc("/auth/password", authPasswordHandler(server).Handle).Methods("POST")
 
-	corsOptions := cors.New(server.cors)
+	handler := cors.New(server.cors).Handler(router)
 
-	handler := corsOptions.Handler(router)
-
-	log.Fatal(http.ListenAndServeTLS(":8080", server.tls.cert, server.tls.key, handler))
+	log.Fatal(http.ListenAndServeTLS(
+		":8080",
+		server.tls.cert,
+		server.tls.key,
+		handler,
+	))
 }
-func renewHandler(server *server) auth_renew.Handler {
+func authRenewHandler(server *server) auth_renew.Handler {
 	return auth_renew.Handler{
 		CookieDomain:  server.cookieDomain,
 		Authenticator: server,
@@ -71,7 +74,17 @@ func authPasswordHandler(server *server) auth_password.Handler {
 }
 
 func initServer() (*server, error) {
-	cloudfrontPem, err := ioutil.ReadFile(os.Getenv("CLOUDFRONT_PEM"))
+	ticketTokener, err := initTicketTokener()
+	if err != nil {
+		return nil, err
+	}
+
+	awsCloudFrontTokener, err := initAwsCloudFrontTokener()
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := initDB()
 	if err != nil {
 		return nil, err
 	}
@@ -89,15 +102,31 @@ func initServer() (*server, error) {
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		ticketTokener: tokener.NewTicketJsonTokener(),
-		awsCloudFrontTokener: tokener.NewAwsCloudFrontTokener(
-			tokener.AwsCloudFrontPem(cloudfrontPem),
-			tokener.AwsCloudFrontBaseURL(os.Getenv("CLOUDFRONT_BASE_URL")),
-			token.AwsCloudFrontKeyPairID(os.Getenv("CLOUDFRONT_KEY_PAIR_ID")),
-		),
+		ticketTokener:        ticketTokener,
+		awsCloudFrontTokener: awsCloudFrontTokener,
 
-		db: memory.NewMemoryStore(),
+		db: db,
 	}, nil
+}
+func initTicketTokener() (tokener.TicketJsonTokener, error) {
+	return tokener.NewTicketJsonTokener(), nil
+}
+func initAwsCloudFrontTokener() (tokener.AwsCloudFrontTokener, error) {
+	var nullTokener tokener.AwsCloudFrontTokener
+
+	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
+	if err != nil {
+		return nullTokener, err
+	}
+
+	return tokener.NewAwsCloudFrontTokener(
+		tokener.AwsCloudFrontPem(pem),
+		tokener.AwsCloudFrontBaseURL(os.Getenv("AWS_CLOUDFRONT_BASE_URL")),
+		token.AwsCloudFrontKeyPairID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
+	), nil
+}
+func initDB() (memory.MemoryStore, error) {
+	return memory.NewMemoryStore(), nil
 }
 
 func (server *server) UserRepository() user.UserRepository {
