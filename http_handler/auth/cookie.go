@@ -24,7 +24,12 @@ type Cookie struct {
 	Value string
 }
 
-func (setter CookieSetter) setAuthTokenCookie(token auth.Token) {
+func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, ticket user.Ticket, token auth.Token) {
+	setter := CookieSetter{
+		w,
+		cookieDomain,
+		ticket,
+	}
 	setter.setTicketCookie(token.TicketToken)
 	setter.setAwsCloudFrontCookie(token.AwsCloudFrontToken)
 }

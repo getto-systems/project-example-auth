@@ -25,12 +25,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	info, err := auth.Password(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
-		setter := CookieSetter{
-			ResponseWriter: w,
-			CookieDomain:   h.CookieDomain,
-			Ticket:         ticket,
-		}
-		setter.setAuthTokenCookie(token)
+		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
 	})
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
