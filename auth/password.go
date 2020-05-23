@@ -28,9 +28,9 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 		return nil, ErrUserPasswordDidNotMatch
 	}
 
-	user := authenticator.UserFactory().NewUser(param.UserID)
-
 	now := authenticator.Now()
+
+	user := authenticator.UserFactory().NewUser(param.UserID)
 
 	ticket, err := user.NewTicket(now, param.Path)
 	if err != nil {
