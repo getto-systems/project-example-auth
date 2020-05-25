@@ -1,13 +1,13 @@
 package auth
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/getto-systems/project-example-id/logger"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
+
+	"errors"
+	"fmt"
 )
 
 type TokenHandler func(user.Ticket, Token)

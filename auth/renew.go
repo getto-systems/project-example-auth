@@ -1,11 +1,11 @@
 package auth
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
+
+	"fmt"
+	"time"
 )
 
 type RenewAuthenticator interface {

@@ -2,11 +2,12 @@ package auth
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/getto-systems/project-example-id/auth"
+
+	"errors"
+	"fmt"
 )
 
 var ErrBodyNotSent = errors.New("body not sent")

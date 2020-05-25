@@ -1,9 +1,9 @@
 package token
 
 import (
-	"fmt"
-
 	"github.com/getto-systems/project-example-id/user"
+
+	"fmt"
 )
 
 type AwsCloudFrontSerializer interface {

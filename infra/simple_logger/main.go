@@ -2,8 +2,9 @@ package simple_logger
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
+
+	"fmt"
 	"time"
 )
 

@@ -3,11 +3,12 @@ package serializer
 import (
 	"encoding/base64"
 	"encoding/json"
-	"strings"
-	"time"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
+
+	"strings"
+	"time"
 )
 
 type TicketJsonSerializer struct {
