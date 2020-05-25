@@ -1,4 +1,4 @@
-package logger
+package journal
 
 type Logger interface {
 	Audit(v ...interface{})

@@ -2,7 +2,6 @@ package simple_logger
 
 import (
 	"log"
-	"os"
 )
 
 type ErrorLogger struct {
@@ -18,9 +17,9 @@ func (logger ErrorLogger) Request() interface{} {
 	return logger.request
 }
 
-func NewErrorLogger(request interface{}) ErrorLogger {
+func NewErrorLogger(logger *log.Logger, request interface{}) ErrorLogger {
 	return ErrorLogger{
-		logger:  log.New(os.Stdout, "", 0),
+		logger:  logger,
 		request: request,
 	}
 }

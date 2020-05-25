@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/logger"
-
 	"github.com/getto-systems/project-example-id/auth"
+
+	"github.com/getto-systems/project-example-id/journal"
 
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -65,7 +65,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func renewParam(r *http.Request, logger logger.Logger) (auth.RenewParam, error) {
+func renewParam(r *http.Request, logger journal.Logger) (auth.RenewParam, error) {
 	var nullParam auth.RenewParam
 
 	if r.Body == nil {

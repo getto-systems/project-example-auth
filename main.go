@@ -5,27 +5,24 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/google/uuid"
+	"time"
 
 	"github.com/gorilla/mux"
-
 	"github.com/rs/cors"
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
-	"github.com/getto-systems/project-example-id/infra/serializer"
-	"github.com/getto-systems/project-example-id/infra/simple_logger"
+
+	"github.com/getto-systems/project-example-id/adapter/logger"
+	"github.com/getto-systems/project-example-id/adapter/serializer"
 
 	auth_handler "github.com/getto-systems/project-example-id/http_handler/auth"
 
-	"github.com/getto-systems/project-example-id/logger"
-
 	"github.com/getto-systems/project-example-id/auth"
+
+	"github.com/getto-systems/project-example-id/journal"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
-
-	"time"
 )
 
 type Server struct {
@@ -37,6 +34,8 @@ type Server struct {
 	ticketSerializer        serializer.TicketJsonSerializer
 	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 
+	log Log
+
 	db memory.MemoryStore
 }
 
@@ -45,8 +44,13 @@ type Tls struct {
 	key  string
 }
 
+type Log struct {
+	level  string
+	logger *log.Logger
+}
+
 func main() {
-	server, err := initServer()
+	server, err := NewServer()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,28 +72,28 @@ func main() {
 func authRenewHandler(server *Server) auth_handler.RenewHandler {
 	return auth_handler.RenewHandler{
 		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: func(r *http.Request) (auth.RenewAuthenticator, error) { return server.initHandler(r) },
+		AuthenticatorFactory: func(r *http.Request) (auth.RenewAuthenticator, error) { return server.NewHandler(r) },
 	}
 }
 func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
 	return auth_handler.PasswordHandler{
 		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: func(r *http.Request) (auth.PasswordAuthenticator, error) { return server.initHandler(r) },
+		AuthenticatorFactory: func(r *http.Request) (auth.PasswordAuthenticator, error) { return server.NewHandler(r) },
 	}
 }
 
-func initServer() (*Server, error) {
-	ticketSerializer, err := initTicketSerializer()
+func NewServer() (*Server, error) {
+	ticketSerializer, err := NewTicketSerializer()
 	if err != nil {
 		return nil, err
 	}
 
-	awsCloudFrontSerializer, err := initAwsCloudFrontSerializer()
+	awsCloudFrontSerializer, err := NewAwsCloudFrontSerializer()
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := initDB()
+	db, err := NewDB()
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +114,18 @@ func initServer() (*Server, error) {
 		ticketSerializer:        ticketSerializer,
 		awsCloudFrontSerializer: awsCloudFrontSerializer,
 
+		log: Log{
+			level:  os.Getenv("LOG_LEVEL"),
+			logger: log.New(os.Stdout, "", 0),
+		},
+
 		db: db,
 	}, nil
 }
-func initTicketSerializer() (serializer.TicketJsonSerializer, error) {
+func NewTicketSerializer() (serializer.TicketJsonSerializer, error) {
 	return serializer.NewTicketJsonSerializer(), nil
 }
-func initAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
+func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 	var nullSerializer serializer.AwsCloudFrontSerializer
 
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
@@ -130,20 +139,20 @@ func initAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 		token.AwsCloudFrontKeyPairID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 	), nil
 }
-func initDB() (memory.MemoryStore, error) {
+func NewDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
 
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
 type Handler struct {
 	server *Server
-	logger logger.Logger
+	logger journal.Logger
 }
 
-func (server *Server) initHandler(r *http.Request) (Handler, error) {
+func (server *Server) NewHandler(r *http.Request) (Handler, error) {
 	var nullHandler Handler
 
-	logger, err := initLogger(r)
+	logger, err := logger.NewLogger(server.log.level, server.log.logger, r)
 	if err != nil {
 		return nullHandler, err
 	}
@@ -154,38 +163,7 @@ func (server *Server) initHandler(r *http.Request) (Handler, error) {
 	}, nil
 }
 
-type RequestLogEntry struct {
-	RequestID string
-	RemoteIP  string `json:"remote_ip"`
-}
-
-func initLogger(r *http.Request) (logger.Logger, error) {
-	requestID, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-
-	request := RequestLogEntry{
-		RequestID: requestID.String(),
-		RemoteIP:  r.RemoteAddr,
-	}
-
-	return leveledLogger(os.Getenv("LOG_LEVEL"), request), nil
-}
-func leveledLogger(level string, request RequestLogEntry) logger.Logger {
-	switch level {
-	case "DEBUG":
-		return simple_logger.NewDebugLogger(request)
-	case "INFO":
-		return simple_logger.NewInfoLogger(request)
-	case "WARNING":
-		return simple_logger.NewWarningLogger(request)
-	default:
-		return simple_logger.NewErrorLogger(request)
-	}
-}
-
-func (handler Handler) Logger() logger.Logger {
+func (handler Handler) Logger() journal.Logger {
 	return handler.logger
 }
 

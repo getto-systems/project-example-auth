@@ -2,7 +2,6 @@ package simple_logger
 
 import (
 	"log"
-	"os"
 )
 
 type DebugLogger struct {
@@ -18,9 +17,9 @@ func (logger DebugLogger) Request() interface{} {
 	return logger.request
 }
 
-func NewDebugLogger(request interface{}) DebugLogger {
+func NewDebugLogger(logger *log.Logger, request interface{}) DebugLogger {
 	return DebugLogger{
-		logger:  log.New(os.Stdout, "", 0),
+		logger:  logger,
 		request: request,
 	}
 }

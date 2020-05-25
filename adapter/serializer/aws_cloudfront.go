@@ -1,7 +1,7 @@
 package serializer
 
 import (
-	"github.com/getto-systems/project-example-id/infra/aws_cloudfront_signed_cookie"
+	"github.com/getto-systems/project-example-id/misc/aws_cloudfront_signed_cookie"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"

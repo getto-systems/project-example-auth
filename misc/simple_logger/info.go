@@ -2,7 +2,6 @@ package simple_logger
 
 import (
 	"log"
-	"os"
 )
 
 type InfoLogger struct {
@@ -18,9 +17,9 @@ func (logger InfoLogger) Request() interface{} {
 	return logger.request
 }
 
-func NewInfoLogger(request interface{}) InfoLogger {
+func NewInfoLogger(logger *log.Logger, request interface{}) InfoLogger {
 	return InfoLogger{
-		logger:  log.New(os.Stdout, "", 0),
+		logger:  logger,
 		request: request,
 	}
 }

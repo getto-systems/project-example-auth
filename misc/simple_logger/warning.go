@@ -2,7 +2,6 @@ package simple_logger
 
 import (
 	"log"
-	"os"
 )
 
 type WarningLogger struct {
@@ -18,9 +17,9 @@ func (logger WarningLogger) Request() interface{} {
 	return logger.request
 }
 
-func NewWarningLogger(request interface{}) WarningLogger {
+func NewWarningLogger(logger *log.Logger, request interface{}) WarningLogger {
 	return WarningLogger{
-		logger:  log.New(os.Stdout, "", 0),
+		logger:  logger,
 		request: request,
 	}
 }

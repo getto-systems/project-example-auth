@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/getto-systems/project-example-id/logger"
+	"github.com/getto-systems/project-example-id/journal"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
@@ -33,7 +33,7 @@ var ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token seri
 var ErrAppTokenSerializeFailed = errors.New("app token serialize failed")
 
 type Authenticator interface {
-	Logger() logger.Logger
+	Logger() journal.Logger
 	TicketSerializer() token.TicketSerializer
 	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
 }
