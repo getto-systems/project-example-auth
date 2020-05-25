@@ -7,7 +7,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/misc/simple_logger"
 
-	"github.com/getto-systems/project-example-id/journal"
+	"github.com/getto-systems/project-example-id/applog"
 )
 
 type RequestLogEntry struct {
@@ -15,7 +15,7 @@ type RequestLogEntry struct {
 	RemoteIP  string
 }
 
-func NewLogger(level string, logger *log.Logger, r *http.Request) (journal.Logger, error) {
+func NewLogger(level string, logger *log.Logger, r *http.Request) (applog.Logger, error) {
 	requestID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func NewLogger(level string, logger *log.Logger, r *http.Request) (journal.Logge
 
 	return leveledLogger(level, request, logger), nil
 }
-func leveledLogger(level string, request RequestLogEntry, logger *log.Logger) journal.Logger {
+func leveledLogger(level string, request RequestLogEntry, logger *log.Logger) applog.Logger {
 	switch level {
 	case "DEBUG":
 		return simple_logger.NewDebugLogger(logger, request)

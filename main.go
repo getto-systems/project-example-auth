@@ -19,7 +19,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/auth"
 
-	"github.com/getto-systems/project-example-id/journal"
+	"github.com/getto-systems/project-example-id/applog"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
@@ -146,7 +146,7 @@ func NewDB() (memory.MemoryStore, error) {
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
 type Handler struct {
 	server *Server
-	logger journal.Logger
+	logger applog.Logger
 }
 
 func (server *Server) NewHandler(r *http.Request) (Handler, error) {
@@ -163,7 +163,7 @@ func (server *Server) NewHandler(r *http.Request) (Handler, error) {
 	}, nil
 }
 
-func (handler Handler) Logger() journal.Logger {
+func (handler Handler) Logger() applog.Logger {
 	return handler.logger
 }
 

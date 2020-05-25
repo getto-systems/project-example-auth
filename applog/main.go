@@ -1,4 +1,4 @@
-package journal
+package applog
 
 type Logger interface {
 	Audit(v ...interface{})

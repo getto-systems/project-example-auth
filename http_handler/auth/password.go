@@ -6,7 +6,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/auth"
 
-	"github.com/getto-systems/project-example-id/journal"
+	"github.com/getto-systems/project-example-id/applog"
 
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -67,7 +67,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func passwordParam(r *http.Request, logger journal.Logger) (auth.PasswordParam, error) {
+func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, error) {
 	var nullParam auth.PasswordParam
 
 	if r.Body == nil {
