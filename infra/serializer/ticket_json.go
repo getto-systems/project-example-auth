@@ -3,11 +3,11 @@ package serializer
 import (
 	"encoding/base64"
 	"encoding/json"
+	"strings"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
-	"strings"
 	"time"
 )
 

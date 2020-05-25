@@ -8,9 +8,9 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"strings"
 
 	"fmt"
-	"strings"
 	"time"
 )
 
