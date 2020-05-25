@@ -70,7 +70,7 @@ func main() {
 	))
 }
 func authRenewHandler(server *Server) auth_handler.RenewHandler {
-	factory := func(r *http.Request) (auth.RenewAuthenticator, error) {
+	factory := func(r *http.Request) auth.RenewAuthenticator {
 		return server.NewHandler(r)
 	}
 
@@ -80,7 +80,7 @@ func authRenewHandler(server *Server) auth_handler.RenewHandler {
 	}
 }
 func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
-	factory := func(r *http.Request) (auth.PasswordAuthenticator, error) {
+	factory := func(r *http.Request) auth.PasswordAuthenticator {
 		return server.NewHandler(r)
 	}
 
@@ -157,18 +157,16 @@ type Handler struct {
 	logger applog.Logger
 }
 
-func (server *Server) NewHandler(r *http.Request) (Handler, error) {
-	var nullHandler Handler
-
+func (server *Server) NewHandler(r *http.Request) Handler {
 	logger, err := logger.NewLogger(server.log.level, server.log.logger, r)
 	if err != nil {
-		return nullHandler, err
+		server.log.logger.Fatalf("failed initialize logger: %s", err)
 	}
 
 	return Handler{
 		server: server,
 		logger: logger,
-	}, nil
+	}
 }
 
 func (handler Handler) Logger() applog.Logger {

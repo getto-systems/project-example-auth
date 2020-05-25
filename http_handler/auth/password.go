@@ -13,7 +13,7 @@ import (
 
 type PasswordHandler struct {
 	CookieDomain         CookieDomain
-	AuthenticatorFactory func(*http.Request) (auth.PasswordAuthenticator, error)
+	AuthenticatorFactory func(*http.Request) auth.PasswordAuthenticator
 }
 
 type PasswordInput struct {
@@ -31,11 +31,7 @@ type PasswordResponse struct {
 func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	authenticator, err := h.AuthenticatorFactory(r)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	authenticator := h.AuthenticatorFactory(r)
 
 	logger := authenticator.Logger()
 

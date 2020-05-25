@@ -13,7 +13,7 @@ import (
 
 type RenewHandler struct {
 	CookieDomain         CookieDomain
-	AuthenticatorFactory func(*http.Request) (auth.RenewAuthenticator, error)
+	AuthenticatorFactory func(*http.Request) auth.RenewAuthenticator
 }
 
 type RenewInput struct {
@@ -29,11 +29,7 @@ type RenewResponse struct {
 func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	authenticator, err := h.AuthenticatorFactory(r)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	authenticator := h.AuthenticatorFactory(r)
 
 	logger := authenticator.Logger()
 
