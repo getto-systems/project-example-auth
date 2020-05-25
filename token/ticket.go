@@ -5,10 +5,14 @@ import (
 )
 
 type TicketSerializer interface {
-	Parse(TicketToken, user.Path) (user.Ticket, error)
-	Token(user.Ticket) (TicketToken, error)
-	Info(user.Ticket) (TicketInfo, error)
+	Parse(RenewToken, user.Path) (user.Ticket, error)
+	RenewToken(user.Ticket) (RenewToken, error)
+	AppToken(user.Ticket) (AppToken, error)
 }
 
-type TicketToken []byte // use cookie value : e.g. JWT
-type TicketInfo []byte  // use http response value : e.g. json data '{user_id, roles, token}'
+type RenewToken []byte
+type AppToken struct {
+	Token  string
+	UserID user.UserID
+	Roles  user.Roles
+}

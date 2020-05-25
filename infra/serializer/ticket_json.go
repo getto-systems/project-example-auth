@@ -13,24 +13,27 @@ import (
 type TicketJsonSerializer struct {
 }
 
-type TicketTokenJson struct {
+type RenewTokenJson struct {
+	RenewTokenID string   `json:"renew_token_id"`
+	UserID       string   `json:"user_id"`
+	Roles        []string `json:"roles"`
+	Authorized   int64    `json:"authorized"`
+	Expires      int64    `json:"expires"`
+}
+
+type AppTokenJson struct {
+	AppTokenID string   `json:"app_token_id"`
 	UserID     string   `json:"user_id"`
 	Roles      []string `json:"roles"`
 	Authorized int64    `json:"authorized"`
 	Expires    int64    `json:"expires"`
 }
 
-type TicketInfoJson struct {
-	UserID string   `json:"user_id"`
-	Roles  []string `json:"roles"`
-	Token  string   `json:"token"`
-}
-
 func NewTicketJsonSerializer() TicketJsonSerializer {
 	return TicketJsonSerializer{}
 }
 
-func (TicketJsonSerializer) Parse(raw token.TicketToken, path user.Path) (user.Ticket, error) {
+func (TicketJsonSerializer) Parse(raw token.RenewToken, path user.Path) (user.Ticket, error) {
 	var nullTicket user.Ticket
 
 	decoded, err := base64.StdEncoding.DecodeString(string(raw))
@@ -38,9 +41,13 @@ func (TicketJsonSerializer) Parse(raw token.TicketToken, path user.Path) (user.T
 		return nullTicket, err
 	}
 
-	var data TicketTokenJson
+	var data RenewTokenJson
 	err = json.NewDecoder(strings.NewReader(string(decoded))).Decode(&data)
 	if err != nil {
+		return nullTicket, err
+	}
+
+	if data.RenewTokenID == "" {
 		return nullTicket, err
 	}
 
@@ -52,34 +59,38 @@ func (TicketJsonSerializer) Parse(raw token.TicketToken, path user.Path) (user.T
 	})
 }
 
-func (TicketJsonSerializer) Token(ticket user.Ticket) (token.TicketToken, error) {
-	data, err := json.Marshal(TicketTokenJson{
+func (TicketJsonSerializer) RenewToken(ticket user.Ticket) (token.RenewToken, error) {
+	data, err := json.Marshal(RenewTokenJson{
+		RenewTokenID: "RenewTokenID",
+		UserID:       string(ticket.UserID()),
+		Roles:        []string(ticket.Roles()),
+		Authorized:   ticket.Authorized().Unix(),
+		Expires:      ticket.Expires().Unix(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return token.RenewToken(base64.StdEncoding.EncodeToString(data)), nil
+}
+
+func (TicketJsonSerializer) AppToken(ticket user.Ticket) (token.AppToken, error) {
+	var nullToken token.AppToken
+
+	data, err := json.Marshal(AppTokenJson{
+		AppTokenID: "AppTokenID",
 		UserID:     string(ticket.UserID()),
 		Roles:      []string(ticket.Roles()),
 		Authorized: ticket.Authorized().Unix(),
 		Expires:    ticket.Expires().Unix(),
 	})
 	if err != nil {
-		return nil, err
+		return nullToken, err
 	}
 
-	return token.TicketToken(base64.StdEncoding.EncodeToString(data)), nil
-}
-
-func (serializer TicketJsonSerializer) Info(ticket user.Ticket) (token.TicketInfo, error) {
-	token, err := serializer.Token(ticket)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := json.Marshal(TicketInfoJson{
-		UserID: string(ticket.UserID()),
-		Roles:  []string(ticket.Roles()),
-		Token:  string(token),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+	return token.AppToken{
+		Token:  base64.StdEncoding.EncodeToString(data),
+		UserID: ticket.UserID(),
+		Roles:  ticket.Roles(),
+	}, nil
 }

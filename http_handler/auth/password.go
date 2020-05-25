@@ -7,6 +7,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/auth"
 
+	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -30,7 +31,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	info, err := auth.Password(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
+	appToken, err := auth.Password(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
 		logger.Debugf("set ticket cookie: %v; %v", ticket, token)
 		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
 	})
@@ -41,8 +42,14 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Auditf("auth password success: ", param)
 
+	response, err := passwordResponse(appToken)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", info)
+	fmt.Fprintf(w, "%s", response)
 }
 
 type PasswordInput struct {
@@ -73,4 +80,18 @@ func (h PasswordHandler) passwordParam(r *http.Request) (auth.PasswordParam, err
 		Password: user.Password(input.UserPassword),
 		Path:     user.Path(input.Path),
 	}, nil
+}
+
+type PasswordResponse struct {
+	UserID   string   `json:"user_id"`
+	Roles    []string `json:"roles"`
+	AppToken string   `json:"app_token"`
+}
+
+func passwordResponse(appToken token.AppToken) ([]byte, error) {
+	return json.Marshal(PasswordResponse{
+		UserID:   string(appToken.UserID),
+		Roles:    []string(appToken.Roles),
+		AppToken: appToken.Token,
+	})
 }

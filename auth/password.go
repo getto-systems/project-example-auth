@@ -29,16 +29,18 @@ func (param PasswordParam) String() string {
 	)
 }
 
-func Password(authenticator PasswordAuthenticator, param PasswordParam, handler TokenHandler) (token.TicketInfo, error) {
+func Password(authenticator PasswordAuthenticator, param PasswordParam, handler TokenHandler) (token.AppToken, error) {
 	logger := authenticator.Logger()
 
 	logger.Debugf("password auth: %v", param)
+
+	var nullToken token.AppToken
 
 	userPassword := authenticator.UserPasswordFactory().NewUserPassword(param.UserID)
 
 	if !userPassword.Match(param.Password) {
 		logger.Auditf("password did not match: %s", param.UserID)
-		return nil, ErrUserPasswordDidNotMatch
+		return nullToken, ErrUserPasswordDidNotMatch
 	}
 
 	now := authenticator.Now()
@@ -50,21 +52,21 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 	ticket, err := user.NewTicket(param.Path, now)
 	if err != nil {
 		logger.Auditf("access denied: %s; %v", err, param)
-		return nil, ErrUserAccessDenied
+		return nullToken, ErrUserAccessDenied
 	}
 
-	err = handleTicketToken(authenticator, ticket, handler)
+	err = handleTicket(authenticator, ticket, handler)
 	if err != nil {
-		return nil, err
+		return nullToken, err
 	}
 
-	logger.Debugf("serialize ticket info: %v", ticket)
+	logger.Debugf("serialize app token: %v", ticket)
 
-	info, err := authenticator.TicketSerializer().Info(ticket)
+	appToken, err := authenticator.TicketSerializer().AppToken(ticket)
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return nil, ErrTicketInfoSerializeFailed
+		return nullToken, ErrAppTokenSerializeFailed
 	}
 
-	return info, nil
+	return appToken, nil
 }

@@ -15,29 +15,31 @@ type RenewAuthenticator interface {
 }
 
 type RenewParam struct {
-	TicketToken token.TicketToken
-	Path        user.Path
+	RenewToken token.RenewToken
+	Path       user.Path
 }
 
 func (param RenewParam) String() string {
 	return fmt.Sprintf(
-		"RenewParam{TicketToken:%s, Path:%s}",
-		param.TicketToken,
+		"RenewParam{RenewParam:%s, Path:%s}",
+		param.RenewToken,
 		param.Path,
 	)
 }
 
-func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHandler) (token.TicketInfo, error) {
+func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHandler) (token.AppToken, error) {
 	logger := authenticator.Logger()
-
-	ticketSerializer := authenticator.TicketSerializer()
 
 	logger.Debugf("renew token: %v", param)
 
-	ticket, err := ticketSerializer.Parse(param.TicketToken, param.Path)
+	var nullToken token.AppToken
+
+	ticketSerializer := authenticator.TicketSerializer()
+
+	ticket, err := ticketSerializer.Parse(param.RenewToken, param.Path)
 	if err != nil {
 		logger.Debugf("parse token error: %s; %v", err, param)
-		return nil, ErrTicketTokenParseFailed
+		return nullToken, ErrRenewTokenParseFailed
 	}
 
 	now := authenticator.Now()
@@ -52,25 +54,25 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 		new_ticket, err := user.NewTicket(param.Path, now)
 		if err != nil {
 			logger.Auditf("access denied: %s; %v; %v", err, ticket, param)
-			return nil, ErrUserAccessDenied
+			return nullToken, ErrUserAccessDenied
 		}
 
 		logger.Auditf("token renewed: %v; %s", new_ticket, param.Path)
 		ticket = new_ticket
 
-		err = handleTicketToken(authenticator, ticket, handler)
+		err = handleTicket(authenticator, ticket, handler)
 		if err != nil {
-			return nil, err
+			return nullToken, err
 		}
 	}
 
-	logger.Debugf("serialize ticket info: %v", ticket)
+	logger.Debugf("serialize app token: %v", ticket)
 
-	info, err := ticketSerializer.Info(ticket)
+	appToken, err := ticketSerializer.AppToken(ticket)
 	if err != nil {
-		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return nil, ErrTicketInfoSerializeFailed
+		logger.Errorf("app token serialize error: %s; %v", err, ticket)
+		return nullToken, ErrAppTokenSerializeFailed
 	}
 
-	return info, nil
+	return appToken, nil
 }

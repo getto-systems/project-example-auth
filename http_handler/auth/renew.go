@@ -30,7 +30,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	info, err := auth.Renew(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
+	appToken, err := auth.Renew(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
 		logger.Debugf("set ticket cookie: %v; %v", ticket, token)
 		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
 	})
@@ -42,7 +42,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	logger.Debugf("auth renew ok: %v", param)
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", info)
+	fmt.Fprintf(w, "%s", appToken)
 }
 
 type RenewInput struct {
@@ -66,14 +66,14 @@ func (h RenewHandler) renewParam(r *http.Request) (auth.RenewParam, error) {
 		return nullParam, ErrBodyParseFailed
 	}
 
-	ticketToken, err := getTicketCookie(r)
+	renewToken, err := getRenewToken(r)
 	if err != nil {
 		logger.Info("ticket cookie not sent error")
 		return nullParam, ErrTicketCookieNotSent
 	}
 
 	return auth.RenewParam{
-		TicketToken: ticketToken,
-		Path:        user.Path(input.Path),
+		RenewToken: renewToken,
+		Path:       user.Path(input.Path),
 	}, nil
 }

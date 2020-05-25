@@ -30,23 +30,23 @@ func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, ticket
 		cookieDomain,
 		ticket,
 	}
-	setter.setTicketCookie(token.TicketToken)
+	setter.setTicketCookie(token.RenewToken)
 	setter.setAwsCloudFrontCookie(token.AwsCloudFrontToken)
 }
 
-func getTicketCookie(r *http.Request) (token.TicketToken, error) {
+func getRenewToken(r *http.Request) (token.RenewToken, error) {
 	cookie, err := r.Cookie(COOKIE_AUTH_TOKEN)
 	if err != nil {
 		return nil, err
 	}
 
-	return token.TicketToken(cookie.Value), nil
+	return token.RenewToken(cookie.Value), nil
 }
 
-func (setter CookieSetter) setTicketCookie(ticketToken token.TicketToken) {
+func (setter CookieSetter) setTicketCookie(renewToken token.RenewToken) {
 	setter.setCookie(&Cookie{
 		Name:  COOKIE_AUTH_TOKEN,
-		Value: string(ticketToken),
+		Value: string(renewToken),
 	})
 }
 

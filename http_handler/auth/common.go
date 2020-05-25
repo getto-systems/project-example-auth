@@ -17,7 +17,7 @@ func httpStatusCode(err error) int {
 	case ErrBodyNotSent, ErrBodyParseFailed:
 		return http.StatusBadRequest
 
-	case ErrTicketCookieNotSent, auth.ErrTicketTokenParseFailed:
+	case ErrTicketCookieNotSent, auth.ErrRenewTokenParseFailed:
 		return http.StatusUnauthorized
 
 	case auth.ErrUserAccessDenied:
