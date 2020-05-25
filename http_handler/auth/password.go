@@ -10,9 +10,9 @@ import (
 )
 
 type PasswordInput struct {
-	Path         string `json:"path"`
-	UserID       string `json:"user_id"`
-	UserPassword string `json:"password"`
+	Path     string `json:"path"`
+	UserID   string `json:"user_id"`
+	Password string `json:"password"`
 }
 
 type PasswordResponse struct {
@@ -78,7 +78,7 @@ func (h PasswordHandler) passwordParam(r *http.Request) (auth.PasswordParam, err
 
 	return auth.PasswordParam{
 		UserID:   user.UserID(input.UserID),
-		Password: user.Password(input.UserPassword),
+		Password: user.Password(input.Password),
 		Path:     user.Path(input.Path),
 	}, nil
 }
