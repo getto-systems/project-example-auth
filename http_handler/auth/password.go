@@ -4,10 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/logger"
+
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/user"
 )
+
+type PasswordHandler struct {
+	CookieDomain         CookieDomain
+	AuthenticatorFactory func(*http.Request) (auth.PasswordAuthenticator, error)
+}
 
 type PasswordInput struct {
 	Path     string `json:"path"`
@@ -21,19 +28,20 @@ type PasswordResponse struct {
 	AppToken string   `json:"app_token"`
 }
 
-type PasswordHandler struct {
-	CookieDomain  CookieDomain
-	Authenticator auth.PasswordAuthenticator
-}
-
 func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	logger := h.Authenticator.Logger()
+	authenticator, err := h.AuthenticatorFactory(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	logger := authenticator.Logger()
 
 	logger.Debug("auth password handling...")
 
-	param, err := h.passwordParam(r)
+	param, err := passwordParam(r, logger)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
@@ -41,7 +49,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	appToken, err := auth.Password(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
+	appToken, err := auth.Password(authenticator, param, func(ticket user.Ticket, token auth.Token) {
 		logger.Debugf("set ticket cookie: %v; %v", ticket, token)
 		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
 	})
@@ -59,9 +67,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h PasswordHandler) passwordParam(r *http.Request) (auth.PasswordParam, error) {
-	logger := h.Authenticator.Logger()
-
+func passwordParam(r *http.Request, logger logger.Logger) (auth.PasswordParam, error) {
 	var nullParam auth.PasswordParam
 
 	if r.Body == nil {

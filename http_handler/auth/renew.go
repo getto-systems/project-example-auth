@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/logger"
+
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/user"
 )
 
 type RenewHandler struct {
-	CookieDomain  CookieDomain
-	Authenticator auth.RenewAuthenticator
+	CookieDomain         CookieDomain
+	AuthenticatorFactory func(*http.Request) (auth.RenewAuthenticator, error)
 }
 
 type RenewInput struct {
@@ -27,11 +29,17 @@ type RenewResponse struct {
 func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	logger := h.Authenticator.Logger()
+	authenticator, err := h.AuthenticatorFactory(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	logger := authenticator.Logger()
 
 	logger.Debug("auth renew handling...")
 
-	param, err := h.renewParam(r)
+	param, err := renewParam(r, logger)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
@@ -39,7 +47,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	appToken, err := auth.Renew(h.Authenticator, param, func(ticket user.Ticket, token auth.Token) {
+	appToken, err := auth.Renew(authenticator, param, func(ticket user.Ticket, token auth.Token) {
 		logger.Debugf("set ticket cookie: %v; %v", ticket, token)
 		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
 	})
@@ -57,9 +65,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h RenewHandler) renewParam(r *http.Request) (auth.RenewParam, error) {
-	logger := h.Authenticator.Logger()
-
+func renewParam(r *http.Request, logger logger.Logger) (auth.RenewParam, error) {
 	var nullParam auth.RenewParam
 
 	if r.Body == nil {

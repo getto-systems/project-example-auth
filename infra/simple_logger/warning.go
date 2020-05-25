@@ -6,18 +6,30 @@ import (
 )
 
 type WarningLogger struct {
-	logger *log.Logger
+	logger  *log.Logger
+	request interface{}
 }
 
-func NewWarningLogger() WarningLogger {
-	return WarningLogger{logger: log.New(os.Stdout, "", 0)}
+func (logger WarningLogger) Logger() *log.Logger {
+	return logger.logger
+}
+
+func (logger WarningLogger) Request() interface{} {
+	return logger.request
+}
+
+func NewWarningLogger(request interface{}) WarningLogger {
+	return WarningLogger{
+		logger:  log.New(os.Stdout, "", 0),
+		request: request,
+	}
 }
 
 func (logger WarningLogger) Audit(v ...interface{}) {
-	message(logger.logger, "audit", v...)
+	message(logger, "audit", v...)
 }
 func (logger WarningLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger.logger, "audit", format, v...)
+	messagef(logger, "audit", format, v...)
 }
 
 func (WarningLogger) Debug(v ...interface{}) {
@@ -35,15 +47,15 @@ func (WarningLogger) Infof(format string, v ...interface{}) {
 }
 
 func (logger WarningLogger) Warning(v ...interface{}) {
-	message(logger.logger, "warning", v...)
+	message(logger, "warning", v...)
 }
 func (logger WarningLogger) Warningf(format string, v ...interface{}) {
-	messagef(logger.logger, "warning", format, v...)
+	messagef(logger, "warning", format, v...)
 }
 
 func (logger WarningLogger) Error(v ...interface{}) {
-	message(logger.logger, "error", v...)
+	message(logger, "error", v...)
 }
 func (logger WarningLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger.logger, "error", format, v...)
+	messagef(logger, "error", format, v...)
 }

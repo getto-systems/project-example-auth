@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/google/uuid"
+
 	"github.com/gorilla/mux"
 
 	"github.com/rs/cors"
@@ -14,9 +16,11 @@ import (
 	"github.com/getto-systems/project-example-id/infra/serializer"
 	"github.com/getto-systems/project-example-id/infra/simple_logger"
 
-	"github.com/getto-systems/project-example-id/http_handler/auth"
+	auth_handler "github.com/getto-systems/project-example-id/http_handler/auth"
 
 	"github.com/getto-systems/project-example-id/logger"
+
+	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
@@ -24,21 +28,19 @@ import (
 	"time"
 )
 
-type server struct {
-	cookieDomain auth.CookieDomain
+type Server struct {
+	authCookieDomain auth_handler.CookieDomain
 
 	cors cors.Options
-	tls  tls
+	tls  Tls
 
 	ticketSerializer        serializer.TicketJsonSerializer
 	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 
 	db memory.MemoryStore
-
-	logger logger.Logger
 }
 
-type tls struct {
+type Tls struct {
 	cert string
 	key  string
 }
@@ -63,20 +65,20 @@ func main() {
 		handler,
 	))
 }
-func authRenewHandler(server *server) auth.RenewHandler {
-	return auth.RenewHandler{
-		CookieDomain:  server.cookieDomain,
-		Authenticator: server,
+func authRenewHandler(server *Server) auth_handler.RenewHandler {
+	return auth_handler.RenewHandler{
+		CookieDomain:         server.authCookieDomain,
+		AuthenticatorFactory: func(r *http.Request) (auth.RenewAuthenticator, error) { return server.initHandler(r) },
 	}
 }
-func authPasswordHandler(server *server) auth.PasswordHandler {
-	return auth.PasswordHandler{
-		CookieDomain:  server.cookieDomain,
-		Authenticator: server,
+func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
+	return auth_handler.PasswordHandler{
+		CookieDomain:         server.authCookieDomain,
+		AuthenticatorFactory: func(r *http.Request) (auth.PasswordAuthenticator, error) { return server.initHandler(r) },
 	}
 }
 
-func initServer() (*server, error) {
+func initServer() (*Server, error) {
 	ticketSerializer, err := initTicketSerializer()
 	if err != nil {
 		return nil, err
@@ -92,15 +94,15 @@ func initServer() (*server, error) {
 		return nil, err
 	}
 
-	return &server{
-		cookieDomain: auth.CookieDomain(os.Getenv("DOMAIN")),
+	return &Server{
+		authCookieDomain: auth_handler.CookieDomain(os.Getenv("DOMAIN")),
 
 		cors: cors.Options{
 			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
 			AllowedMethods:   []string{"POST"},
 			AllowCredentials: true,
 		},
-		tls: tls{
+		tls: Tls{
 			cert: os.Getenv("TLS_CERT"),
 			key:  os.Getenv("TLS_KEY"),
 		},
@@ -109,8 +111,6 @@ func initServer() (*server, error) {
 		awsCloudFrontSerializer: awsCloudFrontSerializer,
 
 		db: db,
-
-		logger: initLogger(),
 	}, nil
 }
 func initTicketSerializer() (serializer.TicketJsonSerializer, error) {
@@ -133,40 +133,78 @@ func initAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 func initDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
-func initLogger() logger.Logger {
-	switch os.Getenv("LOG_LEVEL") {
-	case "WARNING":
-		return simple_logger.NewWarningLogger()
-	case "INFO":
-		return simple_logger.NewInfoLogger()
+
+// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
+type Handler struct {
+	server *Server
+	logger logger.Logger
+}
+
+func (server *Server) initHandler(r *http.Request) (Handler, error) {
+	var nullHandler Handler
+
+	logger, err := initLogger(r)
+	if err != nil {
+		return nullHandler, err
+	}
+
+	return Handler{
+		server: server,
+		logger: logger,
+	}, nil
+}
+
+type RequestLogEntry struct {
+	RequestID string
+	RemoteIP  string `json:"remote_ip"`
+}
+
+func initLogger(r *http.Request) (logger.Logger, error) {
+	requestID, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
+	request := RequestLogEntry{
+		RequestID: requestID.String(),
+		RemoteIP:  r.RemoteAddr,
+	}
+
+	return leveledLogger(os.Getenv("LOG_LEVEL"), request), nil
+}
+func leveledLogger(level string, request RequestLogEntry) logger.Logger {
+	switch level {
 	case "DEBUG":
-		return simple_logger.NewDebugLogger()
+		return simple_logger.NewDebugLogger(request)
+	case "INFO":
+		return simple_logger.NewInfoLogger(request)
+	case "WARNING":
+		return simple_logger.NewWarningLogger(request)
 	default:
-		return simple_logger.NewErrorLogger()
+		return simple_logger.NewErrorLogger(request)
 	}
 }
 
-// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
-func (server *server) Logger() logger.Logger {
-	return server.logger
+func (handler Handler) Logger() logger.Logger {
+	return handler.logger
 }
 
-func (server *server) TicketSerializer() token.TicketSerializer {
-	return server.ticketSerializer
+func (handler Handler) TicketSerializer() token.TicketSerializer {
+	return handler.server.ticketSerializer
 }
 
-func (server *server) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
-	return server.awsCloudFrontSerializer
+func (handler Handler) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
+	return handler.server.awsCloudFrontSerializer
 }
 
-func (server *server) UserFactory() user.UserFactory {
-	return user.NewUserFactory(server.db)
+func (handler Handler) UserFactory() user.UserFactory {
+	return user.NewUserFactory(handler.server.db)
 }
 
-func (server *server) UserPasswordFactory() user.UserPasswordFactory {
-	return user.NewUserPasswordFactory(server.db)
+func (handler Handler) UserPasswordFactory() user.UserPasswordFactory {
+	return user.NewUserPasswordFactory(handler.server.db)
 }
 
-func (server *server) Now() time.Time {
+func (handler Handler) Now() time.Time {
 	return time.Now().UTC()
 }

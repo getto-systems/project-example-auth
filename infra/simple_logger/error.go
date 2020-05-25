@@ -6,18 +6,30 @@ import (
 )
 
 type ErrorLogger struct {
-	logger *log.Logger
+	logger  *log.Logger
+	request interface{}
 }
 
-func NewErrorLogger() ErrorLogger {
-	return ErrorLogger{logger: log.New(os.Stdout, "", 0)}
+func (logger ErrorLogger) Logger() *log.Logger {
+	return logger.logger
+}
+
+func (logger ErrorLogger) Request() interface{} {
+	return logger.request
+}
+
+func NewErrorLogger(request interface{}) ErrorLogger {
+	return ErrorLogger{
+		logger:  log.New(os.Stdout, "", 0),
+		request: request,
+	}
 }
 
 func (logger ErrorLogger) Audit(v ...interface{}) {
-	message(logger.logger, "audit", v...)
+	message(logger, "audit", v...)
 }
 func (logger ErrorLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger.logger, "audit", format, v...)
+	messagef(logger, "audit", format, v...)
 }
 
 func (ErrorLogger) Debug(v ...interface{}) {
@@ -42,8 +54,8 @@ func (ErrorLogger) Warningf(format string, v ...interface{}) {
 }
 
 func (logger ErrorLogger) Error(v ...interface{}) {
-	message(logger.logger, "error", v...)
+	message(logger, "error", v...)
 }
 func (logger ErrorLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger.logger, "error", format, v...)
+	messagef(logger, "error", format, v...)
 }
