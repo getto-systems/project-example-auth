@@ -43,7 +43,7 @@ func handleTicket(authenticator Authenticator, ticket user.Ticket, handler Token
 
 	logger.Debugf("serialize ticket: %v", ticket)
 
-	logger.Debug("by ticket serializer...")
+	logger.Debug("serialize renew token...")
 
 	renewToken, err := authenticator.TicketSerializer().RenewToken(ticket)
 	if err != nil {
@@ -51,7 +51,7 @@ func handleTicket(authenticator Authenticator, ticket user.Ticket, handler Token
 		return ErrRenewTokenSerializeFailed
 	}
 
-	logger.Debug("by aws cloudfront serializer...")
+	logger.Debug("serialize aws cloudfront token...")
 
 	awsCloudFrontToken, err := authenticator.AwsCloudFrontSerializer().Token(ticket)
 	if err != nil {
