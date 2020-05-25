@@ -70,15 +70,23 @@ func main() {
 	))
 }
 func authRenewHandler(server *Server) auth_handler.RenewHandler {
+	factory := func(r *http.Request) (auth.RenewAuthenticator, error) {
+		return server.NewHandler(r)
+	}
+
 	return auth_handler.RenewHandler{
 		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: func(r *http.Request) (auth.RenewAuthenticator, error) { return server.NewHandler(r) },
+		AuthenticatorFactory: factory,
 	}
 }
 func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
+	factory := func(r *http.Request) (auth.PasswordAuthenticator, error) {
+		return server.NewHandler(r)
+	}
+
 	return auth_handler.PasswordHandler{
 		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: func(r *http.Request) (auth.PasswordAuthenticator, error) { return server.NewHandler(r) },
+		AuthenticatorFactory: factory,
 	}
 }
 
