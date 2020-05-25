@@ -63,9 +63,9 @@ func httpStatusCode(err error) int {
 
 func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, ticket user.Ticket, token auth.Token) {
 	setter := CookieSetter{
-		w,
-		cookieDomain,
-		ticket,
+		ResponseWriter: w,
+		CookieDomain:   cookieDomain,
+		Ticket:         ticket,
 	}
 	setter.setTicketCookie(token.RenewToken)
 	setter.setAwsCloudFrontCookie(token.AwsCloudFrontToken)

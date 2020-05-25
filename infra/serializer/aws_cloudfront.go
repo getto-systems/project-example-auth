@@ -18,9 +18,9 @@ type AwsCloudFrontBaseURL string
 
 func NewAwsCloudFrontSerializer(pem AwsCloudFrontPem, baseURL AwsCloudFrontBaseURL, keyPairID token.AwsCloudFrontKeyPairID) AwsCloudFrontSerializer {
 	return AwsCloudFrontSerializer{
-		pem,
-		baseURL,
-		keyPairID,
+		pem:       pem,
+		baseURL:   baseURL,
+		keyPairID: keyPairID,
 	}
 }
 
