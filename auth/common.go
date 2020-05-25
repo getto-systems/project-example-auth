@@ -25,12 +25,14 @@ func (token Token) String() string {
 	)
 }
 
-var ErrRenewTokenParseFailed = errors.New("ticket token parse failed")
-var ErrUserPasswordDidNotMatch = errors.New("user password did not match")
-var ErrUserAccessDenied = errors.New("user access denied")
-var ErrRenewTokenSerializeFailed = errors.New("renew token serialize failed")
-var ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token serialize failed")
-var ErrAppTokenSerializeFailed = errors.New("app token serialize failed")
+var (
+	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
+	ErrUserPasswordDidNotMatch           = errors.New("user password did not match")
+	ErrUserAccessDenied                  = errors.New("user access denied")
+	ErrRenewTokenSerializeFailed         = errors.New("renew token serialize failed")
+	ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token serialize failed")
+	ErrAppTokenSerializeFailed           = errors.New("app token serialize failed")
+)
 
 type Authenticator interface {
 	Logger() applog.Logger

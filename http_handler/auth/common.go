@@ -28,10 +28,12 @@ type CookieSetter struct {
 	Ticket         user.Ticket
 }
 
-var ErrBodyNotSent = errors.New("body not sent")
-var ErrBodyParseFailed = errors.New("body parse failed")
-var ErrTicketCookieNotSent = errors.New("ticket cookie not sent")
-var ErrResponseEncodeFailed = errors.New("response encode failed")
+var (
+	ErrBodyNotSent          = errors.New("body not sent")
+	ErrBodyParseFailed      = errors.New("body parse failed")
+	ErrTicketCookieNotSent  = errors.New("ticket cookie not sent")
+	ErrResponseEncodeFailed = errors.New("response encode failed")
+)
 
 func jsonResponse(w http.ResponseWriter, response interface{}) {
 	data, err := json.Marshal(response)
