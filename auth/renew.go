@@ -58,12 +58,13 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 		}
 
 		logger.Auditf("token renewed: %v; %s", new_ticket, param.Path)
-		ticket = new_ticket
 
-		err = handleTicket(authenticator, ticket, handler)
+		err = handleTicket(authenticator, new_ticket, handler)
 		if err != nil {
 			return nullToken, err
 		}
+
+		ticket = new_ticket
 	}
 
 	logger.Debugf("serialize app token: %v", ticket)
