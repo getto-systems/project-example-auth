@@ -2,14 +2,24 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/getto-systems/project-example-id/auth"
 
-	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 )
+
+type PasswordInput struct {
+	Path         string `json:"path"`
+	UserID       string `json:"user_id"`
+	UserPassword string `json:"password"`
+}
+
+type PasswordResponse struct {
+	UserID   string   `json:"user_id"`
+	Roles    []string `json:"roles"`
+	AppToken string   `json:"app_token"`
+}
 
 type PasswordHandler struct {
 	CookieDomain  CookieDomain
@@ -42,20 +52,11 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Auditf("auth password success: ", param)
 
-	response, err := passwordResponse(appToken)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", response)
-}
-
-type PasswordInput struct {
-	Path         string `json:"path"`
-	UserID       string `json:"user_id"`
-	UserPassword string `json:"password"`
+	jsonResponse(w, PasswordResponse{
+		UserID:   string(appToken.UserID),
+		Roles:    []string(appToken.Roles),
+		AppToken: appToken.Token,
+	})
 }
 
 func (h PasswordHandler) passwordParam(r *http.Request) (auth.PasswordParam, error) {
@@ -80,18 +81,4 @@ func (h PasswordHandler) passwordParam(r *http.Request) (auth.PasswordParam, err
 		Password: user.Password(input.UserPassword),
 		Path:     user.Path(input.Path),
 	}, nil
-}
-
-type PasswordResponse struct {
-	UserID   string   `json:"user_id"`
-	Roles    []string `json:"roles"`
-	AppToken string   `json:"app_token"`
-}
-
-func passwordResponse(appToken token.AppToken) ([]byte, error) {
-	return json.Marshal(PasswordResponse{
-		UserID:   string(appToken.UserID),
-		Roles:    []string(appToken.Roles),
-		AppToken: appToken.Token,
-	})
 }

@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/getto-systems/project-example-id/auth"
@@ -13,6 +12,16 @@ import (
 type RenewHandler struct {
 	CookieDomain  CookieDomain
 	Authenticator auth.RenewAuthenticator
+}
+
+type RenewInput struct {
+	Path string `json:"path"`
+}
+
+type RenewResponse struct {
+	UserID   string   `json:"user_id"`
+	Roles    []string `json:"roles"`
+	AppToken string   `json:"app_token"`
 }
 
 func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
@@ -41,12 +50,11 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("auth renew ok: %v", param)
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", appToken)
-}
-
-type RenewInput struct {
-	Path string `json:"path"`
+	jsonResponse(w, RenewResponse{
+		UserID:   string(appToken.UserID),
+		Roles:    []string(appToken.Roles),
+		AppToken: appToken.Token,
+	})
 }
 
 func (h RenewHandler) renewParam(r *http.Request) (auth.RenewParam, error) {
