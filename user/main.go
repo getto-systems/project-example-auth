@@ -87,10 +87,10 @@ func (user User) NewTicket(path Path, now time.Time) (Ticket, error) {
 	expires := now.Add(expireDuration)
 
 	return RestrictTicket(path, TicketData{
-		userID,
-		roles,
-		authorized,
-		expires,
+		UserID:     userID,
+		Roles:      roles,
+		Authorized: authorized,
+		Expires:    expires,
 	})
 }
 
@@ -102,10 +102,10 @@ func RestrictTicket(path Path, data TicketData) (Ticket, error) {
 	}
 
 	return Ticket{
-		data.UserID,
-		data.Roles,
-		data.Authorized,
-		data.Expires,
+		userID:     data.UserID,
+		roles:      data.Roles,
+		authorized: data.Authorized,
+		expires:    data.Expires,
 	}, nil
 }
 
