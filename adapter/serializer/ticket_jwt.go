@@ -9,6 +9,7 @@ import (
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
+	"errors"
 	"time"
 )
 
@@ -95,11 +96,15 @@ func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path user.Path
 	var nullTicket user.Ticket
 
 	var claims jwt.MapClaims
-	_, err := jwt.ParseWithClaims(string(raw), &claims, func(token *jwt.Token) (interface{}, error) {
+	jwtToken, err := jwt.ParseWithClaims(string(raw), &claims, func(token *jwt.Token) (interface{}, error) {
 		return serializer.RenewKey.verifyKey(), nil
 	})
 	if err != nil {
 		return nullTicket, err
+	}
+
+	if !jwtToken.Valid {
+		return nullTicket, errors.New("invalid renew jwt")
 	}
 
 	return user.RestrictTicket(path, user.TicketData{
