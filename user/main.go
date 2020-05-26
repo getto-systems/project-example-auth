@@ -20,9 +20,11 @@ type UserRepository interface {
 	UserRoles(UserID) Roles
 }
 
-type UserID string
-type Roles []string
-type Path string
+type (
+	UserID string
+	Roles  []string
+	Path   string
+)
 
 func (user User) UserID() UserID {
 	return user.userID
