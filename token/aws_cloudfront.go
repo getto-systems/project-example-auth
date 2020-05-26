@@ -25,6 +25,8 @@ func (token AwsCloudFrontToken) String() string {
 	)
 }
 
-type AwsCloudFrontKeyPairID string
-type AwsCloudFrontPolicy string
-type AwsCloudFrontSignature string
+type (
+	AwsCloudFrontKeyPairID string
+	AwsCloudFrontPolicy    string
+	AwsCloudFrontSignature string
+)
