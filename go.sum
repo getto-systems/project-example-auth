@@ -1,5 +1,6 @@
 github.com/cloudflare/cfssl v0.0.0-20190726000631-633726f6bcb7 h1:Puu1hUwfps3+1CUzYdAZXijuvLuRMirgiXdf3zsM2Ig=
 github.com/cloudflare/cfssl v0.0.0-20190726000631-633726f6bcb7/go.mod h1:yMWuSON2oQp+43nFtAV/uvKQIFpSPerB57DCt9t8sSA=
+github.com/dgrijalva/jwt-go v1.0.2 h1:KPldsxuKGsS2FPWsNeg9ZO18aCrGKujPoWXn2yo+KQM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/duo-labs/webauthn v0.0.0-20200408163612-425dee8942f4 h1:ZI1LcT6j2xkdfTm5Jb+v1lhk11TTfCaKWbamxPrMDRo=

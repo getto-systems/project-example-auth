@@ -12,7 +12,7 @@ func NewMemoryStore() MemoryStore {
 }
 
 func (store MemoryStore) UserRoles(userID user.UserID) user.Roles {
-	return nil // TODO fetch store data
+	return nil // []string{"admin", "user"} // TODO fetch store data
 }
 
 func (store MemoryStore) MatchUserPassword(userID user.UserID, password user.Password) bool {

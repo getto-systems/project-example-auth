@@ -31,7 +31,7 @@ type Server struct {
 	cors cors.Options
 	tls  Tls
 
-	ticketSerializer        serializer.TicketJsonSerializer
+	ticketSerializer        serializer.TicketJWTSerializer
 	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 
 	log Log
@@ -130,14 +130,55 @@ func NewServer() (*Server, error) {
 		db: db,
 	}, nil
 }
-func NewTicketSerializer() (serializer.TicketJsonSerializer, error) {
-	return serializer.NewTicketJsonSerializer(), nil
+func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
+	var nullSerializer serializer.TicketJWTSerializer
+
+	renewPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PRIVATE_KEY"))
+	if err != nil {
+		log.Printf("renew private key read failed", err)
+		return nullSerializer, err
+	}
+
+	renewPublicKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PUBLIC_KEY"))
+	if err != nil {
+		log.Printf("renew public key read failed", err)
+		return nullSerializer, err
+	}
+
+	renewKey, err := serializer.NewTicketJWT_ES_512_Key(serializer.TicketJWT_ES_512_Pem{
+		PrivateKey: renewPrivateKeyPem,
+		PublicKey:  renewPublicKeyPem,
+	})
+	if err != nil {
+		log.Printf("renew key parse failed", err)
+		return nullSerializer, err
+	}
+
+	appPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
+	if err != nil {
+		log.Printf("app private key read failed", err)
+		return nullSerializer, err
+	}
+
+	appKey, err := serializer.NewTicketJWT_ES_512_Key(serializer.TicketJWT_ES_512_Pem{
+		PrivateKey: appPrivateKeyPem,
+	})
+	if err != nil {
+		log.Printf("app key parse failed", err)
+		return nullSerializer, err
+	}
+
+	return serializer.TicketJWTSerializer{
+		RenewKey: renewKey,
+		AppKey:   appKey,
+	}, nil
 }
 func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 	var nullSerializer serializer.AwsCloudFrontSerializer
 
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
+		log.Printf("aws cloudfront private key read failed", err)
 		return nullSerializer, err
 	}
 
