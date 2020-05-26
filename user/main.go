@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
-var expireDuration = time.Duration(30 * 1_000_000_000)
-var renewThreshold = time.Duration(5 * 1_000_000_000)
+var (
+	expireDuration = time.Duration(30 * 1_000_000_000)
+	renewThreshold = time.Duration(5 * 1_000_000_000)
+)
 
 type User struct {
 	db UserRepository
