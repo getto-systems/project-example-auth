@@ -1,26 +1,19 @@
-package simple_logger
-
-import (
-	"log"
-)
+package jsonlog
 
 type WarningLogger struct {
-	logger  *log.Logger
-	request interface{}
+	warningConfig config
 }
 
-func (logger WarningLogger) Logger() *log.Logger {
-	return logger.logger
+func (logger WarningLogger) config() config {
+	return logger.warningConfig
 }
 
-func (logger WarningLogger) Request() interface{} {
-	return logger.request
-}
-
-func NewWarningLogger(logger *log.Logger, request interface{}) WarningLogger {
+func NewWarningLogger(logger logger, request interface{}) WarningLogger {
 	return WarningLogger{
-		logger:  logger,
-		request: request,
+		warningConfig: config{
+			logger:  logger,
+			request: request,
+		},
 	}
 }
 

@@ -1,26 +1,19 @@
-package simple_logger
-
-import (
-	"log"
-)
+package jsonlog
 
 type ErrorLogger struct {
-	logger  *log.Logger
-	request interface{}
+	errorConfig config
 }
 
-func (logger ErrorLogger) Logger() *log.Logger {
-	return logger.logger
+func (logger ErrorLogger) config() config {
+	return logger.errorConfig
 }
 
-func (logger ErrorLogger) Request() interface{} {
-	return logger.request
-}
-
-func NewErrorLogger(logger *log.Logger, request interface{}) ErrorLogger {
+func NewErrorLogger(logger logger, request interface{}) ErrorLogger {
 	return ErrorLogger{
-		logger:  logger,
-		request: request,
+		errorConfig: config{
+			logger:  logger,
+			request: request,
+		},
 	}
 }
 

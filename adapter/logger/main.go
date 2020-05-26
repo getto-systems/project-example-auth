@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/misc/simple_logger"
+	"github.com/getto-systems/project-example-id/misc/jsonlog"
 
 	"github.com/getto-systems/project-example-id/applog"
 )
@@ -31,12 +31,12 @@ func NewLogger(level string, logger *log.Logger, r *http.Request) (applog.Logger
 func leveledLogger(level string, request RequestLogEntry, logger *log.Logger) applog.Logger {
 	switch level {
 	case "DEBUG":
-		return simple_logger.NewDebugLogger(logger, request)
+		return jsonlog.NewDebugLogger(logger, request)
 	case "INFO":
-		return simple_logger.NewInfoLogger(logger, request)
+		return jsonlog.NewInfoLogger(logger, request)
 	case "WARNING":
-		return simple_logger.NewWarningLogger(logger, request)
+		return jsonlog.NewWarningLogger(logger, request)
 	default:
-		return simple_logger.NewErrorLogger(logger, request)
+		return jsonlog.NewErrorLogger(logger, request)
 	}
 }

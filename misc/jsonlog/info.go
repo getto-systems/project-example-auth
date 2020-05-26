@@ -1,26 +1,19 @@
-package simple_logger
-
-import (
-	"log"
-)
+package jsonlog
 
 type InfoLogger struct {
-	logger  *log.Logger
-	request interface{}
+	infoConfig config
 }
 
-func (logger InfoLogger) Logger() *log.Logger {
-	return logger.logger
+func (logger InfoLogger) config() config {
+	return logger.infoConfig
 }
 
-func (logger InfoLogger) Request() interface{} {
-	return logger.request
-}
-
-func NewInfoLogger(logger *log.Logger, request interface{}) InfoLogger {
+func NewInfoLogger(logger logger, request interface{}) InfoLogger {
 	return InfoLogger{
-		logger:  logger,
-		request: request,
+		infoConfig: config{
+			logger:  logger,
+			request: request,
+		},
 	}
 }
 
