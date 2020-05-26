@@ -1,16 +1,12 @@
 package jsonlog
 
 type WarningLogger struct {
-	warningConfig config
+	config config
 }
 
-func (logger WarningLogger) config() config {
-	return logger.warningConfig
-}
-
-func NewWarningLogger(logger logger, request interface{}) WarningLogger {
+func NewWarningLogger(logger logger, request interface{}) Logger {
 	return WarningLogger{
-		warningConfig: config{
+		config: config{
 			logger:  logger,
 			request: request,
 		},
@@ -18,17 +14,24 @@ func NewWarningLogger(logger logger, request interface{}) WarningLogger {
 }
 
 func (logger WarningLogger) Audit(v ...interface{}) {
-	message(logger, "audit", v...)
+	logger.config.Audit(v...)
 }
 func (logger WarningLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger, "audit", format, v...)
+	logger.config.Auditf(format, v...)
 }
 
-func (WarningLogger) Debug(v ...interface{}) {
-	// noop
+func (logger WarningLogger) Error(v ...interface{}) {
+	logger.config.Error(v...)
 }
-func (WarningLogger) Debugf(format string, v ...interface{}) {
-	// noop
+func (logger WarningLogger) Errorf(format string, v ...interface{}) {
+	logger.config.Errorf(format, v...)
+}
+
+func (logger WarningLogger) Warning(v ...interface{}) {
+	logger.config.Warning(v...)
+}
+func (logger WarningLogger) Warningf(format string, v ...interface{}) {
+	logger.config.Warningf(format, v...)
 }
 
 func (WarningLogger) Info(v ...interface{}) {
@@ -38,16 +41,9 @@ func (WarningLogger) Infof(format string, v ...interface{}) {
 	// noop
 }
 
-func (logger WarningLogger) Warning(v ...interface{}) {
-	message(logger, "warning", v...)
+func (WarningLogger) Debug(v ...interface{}) {
+	// noop
 }
-func (logger WarningLogger) Warningf(format string, v ...interface{}) {
-	messagef(logger, "warning", format, v...)
-}
-
-func (logger WarningLogger) Error(v ...interface{}) {
-	message(logger, "error", v...)
-}
-func (logger WarningLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger, "error", format, v...)
+func (WarningLogger) Debugf(format string, v ...interface{}) {
+	// noop
 }

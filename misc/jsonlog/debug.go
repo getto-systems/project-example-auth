@@ -1,16 +1,12 @@
 package jsonlog
 
 type DebugLogger struct {
-	debugConfig config
+	config config
 }
 
-func (logger DebugLogger) config() config {
-	return logger.debugConfig
-}
-
-func NewDebugLogger(logger logger, request interface{}) DebugLogger {
+func NewDebugLogger(logger logger, request interface{}) Logger {
 	return DebugLogger{
-		debugConfig: config{
+		config: config{
 			logger:  logger,
 			request: request,
 		},
@@ -18,36 +14,36 @@ func NewDebugLogger(logger logger, request interface{}) DebugLogger {
 }
 
 func (logger DebugLogger) Audit(v ...interface{}) {
-	message(logger, "audit", v...)
+	logger.config.Audit(v...)
 }
 func (logger DebugLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger, "audit", format, v...)
-}
-
-func (logger DebugLogger) Debug(v ...interface{}) {
-	message(logger, "debug", v...)
-}
-func (logger DebugLogger) Debugf(format string, v ...interface{}) {
-	messagef(logger, "debug", format, v...)
-}
-
-func (logger DebugLogger) Info(v ...interface{}) {
-	message(logger, "info", v...)
-}
-func (logger DebugLogger) Infof(format string, v ...interface{}) {
-	messagef(logger, "info", format, v...)
-}
-
-func (logger DebugLogger) Warning(v ...interface{}) {
-	message(logger, "warning", v...)
-}
-func (logger DebugLogger) Warningf(format string, v ...interface{}) {
-	messagef(logger, "warning", format, v...)
+	logger.config.Auditf(format, v...)
 }
 
 func (logger DebugLogger) Error(v ...interface{}) {
-	message(logger, "error", v...)
+	logger.config.Error(v...)
 }
 func (logger DebugLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger, "error", format, v...)
+	logger.config.Errorf(format, v...)
+}
+
+func (logger DebugLogger) Warning(v ...interface{}) {
+	logger.config.Warning(v...)
+}
+func (logger DebugLogger) Warningf(format string, v ...interface{}) {
+	logger.config.Warningf(format, v...)
+}
+
+func (logger DebugLogger) Info(v ...interface{}) {
+	logger.config.Info(v...)
+}
+func (logger DebugLogger) Infof(format string, v ...interface{}) {
+	logger.config.Infof(format, v...)
+}
+
+func (logger DebugLogger) Debug(v ...interface{}) {
+	logger.config.Debug(v...)
+}
+func (logger DebugLogger) Debugf(format string, v ...interface{}) {
+	logger.config.Debugf(format, v...)
 }

@@ -1,16 +1,12 @@
 package jsonlog
 
 type ErrorLogger struct {
-	errorConfig config
+	config config
 }
 
-func (logger ErrorLogger) config() config {
-	return logger.errorConfig
-}
-
-func NewErrorLogger(logger logger, request interface{}) ErrorLogger {
+func NewErrorLogger(logger logger, request interface{}) Logger {
 	return ErrorLogger{
-		errorConfig: config{
+		config: config{
 			logger:  logger,
 			request: request,
 		},
@@ -18,16 +14,23 @@ func NewErrorLogger(logger logger, request interface{}) ErrorLogger {
 }
 
 func (logger ErrorLogger) Audit(v ...interface{}) {
-	message(logger, "audit", v...)
+	logger.config.Audit(v...)
 }
 func (logger ErrorLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger, "audit", format, v...)
+	logger.config.Auditf(format, v...)
 }
 
-func (ErrorLogger) Debug(v ...interface{}) {
+func (logger ErrorLogger) Error(v ...interface{}) {
+	logger.config.Error(v...)
+}
+func (logger ErrorLogger) Errorf(format string, v ...interface{}) {
+	logger.config.Errorf(format, v...)
+}
+
+func (ErrorLogger) Warning(v ...interface{}) {
 	// noop
 }
-func (ErrorLogger) Debugf(format string, v ...interface{}) {
+func (ErrorLogger) Warningf(format string, v ...interface{}) {
 	// noop
 }
 
@@ -38,16 +41,9 @@ func (ErrorLogger) Infof(format string, v ...interface{}) {
 	// noop
 }
 
-func (ErrorLogger) Warning(v ...interface{}) {
+func (ErrorLogger) Debug(v ...interface{}) {
 	// noop
 }
-func (ErrorLogger) Warningf(format string, v ...interface{}) {
+func (ErrorLogger) Debugf(format string, v ...interface{}) {
 	// noop
-}
-
-func (logger ErrorLogger) Error(v ...interface{}) {
-	message(logger, "error", v...)
-}
-func (logger ErrorLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger, "error", format, v...)
 }

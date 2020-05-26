@@ -1,16 +1,12 @@
 package jsonlog
 
 type InfoLogger struct {
-	infoConfig config
+	config config
 }
 
-func (logger InfoLogger) config() config {
-	return logger.infoConfig
-}
-
-func NewInfoLogger(logger logger, request interface{}) InfoLogger {
+func NewInfoLogger(logger logger, request interface{}) Logger {
 	return InfoLogger{
-		infoConfig: config{
+		config: config{
 			logger:  logger,
 			request: request,
 		},
@@ -18,10 +14,31 @@ func NewInfoLogger(logger logger, request interface{}) InfoLogger {
 }
 
 func (logger InfoLogger) Audit(v ...interface{}) {
-	message(logger, "audit", v...)
+	logger.config.Audit(v...)
 }
 func (logger InfoLogger) Auditf(format string, v ...interface{}) {
-	messagef(logger, "audit", format, v...)
+	logger.config.Auditf(format, v...)
+}
+
+func (logger InfoLogger) Error(v ...interface{}) {
+	logger.config.Error(v...)
+}
+func (logger InfoLogger) Errorf(format string, v ...interface{}) {
+	logger.config.Errorf(format, v...)
+}
+
+func (logger InfoLogger) Warning(v ...interface{}) {
+	logger.config.Warning(v...)
+}
+func (logger InfoLogger) Warningf(format string, v ...interface{}) {
+	logger.config.Warningf(format, v...)
+}
+
+func (logger InfoLogger) Info(v ...interface{}) {
+	logger.config.Info(v...)
+}
+func (logger InfoLogger) Infof(format string, v ...interface{}) {
+	logger.config.Infof(format, v...)
 }
 
 func (InfoLogger) Debug(v ...interface{}) {
@@ -29,25 +46,4 @@ func (InfoLogger) Debug(v ...interface{}) {
 }
 func (InfoLogger) Debugf(format string, v ...interface{}) {
 	// noop
-}
-
-func (logger InfoLogger) Info(v ...interface{}) {
-	message(logger, "info", v...)
-}
-func (logger InfoLogger) Infof(format string, v ...interface{}) {
-	messagef(logger, "info", format, v...)
-}
-
-func (logger InfoLogger) Warning(v ...interface{}) {
-	message(logger, "warning", v...)
-}
-func (logger InfoLogger) Warningf(format string, v ...interface{}) {
-	messagef(logger, "warning", format, v...)
-}
-
-func (logger InfoLogger) Error(v ...interface{}) {
-	message(logger, "error", v...)
-}
-func (logger InfoLogger) Errorf(format string, v ...interface{}) {
-	messagef(logger, "error", format, v...)
 }
