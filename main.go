@@ -15,7 +15,7 @@ import (
 	"github.com/getto-systems/project-example-id/adapter/logger"
 	"github.com/getto-systems/project-example-id/adapter/serializer"
 
-	auth_handler "github.com/getto-systems/project-example-id/http_handler/auth"
+	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
 	"github.com/getto-systems/project-example-id/auth"
 
@@ -135,13 +135,13 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 
 	renewPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PRIVATE_KEY"))
 	if err != nil {
-		log.Printf("renew private key read failed", err)
+		log.Printf("renew private key read failed: %s", err)
 		return nullSerializer, err
 	}
 
 	renewPublicKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PUBLIC_KEY"))
 	if err != nil {
-		log.Printf("renew public key read failed", err)
+		log.Printf("renew public key read failed: %s", err)
 		return nullSerializer, err
 	}
 
@@ -150,13 +150,13 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 		PublicKey:  renewPublicKeyPem,
 	})
 	if err != nil {
-		log.Printf("renew key parse failed", err)
+		log.Printf("renew key parse failed: %s", err)
 		return nullSerializer, err
 	}
 
 	appPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
 	if err != nil {
-		log.Printf("app private key read failed", err)
+		log.Printf("app private key read failed: %s", err)
 		return nullSerializer, err
 	}
 
@@ -164,7 +164,7 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 		PrivateKey: appPrivateKeyPem,
 	})
 	if err != nil {
-		log.Printf("app key parse failed", err)
+		log.Printf("app key parse failed: %s", err)
 		return nullSerializer, err
 	}
 
@@ -178,7 +178,7 @@ func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
-		log.Printf("aws cloudfront private key read failed", err)
+		log.Printf("aws cloudfront private key read failed: %s", err)
 		return nullSerializer, err
 	}
 

@@ -1,19 +1,28 @@
 package logger
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/getto-systems/project-example-id/misc/jsonlog"
+	"github.com/getto-systems/applog-go"
 )
 
-type RequestLogEntry struct {
-	RequestID string
-	RemoteIP  string
+type LogEntry struct {
+	Time    string          `json:"time"`
+	Level   string          `json:"level"`
+	Message string          `json:"message"`
+	Request RequestLogEntry `json:"request"`
 }
 
-func NewLogger(level string, logger *log.Logger, r *http.Request) (jsonlog.Logger, error) {
+type RequestLogEntry struct {
+	RequestID string `json:"request_id"`
+	RemoteIP  string `json:"remote_ip"`
+}
+
+func NewLogger(level string, logger *log.Logger, r *http.Request) (applog.Logger, error) {
 	requestID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -24,17 +33,31 @@ func NewLogger(level string, logger *log.Logger, r *http.Request) (jsonlog.Logge
 		RemoteIP:  r.RemoteAddr,
 	}
 
-	return leveledLogger(level, request, logger), nil
+	entry := func(level string, message string) string {
+		data, err := json.Marshal(LogEntry{
+			Time:    time.Now().UTC().String(),
+			Level:   level,
+			Message: message,
+			Request: request,
+		})
+		if err != nil {
+			return err.Error()
+		}
+
+		return string(data)
+	}
+
+	return leveledLogger(level, logger, entry), nil
 }
-func leveledLogger(level string, request RequestLogEntry, logger *log.Logger) jsonlog.Logger {
+func leveledLogger(level string, output applog.Output, entry applog.Entry) applog.Logger {
 	switch level {
 	case "DEBUG":
-		return jsonlog.NewDebugLogger(logger, request)
+		return applog.NewDebugLogger(output, entry)
 	case "INFO":
-		return jsonlog.NewInfoLogger(logger, request)
+		return applog.NewInfoLogger(output, entry)
 	case "WARNING":
-		return jsonlog.NewWarningLogger(logger, request)
+		return applog.NewWarnLogger(output, entry)
 	default:
-		return jsonlog.NewErrorLogger(logger, request)
+		return applog.NewErrorLogger(output, entry)
 	}
 }
