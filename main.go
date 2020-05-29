@@ -195,7 +195,7 @@ func NewDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
 func NewUserPasswordEncrypter() password.UserPasswordEncrypter {
-	return password.NewUserPasswordEncrypter(12)
+	return password.NewUserPasswordEncrypter(10) // bcrypt.DefaultCost
 }
 
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
