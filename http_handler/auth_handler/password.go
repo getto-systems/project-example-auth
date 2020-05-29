@@ -35,7 +35,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger := authenticator.Logger()
 
-	logger.Debug("auth password handling...")
+	logger.Debug("handling auth/password...")
 
 	param, err := passwordParam(r, logger)
 	if err != nil {
