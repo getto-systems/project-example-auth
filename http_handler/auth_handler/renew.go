@@ -33,7 +33,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger := authenticator.Logger()
 
-	logger.Debug("auth renew handling...")
+	logger.Debug("handling auth/renew...")
 
 	param, err := renewParam(r, logger)
 	if err != nil {
