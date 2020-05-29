@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrEmptyPassword   = errors.New("empty password is not allowed")
+	ErrPasswordEmpty   = errors.New("empty password is not allowed")
 	ErrPasswordTooLong = errors.New("password too long")
 )
 
@@ -52,7 +52,7 @@ func NewPassword(password user.Password) (Password, error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {
-		return nil, ErrEmptyPassword
+		return nil, ErrPasswordEmpty
 	}
 
 	if len(bytes) > 72 {
