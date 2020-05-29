@@ -198,44 +198,44 @@ func NewUserPasswordEncrypter() password.UserPasswordEncrypter {
 	return password.NewUserPasswordEncrypter(10) // bcrypt.DefaultCost
 }
 
-// interface methods (auth/renew:Authenticator, auth/password:Authenticator)
-type Handler struct {
+// Authenticator interface methods (auth/renew, auth/password)
+type Authenticator struct {
 	server *Server
 	logger applog.Logger
 }
 
-func (server *Server) NewHandler(r *http.Request) Handler {
+func (server *Server) NewHandler(r *http.Request) Authenticator {
 	logger, err := logger.NewLogger(server.log.level, server.log.logger, r)
 	if err != nil {
 		server.log.logger.Fatalf("failed initialize logger: %s", err)
 	}
 
-	return Handler{
+	return Authenticator{
 		server: server,
 		logger: logger,
 	}
 }
 
-func (handler Handler) Logger() applog.Logger {
-	return handler.logger
+func (authenticator Authenticator) Logger() applog.Logger {
+	return authenticator.logger
 }
 
-func (handler Handler) TicketSerializer() token.TicketSerializer {
-	return handler.server.ticketSerializer
+func (authenticator Authenticator) TicketSerializer() token.TicketSerializer {
+	return authenticator.server.ticketSerializer
 }
 
-func (handler Handler) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
-	return handler.server.awsCloudFrontSerializer
+func (authenticator Authenticator) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
+	return authenticator.server.awsCloudFrontSerializer
 }
 
-func (handler Handler) UserFactory() user.UserFactory {
-	return user.NewUserFactory(handler.server.db)
+func (authenticator Authenticator) UserFactory() user.UserFactory {
+	return user.NewUserFactory(authenticator.server.db)
 }
 
-func (handler Handler) UserPasswordFactory() user.UserPasswordFactory {
-	return user.NewUserPasswordFactory(handler.server.db, handler.server.enc)
+func (authenticator Authenticator) UserPasswordFactory() user.UserPasswordFactory {
+	return user.NewUserPasswordFactory(authenticator.server.db, authenticator.server.enc)
 }
 
-func (handler Handler) Now() time.Time {
+func (authenticator Authenticator) Now() time.Time {
 	return time.Now().UTC()
 }
