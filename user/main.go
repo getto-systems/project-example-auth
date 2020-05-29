@@ -8,6 +8,12 @@ import (
 var (
 	expireDuration = time.Duration(30 * 1_000_000_000)
 	renewThreshold = time.Duration(5 * 1_000_000_000)
+
+	accessibleMap = AccessibleMap{}
+)
+
+const (
+	super_role = "admin"
 )
 
 type User struct {
@@ -109,13 +115,40 @@ func RestrictTicket(path Path, data TicketData) (Ticket, error) {
 	}, nil
 }
 
-func (roles Roles) isAccessible(path Path) bool {
-	return true // TODO fix: accessible check
-}
-
 type TicketData struct {
 	UserID     UserID
 	Roles      Roles
 	Authorized time.Time
 	Expires    time.Time
+}
+
+func (roles Roles) isAccessible(path Path) bool {
+	for _, role := range roles {
+		if role == super_role {
+			return true
+		}
+
+		pathList, ok := accessibleMap[role]
+		if ok {
+			if pathList.contains(path) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+type AccessibleMap map[string]PathList
+
+type PathList []Path
+
+func (pathList PathList) contains(path Path) bool {
+	for _, accessible := range pathList {
+		if path == accessible {
+			return true
+		}
+	}
+
+	return false
 }
