@@ -125,9 +125,20 @@ func parseUserID(raw interface{}) user.UserID {
 	return user.UserID(userID)
 }
 func parseRoles(raw interface{}) user.Roles {
-	roles, ok := raw.([]string)
+	arr, ok := raw.([]interface{})
 	if !ok {
 		return nil
+	}
+
+	var roles []string
+
+	for _, val := range arr {
+		role, ok := val.(string)
+		if !ok {
+			return nil
+		}
+
+		roles = append(roles, role)
 	}
 
 	return roles
