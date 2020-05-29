@@ -1,29 +1,47 @@
 package user
 
 type UserPassword struct {
-	db UserPasswordRepository
+	db  UserPasswordRepository
+	enc UserPasswordEncrypter
 
 	userID UserID
 }
 
 type UserPasswordRepository interface {
-	MatchUserPassword(UserID, Password) bool
+	UserPassword(UserID) HashedPassword
 }
 
-type Password string
+type UserPasswordEncrypter interface {
+	GenerateUserPassword(Password) (HashedPassword, error)
+	MatchUserPassword(HashedPassword, Password) error
+}
 
-func (userPassword UserPassword) Match(password Password) bool {
-	return userPassword.db.MatchUserPassword(userPassword.userID, password)
+type (
+	Password       string
+	HashedPassword []byte
+)
+
+func (p UserPassword) Match(password Password) error {
+	hashed := p.db.UserPassword(p.userID)
+	return p.enc.MatchUserPassword(hashed, password)
 }
 
 type UserPasswordFactory struct {
-	db UserPasswordRepository
+	db  UserPasswordRepository
+	enc UserPasswordEncrypter
 }
 
-func NewUserPasswordFactory(db UserPasswordRepository) UserPasswordFactory {
-	return UserPasswordFactory{db}
+func NewUserPasswordFactory(db UserPasswordRepository, enc UserPasswordEncrypter) UserPasswordFactory {
+	return UserPasswordFactory{
+		db:  db,
+		enc: enc,
+	}
 }
 
 func (f UserPasswordFactory) NewUserPassword(userID UserID) UserPassword {
-	return UserPassword{f.db, userID}
+	return UserPassword{
+		db:     f.db,
+		enc:    f.enc,
+		userID: userID,
+	}
 }
