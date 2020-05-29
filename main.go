@@ -11,6 +11,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
+	"github.com/getto-systems/project-example-id/infra/password"
 
 	"github.com/getto-systems/project-example-id/adapter/logger"
 	"github.com/getto-systems/project-example-id/adapter/serializer"
@@ -36,7 +37,8 @@ type Server struct {
 
 	log Log
 
-	db memory.MemoryStore
+	db  memory.MemoryStore
+	enc password.UserPasswordEncrypter
 }
 
 type Tls struct {
@@ -127,7 +129,8 @@ func NewServer() (*Server, error) {
 			logger: log.New(os.Stdout, "", 0),
 		},
 
-		db: db,
+		db:  db,
+		enc: NewUserPasswordEncrypter(),
 	}, nil
 }
 func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
@@ -191,6 +194,9 @@ func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 func NewDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
+func NewUserPasswordEncrypter() password.UserPasswordEncrypter {
+	return password.NewUserPasswordEncrypter(10) // bcrypt.DefaultCost
+}
 
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
 type Handler struct {
@@ -227,7 +233,7 @@ func (handler Handler) UserFactory() user.UserFactory {
 }
 
 func (handler Handler) UserPasswordFactory() user.UserPasswordFactory {
-	return user.NewUserPasswordFactory(handler.server.db)
+	return user.NewUserPasswordFactory(handler.server.db, handler.server.enc)
 }
 
 func (handler Handler) Now() time.Time {
