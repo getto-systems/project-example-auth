@@ -183,8 +183,8 @@ func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 	}
 
 	return serializer.NewAwsCloudFrontSerializer(
-		serializer.AwsCloudFrontPem(pem),
-		serializer.AwsCloudFrontBaseURL(os.Getenv("AWS_CLOUDFRONT_BASE_URL")),
+		pem,
+		os.Getenv("AWS_CLOUDFRONT_BASE_URL"),
 		token.AwsCloudFrontKeyPairID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 	), nil
 }
