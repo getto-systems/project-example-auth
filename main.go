@@ -11,7 +11,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
-	"github.com/getto-systems/project-example-id/infra/encrypt"
+	"github.com/getto-systems/project-example-id/infra/password"
 
 	"github.com/getto-systems/project-example-id/adapter/logger"
 	"github.com/getto-systems/project-example-id/adapter/serializer"
@@ -38,7 +38,7 @@ type Server struct {
 	log Log
 
 	db  memory.MemoryStore
-	enc encrypt.UserPasswordEncrypter
+	enc password.UserPasswordEncrypter
 }
 
 type Tls struct {
@@ -194,8 +194,8 @@ func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 func NewDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
-func NewUserPasswordEncrypter() encrypt.UserPasswordEncrypter {
-	return encrypt.NewUserPasswordEncrypter(12)
+func NewUserPasswordEncrypter() password.UserPasswordEncrypter {
+	return password.NewUserPasswordEncrypter(12)
 }
 
 // interface methods (auth/renew:Authenticator, auth/password:Authenticator)
