@@ -117,5 +117,6 @@ func (setter CookieSetter) setCookie(cookie *Cookie) {
 
 		Secure:   true,
 		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
