@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/http_handler"
+
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/applog"
@@ -81,6 +83,8 @@ func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) 
 	}
 
 	return auth.RenewParam{
+		RequestedAt: http_handler.Now(),
+
 		RenewToken: renewToken,
 		Path:       user.Path(input.Path),
 	}, nil

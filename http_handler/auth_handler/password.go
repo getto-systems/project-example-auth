@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/http_handler"
+
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/applog"
@@ -77,6 +79,8 @@ func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, e
 	}
 
 	return auth.PasswordParam{
+		RequestedAt: http_handler.Now(),
+
 		UserID:   user.UserID(input.UserID),
 		Password: user.Password(input.Password),
 		Path:     user.Path(input.Path),

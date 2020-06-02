@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -230,8 +229,4 @@ func (authenticator Authenticator) UserFactory() user.UserFactory {
 
 func (authenticator Authenticator) UserPasswordFactory() user.UserPasswordFactory {
 	return user.NewUserPasswordFactory(authenticator.server.db, authenticator.server.enc)
-}
-
-func (authenticator Authenticator) Now() time.Time {
-	return time.Now().UTC()
 }
