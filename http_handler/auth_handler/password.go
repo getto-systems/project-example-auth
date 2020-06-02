@@ -3,7 +3,8 @@ package auth_handler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
+
+	"github.com/getto-systems/project-example-id/http_handler"
 
 	"github.com/getto-systems/project-example-id/auth"
 
@@ -78,7 +79,7 @@ func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, e
 	}
 
 	return auth.PasswordParam{
-		RequestedAt: time.Now().UTC(),
+		RequestedAt: http_handler.Now(),
 
 		UserID:   user.UserID(input.UserID),
 		Password: user.Password(input.Password),
