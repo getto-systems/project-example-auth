@@ -1,6 +1,8 @@
 package user
 
 import (
+	"strings"
+
 	"github.com/getto-systems/project-example-id/basic"
 
 	"fmt"
@@ -9,8 +11,6 @@ import (
 var (
 	expireDuration = basic.Second(30)
 	renewThreshold = basic.Second(5)
-
-	accessibleMap = AccessibleMap{}
 )
 
 const (
@@ -121,24 +121,7 @@ func isAccessible(roles basic.Roles, path basic.Path) bool {
 			return true
 		}
 
-		pathList, ok := accessibleMap[role]
-		if ok {
-			if pathList.contains(path) {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-type AccessibleMap map[string]PathList
-
-type PathList []basic.Path
-
-func (pathList PathList) contains(path basic.Path) bool {
-	for _, accessible := range pathList {
-		if path == accessible {
+		if strings.HasPrefix(fmt.Sprintf("/%s/", role), string(path)) {
 			return true
 		}
 	}
