@@ -8,18 +8,22 @@ import (
 
 	"errors"
 	"fmt"
+	"time"
 )
 
-type TokenHandler func(user.Ticket, Token)
+type TokenHandler func(Token)
 
 type Token struct {
+	Expires time.Time
+
 	RenewToken         token.RenewToken
 	AwsCloudFrontToken token.AwsCloudFrontToken
 }
 
 func (token Token) String() string {
 	return fmt.Sprintf(
-		"Token{RenewToken:%s, AwsCloudFrontToken:%s}",
+		"Token{Expires: %s, RenewToken:%s, AwsCloudFrontToken:%s}",
+		token.Expires,
 		token.RenewToken,
 		token.AwsCloudFrontToken,
 	)
@@ -63,7 +67,9 @@ func handleTicket(authenticator Authenticator, ticket user.Ticket, handler Token
 
 	logger.Debug("handling ticket token...")
 
-	handler(ticket, Token{
+	handler(Token{
+		Expires: ticket.Expires(),
+
 		RenewToken:         renewToken,
 		AwsCloudFrontToken: awsCloudFrontToken,
 	})

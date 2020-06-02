@@ -47,9 +47,9 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	appToken, err := auth.Password(authenticator, param, func(ticket user.Ticket, token auth.Token) {
-		logger.Debugf("set ticket cookie: %v; %v", ticket, token)
-		setAuthTokenCookie(w, h.CookieDomain, ticket, token)
+	appToken, err := auth.Password(authenticator, param, func(token auth.Token) {
+		logger.Debugf("set ticket cookie: %v", token)
+		setAuthTokenCookie(w, h.CookieDomain, token)
 	})
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
