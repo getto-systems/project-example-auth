@@ -6,6 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
+	"github.com/getto-systems/project-example-id/basic"
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
@@ -90,7 +91,7 @@ func (key TicketJWT_HS_512_Key) verifyKey() interface{} {
 	return key.key
 }
 
-func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path user.Path) (user.Ticket, error) {
+func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path basic.Path) (user.Ticket, error) {
 	var claims jwt.MapClaims
 	jwtToken, err := jwt.ParseWithClaims(string(raw), &claims, func(token *jwt.Token) (interface{}, error) {
 		return serializer.RenewKey.verifyKey(), nil
@@ -110,15 +111,15 @@ func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path user.Path
 		Expires:    parseTime(claims["exp"]),
 	})
 }
-func parseUserID(raw interface{}) user.UserID {
+func parseUserID(raw interface{}) basic.UserID {
 	userID, ok := raw.(string)
 	if !ok {
-		return user.UserID("")
+		return basic.UserID("")
 	}
 
-	return user.UserID(userID)
+	return basic.UserID(userID)
 }
-func parseRoles(raw interface{}) user.Roles {
+func parseRoles(raw interface{}) basic.Roles {
 	arr, ok := raw.([]interface{})
 	if !ok {
 		return nil
@@ -137,14 +138,14 @@ func parseRoles(raw interface{}) user.Roles {
 
 	return roles
 }
-func parseTime(raw interface{}) time.Time {
+func parseTime(raw interface{}) basic.Time {
 	unixSecond, ok := raw.(int64)
 	if !ok {
 		var defaultTime time.Time
-		return defaultTime
+		return basic.Time(defaultTime)
 	}
 
-	return time.Unix(unixSecond, 0)
+	return basic.Time(time.Unix(unixSecond, 0))
 }
 
 func (serializer TicketJWTSerializer) RenewToken(ticket user.Ticket) (token.RenewToken, error) {
@@ -153,8 +154,8 @@ func (serializer TicketJWTSerializer) RenewToken(ticket user.Ticket) (token.Rene
 	jwtToken := jwt.NewWithClaims(key.signingMethod(), jwt.MapClaims{
 		"sub": ticket.UserID(),
 		"aud": ticket.Roles(),
-		"iat": ticket.Authorized().Unix(),
-		"exp": ticket.Expires().Unix(),
+		"iat": time.Time(ticket.Authorized()).Unix(),
+		"exp": time.Time(ticket.Expires()).Unix(),
 	})
 
 	tokenString, err := jwtToken.SignedString(key.signKey())
@@ -172,8 +173,8 @@ func (serializer TicketJWTSerializer) AppToken(ticket user.Ticket) (token.AppTok
 	jwtToken := jwt.NewWithClaims(key.signingMethod(), jwt.MapClaims{
 		"sub": ticket.UserID(),
 		"aud": ticket.Roles(),
-		"iat": ticket.Authorized().Unix(),
-		"exp": ticket.Expires().Unix(),
+		"iat": time.Time(ticket.Authorized()).Unix(),
+		"exp": time.Time(ticket.Expires()).Unix(),
 	})
 
 	tokenString, err := jwtToken.SignedString(key.signKey())

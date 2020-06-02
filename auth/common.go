@@ -3,18 +3,18 @@ package auth
 import (
 	"github.com/getto-systems/project-example-id/applog"
 
+	"github.com/getto-systems/project-example-id/basic"
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
 	"errors"
 	"fmt"
-	"time"
 )
 
 type TokenHandler func(Token)
 
 type Token struct {
-	Expires time.Time
+	Expires basic.Time
 
 	RenewToken         token.RenewToken
 	AwsCloudFrontToken token.AwsCloudFrontToken

@@ -6,6 +6,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/auth"
 
+	"github.com/getto-systems/project-example-id/basic"
 	"github.com/getto-systems/project-example-id/token"
 
 	"errors"
@@ -25,7 +26,7 @@ type Cookie struct {
 type CookieSetter struct {
 	ResponseWriter http.ResponseWriter
 	CookieDomain   CookieDomain
-	Expires        time.Time
+	Expires        basic.Time
 }
 
 var (
@@ -113,7 +114,7 @@ func (setter CookieSetter) setCookie(cookie *Cookie) {
 
 		Domain:  string(setter.CookieDomain),
 		Path:    "/",
-		Expires: setter.Expires,
+		Expires: time.Time(setter.Expires),
 
 		Secure:   true,
 		HttpOnly: true,

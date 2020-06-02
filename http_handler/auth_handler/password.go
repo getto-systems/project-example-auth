@@ -10,7 +10,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/applog"
 
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-id/basic"
 )
 
 type PasswordHandler struct {
@@ -81,8 +81,8 @@ func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, e
 	return auth.PasswordParam{
 		RequestedAt: http_handler.Now(),
 
-		UserID:   user.UserID(input.UserID),
-		Password: user.Password(input.Password),
-		Path:     user.Path(input.Path),
+		UserID:   basic.UserID(input.UserID),
+		Password: basic.Password(input.Password),
+		Path:     basic.Path(input.Path),
 	}, nil
 }

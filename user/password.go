@@ -1,27 +1,26 @@
 package user
 
+import (
+	"github.com/getto-systems/project-example-id/basic"
+)
+
 type UserPassword struct {
 	db  UserPasswordRepository
 	enc UserPasswordEncrypter
 
-	userID UserID
+	userID basic.UserID
 }
 
 type UserPasswordRepository interface {
-	UserPassword(UserID) HashedPassword
+	UserPassword(basic.UserID) basic.HashedPassword
 }
 
 type UserPasswordEncrypter interface {
-	GenerateUserPassword(Password) (HashedPassword, error)
-	MatchUserPassword(HashedPassword, Password) error
+	GenerateUserPassword(basic.Password) (basic.HashedPassword, error)
+	MatchUserPassword(basic.HashedPassword, basic.Password) error
 }
 
-type (
-	Password       string
-	HashedPassword []byte
-)
-
-func (p UserPassword) Match(password Password) error {
+func (p UserPassword) Match(password basic.Password) error {
 	hashed := p.db.UserPassword(p.userID)
 	return p.enc.MatchUserPassword(hashed, password)
 }
@@ -38,7 +37,7 @@ func NewUserPasswordFactory(db UserPasswordRepository, enc UserPasswordEncrypter
 	}
 }
 
-func (f UserPasswordFactory) NewUserPassword(userID UserID) UserPassword {
+func (f UserPasswordFactory) NewUserPassword(userID basic.UserID) UserPassword {
 	return UserPassword{
 		db:     f.db,
 		enc:    f.enc,

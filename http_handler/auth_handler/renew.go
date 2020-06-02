@@ -10,7 +10,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/applog"
 
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-id/basic"
 )
 
 type RenewHandler struct {
@@ -86,6 +86,6 @@ func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) 
 		RequestedAt: http_handler.Now(),
 
 		RenewToken: renewToken,
-		Path:       user.Path(input.Path),
+		Path:       basic.Path(input.Path),
 	}, nil
 }
