@@ -11,12 +11,12 @@ import (
 type RenewAuthenticator interface {
 	Authenticator
 	UserFactory() user.UserFactory
-	Now() time.Time
 }
 
 type RenewParam struct {
-	RenewToken token.RenewToken
-	Path       user.Path
+	RequestedAt time.Time
+	RenewToken  token.RenewToken
+	Path        user.Path
 }
 
 func (param RenewParam) String() string {
@@ -40,16 +40,14 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 		return token.AppToken{}, ErrRenewTokenParseFailed
 	}
 
-	now := authenticator.Now()
+	logger.Debugf("check renew required: %v/%s", ticket, param.RequestedAt)
 
-	logger.Debugf("check renew required: %v/%s", ticket, now)
-
-	if ticket.IsRenewRequired(now) {
-		logger.Debugf("renew token: %v/%s", ticket, now)
+	if ticket.IsRenewRequired(param.RequestedAt) {
+		logger.Debugf("renew token: %v/%s", ticket, param.RequestedAt)
 
 		user := authenticator.UserFactory().NewUser(ticket.UserID())
 
-		new_ticket, err := user.NewTicket(param.Path, now)
+		new_ticket, err := user.NewTicket(param.Path, param.RequestedAt)
 		if err != nil {
 			logger.Auditf("access denied: %s; %v; %v", err, ticket, param)
 			return token.AppToken{}, ErrUserAccessDenied

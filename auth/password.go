@@ -12,10 +12,11 @@ type PasswordAuthenticator interface {
 	Authenticator
 	UserFactory() user.UserFactory
 	UserPasswordFactory() user.UserPasswordFactory
-	Now() time.Time
 }
 
 type PasswordParam struct {
+	RequestedAt time.Time
+
 	UserID   user.UserID
 	Password user.Password
 	Path     user.Path
@@ -42,13 +43,11 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 		return token.AppToken{}, ErrUserPasswordDidNotMatch
 	}
 
-	now := authenticator.Now()
-
 	user := authenticator.UserFactory().NewUser(param.UserID)
 
 	logger.Debugf("new ticket: %v", param)
 
-	ticket, err := user.NewTicket(param.Path, now)
+	ticket, err := user.NewTicket(param.Path, param.RequestedAt)
 	if err != nil {
 		logger.Auditf("access denied: %s; %v", err, param)
 		return token.AppToken{}, ErrUserAccessDenied
