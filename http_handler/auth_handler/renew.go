@@ -62,24 +62,22 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) {
-	var nullParam auth.RenewParam
-
 	if r.Body == nil {
 		logger.Info("body not sent error")
-		return nullParam, ErrBodyNotSent
+		return auth.RenewParam{}, ErrBodyNotSent
 	}
 
 	var input RenewInput
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		logger.Info("body parse error")
-		return nullParam, ErrBodyParseFailed
+		return auth.RenewParam{}, ErrBodyParseFailed
 	}
 
 	renewToken, err := getRenewToken(r)
 	if err != nil {
 		logger.Info("ticket cookie not sent error")
-		return nullParam, ErrTicketCookieNotSent
+		return auth.RenewParam{}, ErrTicketCookieNotSent
 	}
 
 	return auth.RenewParam{

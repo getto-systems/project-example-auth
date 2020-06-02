@@ -64,18 +64,16 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, error) {
-	var nullParam auth.PasswordParam
-
 	if r.Body == nil {
 		logger.Info("body not sent error")
-		return nullParam, ErrBodyNotSent
+		return auth.PasswordParam{}, ErrBodyNotSent
 	}
 
 	var input PasswordInput
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		logger.Info("body parse error")
-		return nullParam, ErrBodyParseFailed
+		return auth.PasswordParam{}, ErrBodyParseFailed
 	}
 
 	return auth.PasswordParam{

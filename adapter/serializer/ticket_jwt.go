@@ -35,14 +35,12 @@ type TicketJWT_ES_512_Pem struct {
 }
 
 func NewTicketJWT_ES_512_Key(pem TicketJWT_ES_512_Pem) (TicketJWT_ES_512_Key, error) {
-	var nullKey TicketJWT_ES_512_Key
-
 	var key TicketJWT_ES_512_Key
 
 	if pem.PrivateKey != nil {
 		privateKey, err := jwt.ParseECPrivateKeyFromPEM(pem.PrivateKey)
 		if err != nil {
-			return nullKey, err
+			return TicketJWT_ES_512_Key{}, err
 		}
 
 		key.privateKey = privateKey
@@ -51,7 +49,7 @@ func NewTicketJWT_ES_512_Key(pem TicketJWT_ES_512_Pem) (TicketJWT_ES_512_Key, er
 	if pem.PublicKey != nil {
 		publicKey, err := jwt.ParseECPublicKeyFromPEM(pem.PublicKey)
 		if err != nil {
-			return nullKey, err
+			return TicketJWT_ES_512_Key{}, err
 		}
 
 		key.publicKey = publicKey
@@ -93,18 +91,16 @@ func (key TicketJWT_HS_512_Key) verifyKey() interface{} {
 }
 
 func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path user.Path) (user.Ticket, error) {
-	var nullTicket user.Ticket
-
 	var claims jwt.MapClaims
 	jwtToken, err := jwt.ParseWithClaims(string(raw), &claims, func(token *jwt.Token) (interface{}, error) {
 		return serializer.RenewKey.verifyKey(), nil
 	})
 	if err != nil {
-		return nullTicket, err
+		return user.Ticket{}, err
 	}
 
 	if !jwtToken.Valid {
-		return nullTicket, errors.New("invalid renew jwt")
+		return user.Ticket{}, errors.New("invalid renew jwt")
 	}
 
 	return user.RestrictTicket(path, user.TicketData{
@@ -115,11 +111,9 @@ func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path user.Path
 	})
 }
 func parseUserID(raw interface{}) user.UserID {
-	var nullUserID user.UserID
-
 	userID, ok := raw.(string)
 	if !ok {
-		return nullUserID
+		return user.UserID("")
 	}
 
 	return user.UserID(userID)
@@ -144,11 +138,10 @@ func parseRoles(raw interface{}) user.Roles {
 	return roles
 }
 func parseTime(raw interface{}) time.Time {
-	var nullTime time.Time
-
 	unixSecond, ok := raw.(int64)
 	if !ok {
-		return nullTime
+		var defaultTime time.Time
+		return defaultTime
 	}
 
 	return time.Unix(unixSecond, 0)
@@ -174,8 +167,6 @@ func (serializer TicketJWTSerializer) RenewToken(ticket user.Ticket) (token.Rene
 }
 
 func (serializer TicketJWTSerializer) AppToken(ticket user.Ticket) (token.AppToken, error) {
-	var nullToken token.AppToken
-
 	key := serializer.AppKey
 
 	jwtToken := jwt.NewWithClaims(key.signingMethod(), jwt.MapClaims{
@@ -188,7 +179,7 @@ func (serializer TicketJWTSerializer) AppToken(ticket user.Ticket) (token.AppTok
 	tokenString, err := jwtToken.SignedString(key.signKey())
 	if err != nil {
 		log.Println("sign error : app")
-		return nullToken, err
+		return token.AppToken{}, err
 	}
 
 	return token.AppToken{
