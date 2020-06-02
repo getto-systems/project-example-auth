@@ -26,7 +26,7 @@ type Cookie struct {
 type CookieSetter struct {
 	ResponseWriter http.ResponseWriter
 	CookieDomain   CookieDomain
-	Expires        basic.Time
+	Expires        basic.Expires
 }
 
 var (

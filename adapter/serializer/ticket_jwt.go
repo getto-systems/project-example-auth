@@ -107,8 +107,8 @@ func (serializer TicketJWTSerializer) Parse(raw token.RenewToken, path basic.Pat
 	return user.RestrictTicket(path, user.TicketData{
 		UserID:     parseUserID(claims["sub"]),
 		Roles:      parseRoles(claims["aud"]),
-		Authorized: parseTime(claims["iat"]),
-		Expires:    parseTime(claims["exp"]),
+		Authorized: basic.RequestedAt(parseTime(claims["iat"])),
+		Expires:    basic.Expires(parseTime(claims["exp"])),
 	})
 }
 func parseUserID(raw interface{}) basic.UserID {
@@ -138,14 +138,14 @@ func parseRoles(raw interface{}) basic.Roles {
 
 	return roles
 }
-func parseTime(raw interface{}) basic.Time {
+func parseTime(raw interface{}) time.Time {
 	unixSecond, ok := raw.(int64)
 	if !ok {
 		var defaultTime time.Time
-		return basic.Time(defaultTime)
+		return defaultTime
 	}
 
-	return basic.Time(time.Unix(unixSecond, 0))
+	return time.Unix(unixSecond, 0)
 }
 
 func (serializer TicketJWTSerializer) RenewToken(ticket user.Ticket) (token.RenewToken, error) {

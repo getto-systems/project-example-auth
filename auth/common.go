@@ -14,7 +14,7 @@ import (
 type TokenHandler func(Token)
 
 type Token struct {
-	Expires basic.Time
+	Expires basic.Expires
 
 	RenewToken         token.RenewToken
 	AwsCloudFrontToken token.AwsCloudFrontToken

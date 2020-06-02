@@ -46,8 +46,8 @@ func (f UserFactory) NewUser(userID basic.UserID) User {
 type Ticket struct {
 	userID     basic.UserID
 	roles      basic.Roles
-	authorized basic.Time
-	expires    basic.Time
+	authorized basic.RequestedAt
+	expires    basic.Expires
 }
 
 func (ticket Ticket) UserID() basic.UserID {
@@ -58,16 +58,16 @@ func (ticket Ticket) Roles() basic.Roles {
 	return ticket.roles
 }
 
-func (ticket Ticket) Authorized() basic.Time {
+func (ticket Ticket) Authorized() basic.RequestedAt {
 	return ticket.authorized
 }
 
-func (ticket Ticket) Expires() basic.Time {
+func (ticket Ticket) Expires() basic.Expires {
 	return ticket.expires
 }
 
-func (ticket Ticket) IsRenewRequired(now basic.Time) bool {
-	return now.Before(ticket.Expires().Add(renewThreshold))
+func (ticket Ticket) IsRenewRequired(requestedAt basic.RequestedAt) bool {
+	return ticket.Expires().Before(requestedAt.Add(renewThreshold))
 }
 
 func (ticket Ticket) String() string {
@@ -80,12 +80,12 @@ func (ticket Ticket) String() string {
 	)
 }
 
-func (user User) NewTicket(path basic.Path, now basic.Time) (Ticket, error) {
+func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (Ticket, error) {
 	userID := user.userID
 	roles := user.db.UserRoles(userID)
 
-	authorized := now
-	expires := now.Add(expireSeconds)
+	authorized := requestedAt
+	expires := requestedAt.Add(expireSeconds)
 
 	return RestrictTicket(path, TicketData{
 		UserID:     userID,
@@ -111,8 +111,8 @@ func RestrictTicket(path basic.Path, data TicketData) (Ticket, error) {
 type TicketData struct {
 	UserID     basic.UserID
 	Roles      basic.Roles
-	Authorized basic.Time
-	Expires    basic.Time
+	Authorized basic.RequestedAt
+	Expires    basic.Expires
 }
 
 func isAccessible(roles basic.Roles, path basic.Path) bool {

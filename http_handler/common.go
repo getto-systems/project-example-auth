@@ -6,6 +6,6 @@ import (
 	"time"
 )
 
-func Now() basic.Time {
-	return basic.Time(time.Now().UTC())
+func RequestedAt() basic.RequestedAt {
+	return basic.RequestedAt(time.Now().UTC())
 }

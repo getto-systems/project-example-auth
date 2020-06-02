@@ -15,7 +15,7 @@ type PasswordAuthenticator interface {
 }
 
 type PasswordParam struct {
-	RequestedAt basic.Time
+	RequestedAt basic.RequestedAt
 
 	UserID   basic.UserID
 	Password basic.Password

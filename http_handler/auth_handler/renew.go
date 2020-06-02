@@ -83,7 +83,7 @@ func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) 
 	}
 
 	return auth.RenewParam{
-		RequestedAt: http_handler.Now(),
+		RequestedAt: http_handler.RequestedAt(),
 
 		RenewToken: renewToken,
 		Path:       basic.Path(input.Path),
