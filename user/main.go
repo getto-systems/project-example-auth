@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	expireSeconds  = basic.Second(30)
+	expireDuration = basic.Second(30)
 	renewThreshold = basic.Second(5)
 
 	accessibleMap = AccessibleMap{}
@@ -85,7 +85,7 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (Tick
 	roles := user.db.UserRoles(userID)
 
 	authorized := requestedAt
-	expires := requestedAt.Add(expireSeconds)
+	expires := requestedAt.Add(expireDuration)
 
 	return RestrictTicket(path, TicketData{
 		UserID:     userID,
