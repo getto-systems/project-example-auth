@@ -32,3 +32,7 @@ func (expires Expires) Before(target Expires) bool {
 func (expires Expires) String() string {
 	return time.Time(expires).String()
 }
+
+func Mimute(minutes int64) Second {
+	return Second(minutes * 60)
+}
