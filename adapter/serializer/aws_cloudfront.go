@@ -22,11 +22,9 @@ func NewAwsCloudFrontSerializer(pem []byte, baseURL string, keyPairID token.AwsC
 }
 
 func (serializer AwsCloudFrontSerializer) Token(ticket user.Ticket) (token.AwsCloudFrontToken, error) {
-	var nullToken token.AwsCloudFrontToken
-
 	signature, err := serializer.privateKey.Sign(serializer.baseURL, ticket.Expires())
 	if err != nil {
-		return nullToken, err
+		return token.AwsCloudFrontToken{}, err
 	}
 
 	return token.AwsCloudFrontToken{

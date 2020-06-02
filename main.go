@@ -134,18 +134,16 @@ func NewServer() (*Server, error) {
 	}, nil
 }
 func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
-	var nullSerializer serializer.TicketJWTSerializer
-
 	renewPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PRIVATE_KEY"))
 	if err != nil {
 		log.Printf("renew private key read failed: %s", err)
-		return nullSerializer, err
+		return serializer.TicketJWTSerializer{}, err
 	}
 
 	renewPublicKeyPem, err := ioutil.ReadFile(os.Getenv("RENEW_PUBLIC_KEY"))
 	if err != nil {
 		log.Printf("renew public key read failed: %s", err)
-		return nullSerializer, err
+		return serializer.TicketJWTSerializer{}, err
 	}
 
 	renewKey, err := serializer.NewTicketJWT_ES_512_Key(serializer.TicketJWT_ES_512_Pem{
@@ -154,13 +152,13 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 	})
 	if err != nil {
 		log.Printf("renew key parse failed: %s", err)
-		return nullSerializer, err
+		return serializer.TicketJWTSerializer{}, err
 	}
 
 	appPrivateKeyPem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
 	if err != nil {
 		log.Printf("app private key read failed: %s", err)
-		return nullSerializer, err
+		return serializer.TicketJWTSerializer{}, err
 	}
 
 	appKey, err := serializer.NewTicketJWT_ES_512_Key(serializer.TicketJWT_ES_512_Pem{
@@ -168,7 +166,7 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 	})
 	if err != nil {
 		log.Printf("app key parse failed: %s", err)
-		return nullSerializer, err
+		return serializer.TicketJWTSerializer{}, err
 	}
 
 	return serializer.TicketJWTSerializer{
@@ -177,12 +175,10 @@ func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
 	}, nil
 }
 func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
-	var nullSerializer serializer.AwsCloudFrontSerializer
-
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
 		log.Printf("aws cloudfront private key read failed: %s", err)
-		return nullSerializer, err
+		return serializer.AwsCloudFrontSerializer{}, err
 	}
 
 	return serializer.NewAwsCloudFrontSerializer(

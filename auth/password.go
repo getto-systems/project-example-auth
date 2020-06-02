@@ -34,14 +34,12 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	logger.Debugf("password auth: %v", param)
 
-	var nullToken token.AppToken
-
 	userPassword := authenticator.UserPasswordFactory().NewUserPassword(param.UserID)
 
 	err := userPassword.Match(param.Password)
 	if err != nil {
 		logger.Auditf("password match failed: %s; %s", err, param.UserID)
-		return nullToken, ErrUserPasswordDidNotMatch
+		return token.AppToken{}, ErrUserPasswordDidNotMatch
 	}
 
 	now := authenticator.Now()
@@ -53,12 +51,12 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 	ticket, err := user.NewTicket(param.Path, now)
 	if err != nil {
 		logger.Auditf("access denied: %s; %v", err, param)
-		return nullToken, ErrUserAccessDenied
+		return token.AppToken{}, ErrUserAccessDenied
 	}
 
 	err = handleTicket(authenticator, ticket, handler)
 	if err != nil {
-		return nullToken, err
+		return token.AppToken{}, err
 	}
 
 	logger.Debugf("serialize app token: %v", ticket)
@@ -66,7 +64,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 	appToken, err := authenticator.TicketSerializer().AppToken(ticket)
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return nullToken, ErrAppTokenSerializeFailed
+		return token.AppToken{}, ErrAppTokenSerializeFailed
 	}
 
 	return appToken, nil

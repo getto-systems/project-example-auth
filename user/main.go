@@ -101,10 +101,8 @@ func (user User) NewTicket(path Path, now time.Time) (Ticket, error) {
 }
 
 func RestrictTicket(path Path, data TicketData) (Ticket, error) {
-	var nullTicket Ticket
-
 	if !data.Roles.isAccessible(path) {
-		return nullTicket, fmt.Errorf("%s is not accessible as role: %v", path, data.Roles)
+		return Ticket{}, fmt.Errorf("%s is not accessible as role: %v", path, data.Roles)
 	}
 
 	return Ticket{

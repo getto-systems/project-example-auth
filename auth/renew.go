@@ -32,14 +32,12 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 
 	logger.Debugf("renew token: %v", param)
 
-	var nullToken token.AppToken
-
 	ticketSerializer := authenticator.TicketSerializer()
 
 	ticket, err := ticketSerializer.Parse(param.RenewToken, param.Path)
 	if err != nil {
 		logger.Debugf("parse token error: %s; %v", err, param)
-		return nullToken, ErrRenewTokenParseFailed
+		return token.AppToken{}, ErrRenewTokenParseFailed
 	}
 
 	now := authenticator.Now()
@@ -54,14 +52,14 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 		new_ticket, err := user.NewTicket(param.Path, now)
 		if err != nil {
 			logger.Auditf("access denied: %s; %v; %v", err, ticket, param)
-			return nullToken, ErrUserAccessDenied
+			return token.AppToken{}, ErrUserAccessDenied
 		}
 
 		logger.Auditf("token renewed: %v; %s", new_ticket, param.Path)
 
 		err = handleTicket(authenticator, new_ticket, handler)
 		if err != nil {
-			return nullToken, err
+			return token.AppToken{}, err
 		}
 
 		ticket = new_ticket
@@ -72,7 +70,7 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 	appToken, err := ticketSerializer.AppToken(ticket)
 	if err != nil {
 		logger.Errorf("app token serialize error: %s; %v", err, ticket)
-		return nullToken, ErrAppTokenSerializeFailed
+		return token.AppToken{}, ErrAppTokenSerializeFailed
 	}
 
 	return appToken, nil
