@@ -79,7 +79,7 @@ func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, e
 	}
 
 	return auth.PasswordParam{
-		RequestedAt: basic.Time(http_handler.Now()),
+		RequestedAt: http_handler.Now(),
 
 		UserID:   basic.UserID(input.UserID),
 		Password: basic.Password(input.Password),
