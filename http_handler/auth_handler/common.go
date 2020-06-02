@@ -7,10 +7,10 @@ import (
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/token"
-	"github.com/getto-systems/project-example-id/user"
 
 	"errors"
 	"fmt"
+	"time"
 )
 
 const COOKIE_AUTH_TOKEN = "Getto-Example-Auth-Token"
@@ -25,7 +25,7 @@ type Cookie struct {
 type CookieSetter struct {
 	ResponseWriter http.ResponseWriter
 	CookieDomain   CookieDomain
-	Ticket         user.Ticket
+	Expires        time.Time
 }
 
 var (
@@ -63,11 +63,11 @@ func httpStatusCode(err error) int {
 	}
 }
 
-func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, ticket user.Ticket, token auth.Token) {
+func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, token auth.Token) {
 	setter := CookieSetter{
 		ResponseWriter: w,
 		CookieDomain:   cookieDomain,
-		Ticket:         ticket,
+		Expires:        token.Expires,
 	}
 	setter.setTicketCookie(token.RenewToken)
 	setter.setAwsCloudFrontCookie(token.AwsCloudFrontToken)
@@ -113,7 +113,7 @@ func (setter CookieSetter) setCookie(cookie *Cookie) {
 
 		Domain:  string(setter.CookieDomain),
 		Path:    "/",
-		Expires: setter.Ticket.Expires(),
+		Expires: setter.Expires,
 
 		Secure:   true,
 		HttpOnly: true,
