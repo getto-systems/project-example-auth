@@ -3,7 +3,7 @@ package password
 import (
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-id/basic"
 
 	"errors"
 )
@@ -23,7 +23,7 @@ func NewUserPasswordEncrypter(cost int) UserPasswordEncrypter {
 	}
 }
 
-func (enc UserPasswordEncrypter) GenerateUserPassword(password user.Password) (user.HashedPassword, error) {
+func (enc UserPasswordEncrypter) GenerateUserPassword(password basic.Password) (basic.HashedPassword, error) {
 	p, err := NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (enc UserPasswordEncrypter) GenerateUserPassword(password user.Password) (u
 	return p.generate(enc.cost)
 }
 
-func (enc UserPasswordEncrypter) MatchUserPassword(hashed user.HashedPassword, password user.Password) error {
+func (enc UserPasswordEncrypter) MatchUserPassword(hashed basic.HashedPassword, password basic.Password) error {
 	p, err := NewPassword(password)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (enc UserPasswordEncrypter) MatchUserPassword(hashed user.HashedPassword, p
 
 type Password []byte
 
-func NewPassword(password user.Password) (Password, error) {
+func NewPassword(password basic.Password) (Password, error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {

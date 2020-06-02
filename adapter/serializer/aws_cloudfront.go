@@ -5,6 +5,8 @@ import (
 
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
+
+	"time"
 )
 
 type AwsCloudFrontSerializer struct {
@@ -22,7 +24,7 @@ func NewAwsCloudFrontSerializer(pem []byte, baseURL string, keyPairID token.AwsC
 }
 
 func (serializer AwsCloudFrontSerializer) Token(ticket user.Ticket) (token.AwsCloudFrontToken, error) {
-	signature, err := serializer.privateKey.Sign(serializer.baseURL, ticket.Expires())
+	signature, err := serializer.privateKey.Sign(serializer.baseURL, time.Time(ticket.Expires()))
 	if err != nil {
 		return token.AwsCloudFrontToken{}, err
 	}

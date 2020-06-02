@@ -1,11 +1,11 @@
 package auth
 
 import (
+	"github.com/getto-systems/project-example-id/basic"
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
 	"fmt"
-	"time"
 )
 
 type RenewAuthenticator interface {
@@ -14,9 +14,9 @@ type RenewAuthenticator interface {
 }
 
 type RenewParam struct {
-	RequestedAt time.Time
+	RequestedAt basic.Time
 	RenewToken  token.RenewToken
-	Path        user.Path
+	Path        basic.Path
 }
 
 func (param RenewParam) String() string {

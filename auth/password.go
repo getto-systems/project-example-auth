@@ -1,11 +1,11 @@
 package auth
 
 import (
+	"github.com/getto-systems/project-example-id/basic"
 	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
 	"fmt"
-	"time"
 )
 
 type PasswordAuthenticator interface {
@@ -15,11 +15,11 @@ type PasswordAuthenticator interface {
 }
 
 type PasswordParam struct {
-	RequestedAt time.Time
+	RequestedAt basic.Time
 
-	UserID   user.UserID
-	Password user.Password
-	Path     user.Path
+	UserID   basic.UserID
+	Password basic.Password
+	Path     basic.Path
 }
 
 func (param PasswordParam) String() string {
