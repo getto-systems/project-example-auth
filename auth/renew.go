@@ -14,9 +14,10 @@ type RenewAuthenticator interface {
 }
 
 type RenewParam struct {
-	RequestedAt basic.Time
-	RenewToken  token.RenewToken
-	Path        basic.Path
+	RequestedAt basic.RequestedAt
+
+	RenewToken token.RenewToken
+	Path       basic.Path
 }
 
 func (param RenewParam) String() string {

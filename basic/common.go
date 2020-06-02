@@ -10,20 +10,25 @@ type (
 
 	Path string
 
-	Time   time.Time
-	Second int64
+	RequestedAt time.Time
+	Expires     time.Time
+	Second      int64
 )
 
-func (t Time) Add(seconds Second) Time {
+func (requestedAt RequestedAt) Add(seconds Second) Expires {
 	duration := time.Duration(seconds * 1_000_000_000)
-	after := time.Time(t).Add(duration)
-	return Time(after)
+	after := time.Time(requestedAt).Add(duration)
+	return Expires(after)
 }
 
-func (t Time) Before(target Time) bool {
-	return time.Time(t).Before(time.Time(target))
+func (requestedAt RequestedAt) String() string {
+	return time.Time(requestedAt).String()
 }
 
-func (t Time) String() string {
-	return time.Time(t).String()
+func (expires Expires) Before(target Expires) bool {
+	return time.Time(expires).Before(time.Time(target))
+}
+
+func (expires Expires) String() string {
+	return time.Time(expires).String()
 }
