@@ -22,7 +22,7 @@ type RenewParam struct {
 
 func (param RenewParam) String() string {
 	return fmt.Sprintf(
-		"RenewParam{RenewParam:%s, Path:%s}",
+		"RenewParam{RenewToken:%s, Path:%s}",
 		param.RenewToken,
 		param.Path,
 	)
