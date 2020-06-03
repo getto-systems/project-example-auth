@@ -66,8 +66,6 @@ release_build:
   services:
     - docker:dind
 
-  before_script:
-    - export GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON=$GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON_CLOUD_STRAGE_ADMIN
   script:
     - ./scripts/deploy.sh
 
