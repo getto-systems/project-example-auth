@@ -1,0 +1,114 @@
+stages:
+  - bump_version
+  - release
+  - release_build
+  - release_notify
+
+variables:
+  TRELLIS_GIT_POST: https://trellis.getto.systems/git/post/1.0.0
+  TRELLIS_CI_BUMP_VERSION: https://trellis.getto.systems/ci/bump-version/1.4.0
+  TRELLIS_PSYCHER_GETTO: https://trellis.getto.systems/psycher/getto/2.6.0
+
+bump_version:
+  stage: bump_version
+  only:
+    refs:
+      - triggers
+    variables:
+      - $RELEASE
+
+  image: buildpack-deps:buster-scm
+
+  before_script:
+    - git config user.email admin@getto.systems
+    - git config user.name getto
+    - curl $TRELLIS_GIT_POST/setup.sh | sh -s -- ./vendor/getto-systems
+    - export PATH=$PATH:./vendor/getto-systems/git-post/bin
+  script:
+    - curl $TRELLIS_CI_BUMP_VERSION/bump_version.sh | bash
+    - curl $TRELLIS_CI_BUMP_VERSION/request.sh | bash -s -- ./.message/bump.sh
+
+release:
+  stage: release
+  only:
+    refs:
+      - master@getto-systems-base/labo/project-example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+
+  image: buildpack-deps:buster-scm
+
+  script:
+    - curl $TRELLIS_CI_BUMP_VERSION/push_tags.sh | sh
+
+release_build:
+  stage: release_build
+  only:
+    refs:
+      - master@getto-systems-base/labo/project-example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+
+  image: docker:stable
+
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+
+  services:
+    - docker:dind
+
+  script:
+    - ./scripts/deploy.sh
+
+release_success:
+  stage: release_notify
+  only:
+    refs:
+      - master@getto-systems-base/labo/project-example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+  when: on_success
+
+  image: buildpack-deps:buster-curl
+
+  before_script:
+    - export url=$GETTO_PSYCHER_URL?$GETTO_PSYCHER_TOKEN=true
+    - export channel=$SLACK_CHANNEL
+    - export version=id:$(cat .release-version)
+  script:
+    - curl $TRELLIS_PSYCHER_GETTO/notify-release-success.sh | sh -s -- $url $channel $version
+
+release_failure:
+  stage: release_notify
+  only:
+    refs:
+      - master@getto-systems-base/labo/project-example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+  when: on_failure
+
+  image: buildpack-deps:buster-curl
+
+  before_script:
+    - export url=$GETTO_PSYCHER_URL?$GETTO_PSYCHER_TOKEN=true
+    - export channel=$SLACK_CHANNEL
+    - export version=id:$(cat .release-version)
+  script:
+    - curl $TRELLIS_PSYCHER_GETTO/notify-release-failure.sh | sh -s -- $url $channel $version
