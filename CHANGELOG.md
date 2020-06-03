@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 0.0.8
+
+- fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!27
+
+
 ## Version : 0.0.7
 
 - fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!25
