@@ -17,7 +17,7 @@ deploy_main() {
   cat $GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON | docker login -u _json_key --password-stdin https://${host}
 
   project=getto-projects
-  image=example-id
+  image=example/id
   version=$(cat .release-version)
 
   tag=${host}/${project}/${image}:${version}
