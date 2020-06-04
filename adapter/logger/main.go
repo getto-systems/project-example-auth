@@ -11,34 +11,29 @@ import (
 )
 
 type LogEntry struct {
-	Time    string          `json:"time"`
-	Level   string          `json:"level"`
-	Message string          `json:"message"`
-	Request RequestLogEntry `json:"request"`
-}
-
-type RequestLogEntry struct {
-	RequestID string `json:"request_id"`
+	Time      string `json:"time"`
+	Level     string `json:"level"`
+	Message   string `json:"message"`
 	RemoteIP  string `json:"remote_ip"`
+	RequestID string `json:"request_id"`
 }
 
 func NewLogger(level string, logger *log.Logger, r *http.Request) (applog.Logger, error) {
-	requestID, err := uuid.NewRandom()
+	randomID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 
-	request := RequestLogEntry{
-		RequestID: requestID.String(),
-		RemoteIP:  r.RemoteAddr,
-	}
+	requestID := randomID.String()
+	remoteIP := r.RemoteAddr
 
 	entry := func(level string, message string) string {
 		data, err := json.Marshal(LogEntry{
-			Time:    time.Now().UTC().String(),
-			Level:   level,
-			Message: message,
-			Request: request,
+			Time:      time.Now().UTC().String(),
+			Level:     level,
+			Message:   message,
+			RemoteIP:  remoteIP,
+			RequestID: requestID,
 		})
 		if err != nil {
 			return err.Error()
