@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "update id image: $(cat $HOME/.release-version)"
+echo "update image: id:$(cat $HOME/.release-version)"
