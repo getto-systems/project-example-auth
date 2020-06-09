@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## Version : 0.1.1
+
+- fix: update-image message : See merge request getto-systems-base/labo/project-example/id!57
+- fix: bump-version.sh : See merge request getto-systems-base/labo/project-example/id!55
+- fix: bump-version.sh : See merge request getto-systems-base/labo/project-example/id!53
+- fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!51
+- fix: bump-version.sh : See merge request getto-systems-base/labo/project-example/id!49
+- fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!47
+- fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!45
+- fix: bump-version.sh : See merge request getto-systems-base/labo/project-example/id!43
+
+- fix: gitlab-ci : See merge request getto-systems-base/labo/project-example/id!41
+- add: bump-version.sh : See merge request getto-systems-base/labo/project-example/id!39
+- fix: envrc : See merge request getto-systems-base/labo/project-example/id!38
+
+
+
 ## Version : 0.1.0
 
 - add: healthz : See merge request getto-systems-base/labo/project-example/id!36
