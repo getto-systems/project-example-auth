@@ -16,7 +16,7 @@ test:
     refs:
       - merge_requests
     changes:
-      - **/*.go
+      - "**/*.go"
 
   image: golang:1.14.4-buster
 
