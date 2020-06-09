@@ -11,20 +11,20 @@ import (
 
 type AwsCloudFrontSerializer struct {
 	privateKey aws_cloudfront_token.KeyPairPrivateKey
-	baseURL    string
+	url        string
 	keyPairID  token.AwsCloudFrontKeyPairID
 }
 
-func NewAwsCloudFrontSerializer(pem []byte, baseURL string, keyPairID token.AwsCloudFrontKeyPairID) AwsCloudFrontSerializer {
+func NewAwsCloudFrontSerializer(pem []byte, url string, keyPairID token.AwsCloudFrontKeyPairID) AwsCloudFrontSerializer {
 	return AwsCloudFrontSerializer{
 		privateKey: pem,
-		baseURL:    baseURL,
+		url:        url,
 		keyPairID:  keyPairID,
 	}
 }
 
 func (serializer AwsCloudFrontSerializer) Token(ticket user.Ticket) (token.AwsCloudFrontToken, error) {
-	signature, err := serializer.privateKey.Sign(serializer.baseURL, time.Time(ticket.Expires()))
+	signature, err := serializer.privateKey.Sign(serializer.url, time.Time(ticket.Expires()))
 	if err != nil {
 		return token.AwsCloudFrontToken{}, err
 	}
