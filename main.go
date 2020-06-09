@@ -10,10 +10,9 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/getto-systems/project-example-id/infra/db/memory"
+	"github.com/getto-systems/project-example-id/infra/logger"
 	"github.com/getto-systems/project-example-id/infra/password"
-
-	"github.com/getto-systems/project-example-id/adapter/logger"
-	"github.com/getto-systems/project-example-id/adapter/serializer"
+	"github.com/getto-systems/project-example-id/infra/serializer"
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
@@ -26,6 +25,7 @@ import (
 )
 
 type Server struct {
+	port             string
 	authCookieDomain auth_handler.CookieDomain
 
 	cors cors.Options
@@ -63,16 +63,26 @@ func main() {
 
 	handler := cors.New(server.cors).Handler(router)
 
-	log.Fatal(http.ListenAndServeTLS(
-		":8080",
-		server.tls.cert,
-		server.tls.key,
-		handler,
-	))
+	log.Fatal(listen(server, handler))
+}
+func listen(server *Server, handler http.Handler) error {
+	if os.Getenv("SERVER_MODE") == "backend" {
+		return http.ListenAndServe(
+			server.port,
+			handler,
+		)
+	} else {
+		return http.ListenAndServeTLS(
+			server.port,
+			server.tls.cert,
+			server.tls.key,
+			handler,
+		)
+	}
 }
 func authRenewHandler(server *Server) auth_handler.RenewHandler {
 	factory := func(r *http.Request) auth.RenewAuthenticator {
-		return server.NewHandler(r)
+		return server.NewAuthenticator(r)
 	}
 
 	return auth_handler.RenewHandler{
@@ -82,7 +92,7 @@ func authRenewHandler(server *Server) auth_handler.RenewHandler {
 }
 func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
 	factory := func(r *http.Request) auth.PasswordAuthenticator {
-		return server.NewHandler(r)
+		return server.NewAuthenticator(r)
 	}
 
 	return auth_handler.PasswordHandler{
@@ -108,7 +118,8 @@ func NewServer() (*Server, error) {
 	}
 
 	return &Server{
-		authCookieDomain: auth_handler.CookieDomain(os.Getenv("DOMAIN")),
+		port:             ":8080",
+		authCookieDomain: auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
 
 		cors: cors.Options{
 			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
@@ -199,7 +210,7 @@ type Authenticator struct {
 	logger applog.Logger
 }
 
-func (server *Server) NewHandler(r *http.Request) Authenticator {
+func (server *Server) NewAuthenticator(r *http.Request) Authenticator {
 	logger, err := logger.NewLogger(server.log.level, server.log.logger, r)
 	if err != nil {
 		server.log.logger.Fatalf("failed initialize logger: %s", err)
