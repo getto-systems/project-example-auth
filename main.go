@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -58,6 +59,7 @@ func main() {
 
 	router := mux.NewRouter()
 
+	router.HandleFunc("/healthz", healthz).Methods("GET")
 	router.HandleFunc("/auth/renew", authRenewHandler(server).Handle).Methods("POST")
 	router.HandleFunc("/auth/password", authPasswordHandler(server).Handle).Methods("POST")
 
@@ -79,6 +81,14 @@ func listen(server *Server, handler http.Handler) error {
 			handler,
 		)
 	}
+}
+func healthz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	data := "\"OK\""
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "%s", data)
 }
 func authRenewHandler(server *Server) auth_handler.RenewHandler {
 	factory := func(r *http.Request) auth.RenewAuthenticator {
