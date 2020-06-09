@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 0.2.1
+
+- refactor: variable name : See merge request getto-systems-base/labo/project-example/id!61
+
+
 ## Version : 0.2.0
 
 - fix: secure url : See merge request getto-systems-base/labo/project-example/id!59
