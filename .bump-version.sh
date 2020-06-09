@@ -7,7 +7,6 @@ cd k8s
 
 bump_sync id/deployment.yaml 's|\(asia.gcr.io/getto-projects/example/id\):.*|\1:'$version'|'
 
-git commit -m "bump version: id"
-git post "bump version: id" master
+curl $TRELLIS_CI_BUMP_VERSION/request.sh | bash -s -- $HOME/.message/update-id-image.sh
 
 cd -
