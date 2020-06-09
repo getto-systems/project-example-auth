@@ -4,6 +4,8 @@ github.com/getto-systems/applog-go v1.1.2 h1:gJHY0avNGh07I4jCRXkoYwtqo/LTNr2faOg
 github.com/getto-systems/applog-go v1.1.2/go.mod h1:7jYE4dFSEl271Zky/iE7ABmBN1cbh0IaTm4Af5Cybx8=
 github.com/getto-systems/aws_cloudfront_token-go v1.0.0 h1:19ptykp8MU9zCzB4Vn84Kx726p6pHoO8rHlFs16rI3U=
 github.com/getto-systems/aws_cloudfront_token-go v1.0.0/go.mod h1:Vx1H1s4474sk3GWFJcyKhKh3n0ewIe0cFdwvfh+bQbI=
+github.com/getto-systems/aws_cloudfront_token-go v1.1.0 h1:0t/QI62NvApRLTQg0TwWCIq3wk327meWvmbr8h4Iz/A=
+github.com/getto-systems/aws_cloudfront_token-go v1.1.0/go.mod h1:Vx1H1s4474sk3GWFJcyKhKh3n0ewIe0cFdwvfh+bQbI=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/mux v1.7.4 h1:VuZ8uybHlWmqV03+zRzdwKL4tUnIp1MAQtp1mIFE1bc=
