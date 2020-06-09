@@ -38,6 +38,7 @@ bump_version:
     - git config user.name getto
     - curl $TRELLIS_GIT_POST/setup.sh | sh -s -- ./vendor/getto-systems
     - export PATH=$PATH:./vendor/getto-systems/git-post/bin
+    - export HOME=$(pwd)
     - git config --global credential.helper store
     - echo "https://$GITLAB_USER:$GITLAB_ACCESS_TOKEN@gitlab.com" > $HOME/.git-credentials
   script:
