@@ -8,6 +8,6 @@ cd k8s
 bump_sync id/deployment.yaml 's|\(asia.gcr.io/getto-projects/example/id\):.*|\1:'$version'|'
 
 git commit -m "bump version: id"
-git post "bump version: id"
+git post "bump version: id" master
 
 cd -
