@@ -46,10 +46,6 @@ func (f UserFactory) New(userID basic.UserID) User {
 	return User{f.db, userID}
 }
 
-func IsRenewRequired(ticket basic.Ticket, requestedAt basic.RequestedAt) bool {
-	return ticket.Expires.Before(requestedAt.Add(renewThreshold))
-}
-
 func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (basic.Ticket, error) {
 	userID := user.userID
 	roles := user.db.UserRoles(userID)
@@ -64,7 +60,7 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (basi
 		Expires:    expires,
 	}
 
-	err := HasEnoughPermission(ticket, path)
+	err := NewTicketInfo(ticket).HasEnoughPermission(path)
 	if err != nil {
 		return basic.Ticket{}, err
 	}
@@ -72,8 +68,22 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (basi
 	return ticket, nil
 }
 
-func HasEnoughPermission(ticket basic.Ticket, path basic.Path) error {
-	for _, role := range ticket.Roles {
+type TicketInfo struct {
+	data basic.Ticket
+}
+
+func NewTicketInfo(ticket basic.Ticket) TicketInfo {
+	return TicketInfo{
+		data: ticket,
+	}
+}
+
+func (ticket TicketInfo) IsRenewRequired(requestedAt basic.RequestedAt) bool {
+	return ticket.data.Expires.Before(requestedAt.Add(renewThreshold))
+}
+
+func (ticket TicketInfo) HasEnoughPermission(path basic.Path) error {
+	for _, role := range ticket.data.Roles {
 		if role == super_role {
 			return nil
 		}

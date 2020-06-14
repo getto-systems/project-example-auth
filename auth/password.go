@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/getto-systems/project-example-id/basic"
+
 	"github.com/getto-systems/project-example-id/user"
 
 	"fmt"
@@ -23,7 +24,8 @@ type PasswordParam struct {
 
 func (param PasswordParam) String() string {
 	return fmt.Sprintf(
-		"PasswordParam{UserID:%s, Password:[MASKED], Path:%s}",
+		"PasswordParam{RequestedAt:%s, UserID:%s, Password:[MASKED], Path:%s}",
+		param.RequestedAt.String(),
 		param.UserID,
 		param.Path,
 	)
