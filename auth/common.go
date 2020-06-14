@@ -31,6 +31,7 @@ func (token Token) String() string {
 
 var (
 	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
+	ErrUserPasswordNotFound              = errors.New("user password not found")
 	ErrUserPasswordDidNotMatch           = errors.New("user password did not match")
 	ErrUserAccessDenied                  = errors.New("user access denied")
 	ErrRenewTokenSerializeFailed         = errors.New("renew token serialize failed")

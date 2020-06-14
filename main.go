@@ -38,7 +38,7 @@ type Server struct {
 	log Log
 
 	db  memory.MemoryStore
-	enc password.UserPasswordEncrypter
+	enc password.PasswordEncrypter
 }
 
 type Tls struct {
@@ -150,7 +150,7 @@ func NewServer() (*Server, error) {
 		},
 
 		db:  db,
-		enc: NewUserPasswordEncrypter(),
+		enc: NewPasswordEncrypter(),
 	}, nil
 }
 func NewTicketSerializer() (serializer.TicketJWTSerializer, error) {
@@ -210,8 +210,8 @@ func NewAwsCloudFrontSerializer() (serializer.AwsCloudFrontSerializer, error) {
 func NewDB() (memory.MemoryStore, error) {
 	return memory.NewMemoryStore(), nil
 }
-func NewUserPasswordEncrypter() password.UserPasswordEncrypter {
-	return password.NewUserPasswordEncrypter(10) // bcrypt.DefaultCost
+func NewPasswordEncrypter() password.PasswordEncrypter {
+	return password.NewPasswordEncrypter(10) // bcrypt.DefaultCost
 }
 
 // Authenticator interface methods (auth/renew, auth/password)

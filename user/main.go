@@ -50,6 +50,10 @@ type Ticket struct {
 	expires    basic.Expires
 }
 
+func (ticket Ticket) IsRenewRequired(requestedAt basic.RequestedAt) bool {
+	return ticket.Expires().Before(requestedAt.Add(renewThreshold))
+}
+
 func (ticket Ticket) UserID() basic.UserID {
 	return ticket.userID
 }
@@ -64,10 +68,6 @@ func (ticket Ticket) Authorized() basic.RequestedAt {
 
 func (ticket Ticket) Expires() basic.Expires {
 	return ticket.expires
-}
-
-func (ticket Ticket) IsRenewRequired(requestedAt basic.RequestedAt) bool {
-	return ticket.Expires().Before(requestedAt.Add(renewThreshold))
 }
 
 func (ticket Ticket) String() string {
