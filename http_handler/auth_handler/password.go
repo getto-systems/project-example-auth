@@ -77,7 +77,7 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Auditf("auth password success: ", param)
+	logger.Auditf("auth password success: %v", param)
 
 	jsonResponse(w, PasswordResponse{
 		UserID:   string(appToken.UserID),
