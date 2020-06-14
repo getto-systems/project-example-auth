@@ -14,7 +14,7 @@ type (
 )
 
 type TicketSerializer interface {
-	Parse(RenewToken, basic.Path) (basic.TicketData, error)
-	RenewToken(basic.TicketData) (RenewToken, error)
-	AppToken(basic.TicketData) (AppToken, error)
+	Parse(RenewToken, basic.Path) (basic.Ticket, error)
+	RenewToken(basic.Ticket) (RenewToken, error)
+	AppToken(basic.Ticket) (AppToken, error)
 }

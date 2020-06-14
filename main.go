@@ -16,12 +16,12 @@ import (
 	"github.com/getto-systems/project-example-id/infra/serializer"
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
+	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
 
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/applog"
 
-	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 )
 

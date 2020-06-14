@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -14,7 +15,7 @@ type (
 	Expires     time.Time
 	Second      int64
 
-	TicketData struct {
+	Ticket struct {
 		UserID     UserID
 		Roles      Roles
 		Authorized RequestedAt
@@ -42,4 +43,14 @@ func (expires Expires) String() string {
 
 func Mimute(minutes int64) Second {
 	return Second(minutes * 60)
+}
+
+func (ticket Ticket) String() string {
+	return fmt.Sprintf(
+		"Ticket{UserID:%s, Roles:%s, Authorized:%s, Expires:%s}",
+		ticket.UserID,
+		ticket.Roles,
+		ticket.Authorized.String(),
+		ticket.Expires.String(),
+	)
 }

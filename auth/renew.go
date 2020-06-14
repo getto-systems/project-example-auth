@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
 	"fmt"
@@ -16,67 +15,47 @@ type RenewAuthenticator interface {
 type RenewParam struct {
 	RequestedAt basic.RequestedAt
 
-	RenewToken token.RenewToken
-	Path       basic.Path
+	Ticket basic.Ticket
+	Path   basic.Path
 }
 
 func (param RenewParam) String() string {
 	return fmt.Sprintf(
-		"RenewParam{RenewToken:%s, Path:%s}",
-		param.RenewToken,
+		"RenewParam{RequestedAt: %s, Ticket:%s, Path:%s}",
+		param.RequestedAt.String(),
+		param.Ticket,
 		param.Path,
 	)
 }
 
-func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHandler) (token.AppToken, error) {
+func Renew(authenticator RenewAuthenticator, param RenewParam) (basic.Ticket, error) {
 	logger := authenticator.Logger()
 
 	logger.Debugf("renew token: %v", param)
 
-	ticketSerializer := authenticator.TicketSerializer()
+	ticket := param.Ticket
 
-	ticketData, err := ticketSerializer.Parse(param.RenewToken, param.Path)
-	if err != nil {
-		logger.Debugf("parse token error: %s; %v", err, param)
-		return token.AppToken{}, ErrRenewTokenParseFailed
-	}
-
-	ticket, err := user.RestrictTicket(param.Path, ticketData)
+	err := user.HasEnoughPermission(ticket, param.Path)
 	if err != nil {
 		logger.Debugf("token check failed: %s; %v", err, param)
-		return token.AppToken{}, ErrRenewTokenCheckFailed
+		return basic.Ticket{}, err
 	}
 
-	logger.Debugf("check renew required: %v/%s", ticket, param.RequestedAt)
-
-	if ticket.IsRenewRequired(param.RequestedAt) {
-		logger.Debugf("renew token: %v/%s", ticket, param.RequestedAt)
-
-		user := authenticator.UserFactory().New(ticket.UserID())
-
-		new_ticket, err := user.NewTicket(param.Path, param.RequestedAt)
-		if err != nil {
-			logger.Auditf("access denied: %s; %v; %v", err, ticket, param)
-			return token.AppToken{}, ErrUserAccessDenied
-		}
-
-		logger.Auditf("token renewed: %v; %s", new_ticket, param.Path)
-
-		err = handleTicket(authenticator, new_ticket, handler)
-		if err != nil {
-			return token.AppToken{}, err
-		}
-
-		ticket = new_ticket
+	if !user.IsRenewRequired(ticket, param.RequestedAt) {
+		return ticket, nil
 	}
 
-	logger.Debugf("serialize app token: %v", ticket)
+	logger.Debugf("renew token: %v/%s", param)
 
-	appToken, err := ticketSerializer.AppToken(ticket.Data())
+	user := authenticator.UserFactory().New(ticket.UserID)
+
+	new_ticket, err := user.NewTicket(param.Path, param.RequestedAt)
 	if err != nil {
-		logger.Errorf("app token serialize error: %s; %v", err, ticket)
-		return token.AppToken{}, ErrAppTokenSerializeFailed
+		logger.Auditf("access denied: %s; %v; %v", err, param)
+		return basic.Ticket{}, ErrUserAccessDenied
 	}
 
-	return appToken, nil
+	logger.Auditf("token renewed: %v; %s", new_ticket, param.Path)
+
+	return new_ticket, nil
 }

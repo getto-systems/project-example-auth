@@ -7,7 +7,7 @@ import (
 )
 
 type AwsCloudFrontSerializer interface {
-	Token(basic.TicketData) (AwsCloudFrontToken, error)
+	Token(basic.Ticket) (AwsCloudFrontToken, error)
 }
 
 type AwsCloudFrontToken struct {

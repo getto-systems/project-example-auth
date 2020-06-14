@@ -6,8 +6,10 @@ import (
 
 	"github.com/getto-systems/project-example-id/auth"
 
+	"github.com/getto-systems/project-example-id/applog"
+
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/token"
+	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
 
 	"errors"
 	"fmt"
@@ -30,10 +32,14 @@ type CookieSetter struct {
 }
 
 var (
-	ErrBodyNotSent          = errors.New("body not sent")
-	ErrBodyParseFailed      = errors.New("body parse failed")
-	ErrTicketCookieNotSent  = errors.New("ticket cookie not sent")
-	ErrResponseEncodeFailed = errors.New("response encode failed")
+	ErrBodyNotSent                       = errors.New("body not sent")
+	ErrBodyParseFailed                   = errors.New("body parse failed")
+	ErrTicketCookieNotSent               = errors.New("ticket cookie not sent")
+	ErrResponseEncodeFailed              = errors.New("response encode failed")
+	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
+	ErrRenewTokenSerializeFailed         = errors.New("renew token serialize failed")
+	ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token serialize failed")
+	ErrAppTokenSerializeFailed           = errors.New("app token serialize failed")
 )
 
 func jsonResponse(w http.ResponseWriter, response interface{}) {
@@ -53,7 +59,7 @@ func httpStatusCode(err error) int {
 	case ErrBodyNotSent, ErrBodyParseFailed:
 		return http.StatusBadRequest
 
-	case ErrTicketCookieNotSent, auth.ErrRenewTokenParseFailed:
+	case ErrTicketCookieNotSent, ErrRenewTokenParseFailed:
 		return http.StatusUnauthorized
 
 	case auth.ErrUserAccessDenied:
@@ -64,7 +70,7 @@ func httpStatusCode(err error) int {
 	}
 }
 
-func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, token auth.Token) {
+func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, token Token) {
 	setter := CookieSetter{
 		ResponseWriter: w,
 		CookieDomain:   cookieDomain,
@@ -120,4 +126,71 @@ func (setter CookieSetter) setCookie(cookie *Cookie) {
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
+}
+
+type Token struct {
+	Expires basic.Expires
+
+	RenewToken         token.RenewToken
+	AwsCloudFrontToken token.AwsCloudFrontToken
+}
+
+func (token Token) String() string {
+	return fmt.Sprintf(
+		"Token{Expires: %s, RenewToken:%s, AwsCloudFrontToken:%s}",
+		token.Expires,
+		token.RenewToken,
+		token.AwsCloudFrontToken,
+	)
+}
+
+type AuthHandler interface {
+	Logger() applog.Logger
+	TicketSerializer() token.TicketSerializer
+	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
+}
+
+func SerializeAuthToken(handler AuthHandler, ticket basic.Ticket) (Token, error) {
+	logger := handler.Logger()
+
+	logger.Debugf("serialize ticket: %v", ticket)
+
+	logger.Debug("serialize renew token...")
+
+	renewToken, err := handler.TicketSerializer().RenewToken(ticket)
+	if err != nil {
+		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
+		return Token{}, ErrRenewTokenSerializeFailed
+	}
+
+	logger.Debug("serialize aws cloudfront token...")
+
+	awsCloudFrontToken, err := handler.AwsCloudFrontSerializer().Token(ticket)
+	if err != nil {
+		logger.Errorf("aws cloudfront serialize error: %s; %v", err, ticket)
+		return Token{}, ErrAwsCloudFrontTokenSerializeFailed
+	}
+
+	logger.Debug("handling ticket token...")
+
+	return Token{
+		Expires: ticket.Expires,
+
+		RenewToken:         renewToken,
+		AwsCloudFrontToken: awsCloudFrontToken,
+	}, nil
+}
+
+func SerializeAppToken(handler AuthHandler, ticket basic.Ticket) (token.AppToken, error) {
+	logger := handler.Logger()
+
+	logger.Debugf("serialize ticket for app: %v", ticket)
+
+	appToken, err := handler.TicketSerializer().AppToken(ticket)
+	if err != nil {
+		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
+		return token.AppToken{}, ErrAppTokenSerializeFailed
+	}
+
+	return appToken, nil
 }

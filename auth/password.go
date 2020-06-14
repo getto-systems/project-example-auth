@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/token"
 	"github.com/getto-systems/project-example-id/user"
 
 	"fmt"
@@ -30,7 +29,7 @@ func (param PasswordParam) String() string {
 	)
 }
 
-func Password(authenticator PasswordAuthenticator, param PasswordParam, handler TokenHandler) (token.AppToken, error) {
+func Password(authenticator PasswordAuthenticator, param PasswordParam) (basic.Ticket, error) {
 	logger := authenticator.Logger()
 
 	logger.Debugf("password auth: %v", param)
@@ -40,13 +39,13 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 	password, err := userPassword.Password()
 	if err != nil {
 		logger.Auditf("user password not found: %s; %s", err, param.UserID)
-		return token.AppToken{}, ErrUserPasswordNotFound
+		return basic.Ticket{}, ErrUserPasswordNotFound
 	}
 
 	err = password.Match(param.Password)
 	if err != nil {
 		logger.Auditf("password match failed: %s; %s", err, param.UserID)
-		return token.AppToken{}, ErrUserPasswordDidNotMatch
+		return basic.Ticket{}, ErrUserPasswordDidNotMatch
 	}
 
 	user := authenticator.UserFactory().New(param.UserID)
@@ -56,21 +55,8 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 	ticket, err := user.NewTicket(param.Path, param.RequestedAt)
 	if err != nil {
 		logger.Auditf("access denied: %s; %v", err, param)
-		return token.AppToken{}, ErrUserAccessDenied
+		return basic.Ticket{}, ErrUserAccessDenied
 	}
 
-	err = handleTicket(authenticator, ticket, handler)
-	if err != nil {
-		return token.AppToken{}, err
-	}
-
-	logger.Debugf("serialize app token: %v", ticket)
-
-	appToken, err := authenticator.TicketSerializer().AppToken(ticket.Data())
-	if err != nil {
-		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return token.AppToken{}, ErrAppTokenSerializeFailed
-	}
-
-	return appToken, nil
+	return ticket, nil
 }
