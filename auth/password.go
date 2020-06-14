@@ -47,7 +47,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam) (basic.T
 	err = password.Match(param.Password)
 	if err != nil {
 		logger.Auditf("password match failed: %s; %s", err, param.UserID)
-		return basic.Ticket{}, ErrUserPasswordDidNotMatch
+		return basic.Ticket{}, ErrUserPasswordMatchFailed
 	}
 
 	user := authenticator.UserFactory().New(param.UserID)

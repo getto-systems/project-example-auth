@@ -21,22 +21,10 @@ const COOKIE_AUTH_TOKEN = "Getto-Example-Auth-Token"
 
 type CookieDomain string
 
-type Cookie struct {
-	Name  string
-	Value string
-}
-
-type CookieSetter struct {
-	ResponseWriter http.ResponseWriter
-	CookieDomain   CookieDomain
-	Expires        basic.Expires
-}
-
 var (
 	ErrBodyNotSent                       = errors.New("body not sent")
 	ErrBodyParseFailed                   = errors.New("body parse failed")
 	ErrTicketCookieNotSent               = errors.New("ticket cookie not sent")
-	ErrResponseEncodeFailed              = errors.New("response encode failed")
 	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
 	ErrRenewTokenSerializeFailed         = errors.New("renew token serialize failed")
 	ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token serialize failed")
@@ -57,10 +45,18 @@ func jsonResponse(w http.ResponseWriter, response interface{}) {
 func httpStatusCode(err error) int {
 	switch err {
 
-	case ErrBodyNotSent, ErrBodyParseFailed:
+	case
+		ErrBodyNotSent,
+		ErrBodyParseFailed:
+
 		return http.StatusBadRequest
 
-	case ErrTicketCookieNotSent, ErrRenewTokenParseFailed:
+	case
+		ErrTicketCookieNotSent,
+		ErrRenewTokenParseFailed,
+		auth.ErrUserPasswordNotFound,
+		auth.ErrUserPasswordMatchFailed:
+
 		return http.StatusUnauthorized
 
 	case auth.ErrUserAccessDenied:
@@ -69,6 +65,17 @@ func httpStatusCode(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+type Cookie struct {
+	Name  string
+	Value string
+}
+
+type CookieSetter struct {
+	ResponseWriter http.ResponseWriter
+	CookieDomain   CookieDomain
+	Expires        basic.Expires
 }
 
 func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, token Token) {
@@ -88,45 +95,6 @@ func getRenewToken(r *http.Request) (token.RenewToken, error) {
 	}
 
 	return token.RenewToken(cookie.Value), nil
-}
-
-func (setter CookieSetter) setTicketCookie(renewToken token.RenewToken) {
-	setter.setCookie(&Cookie{
-		Name:  COOKIE_AUTH_TOKEN,
-		Value: string(renewToken),
-	})
-}
-
-func (setter CookieSetter) setAwsCloudFrontCookie(token token.AwsCloudFrontToken) {
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Key-Pair-Id",
-		Value: string(token.KeyPairID),
-	})
-
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Policy",
-		Value: string(token.Policy),
-	})
-
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Signature",
-		Value: string(token.Signature),
-	})
-}
-
-func (setter CookieSetter) setCookie(cookie *Cookie) {
-	http.SetCookie(setter.ResponseWriter, &http.Cookie{
-		Name:  cookie.Name,
-		Value: cookie.Value,
-
-		Domain:  string(setter.CookieDomain),
-		Path:    "/",
-		Expires: time.Time(setter.Expires),
-
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	})
 }
 
 type Token struct {
@@ -191,4 +159,43 @@ func (handler AuthHandler) SerializeAppToken(logger applog.Logger, ticket basic.
 	}
 
 	return appToken, nil
+}
+
+func (setter CookieSetter) setTicketCookie(renewToken token.RenewToken) {
+	setter.setCookie(&Cookie{
+		Name:  COOKIE_AUTH_TOKEN,
+		Value: string(renewToken),
+	})
+}
+
+func (setter CookieSetter) setAwsCloudFrontCookie(token token.AwsCloudFrontToken) {
+	setter.setCookie(&Cookie{
+		Name:  "CloudFront-Key-Pair-Id",
+		Value: string(token.KeyPairID),
+	})
+
+	setter.setCookie(&Cookie{
+		Name:  "CloudFront-Policy",
+		Value: string(token.Policy),
+	})
+
+	setter.setCookie(&Cookie{
+		Name:  "CloudFront-Signature",
+		Value: string(token.Signature),
+	})
+}
+
+func (setter CookieSetter) setCookie(cookie *Cookie) {
+	http.SetCookie(setter.ResponseWriter, &http.Cookie{
+		Name:  cookie.Name,
+		Value: cookie.Value,
+
+		Domain:  string(setter.CookieDomain),
+		Path:    "/",
+		Expires: time.Time(setter.Expires),
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 }
