@@ -145,8 +145,8 @@ func (token Token) String() string {
 }
 
 type AuthHandler struct {
-	CookieDomain            CookieDomain
 	LoggerFactory           func(*http.Request) (applog.Logger, error)
+	CookieDomain            CookieDomain
 	TicketSerializer        token.TicketSerializer
 	AwsCloudFrontSerializer token.AwsCloudFrontSerializer
 }

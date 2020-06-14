@@ -26,14 +26,12 @@ import (
 )
 
 type Server struct {
-	port             string
-	authCookieDomain auth_handler.CookieDomain
+	port string
 
 	cors cors.Options
 	tls  Tls
 
-	ticketSerializer        serializer.TicketJWTSerializer
-	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
+	auth Auth
 
 	log Log
 
@@ -44,6 +42,12 @@ type Server struct {
 type Tls struct {
 	cert string
 	key  string
+}
+
+type Auth struct {
+	cookieDomain            auth_handler.CookieDomain
+	ticketSerializer        serializer.TicketJWTSerializer
+	awsCloudFrontSerializer serializer.AwsCloudFrontSerializer
 }
 
 type Log struct {
@@ -128,8 +132,7 @@ func NewServer() (Server, error) {
 	}
 
 	return Server{
-		port:             ":8080",
-		authCookieDomain: auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
+		port: ":8080",
 
 		cors: cors.Options{
 			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
@@ -141,8 +144,11 @@ func NewServer() (Server, error) {
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		ticketSerializer:        ticketSerializer,
-		awsCloudFrontSerializer: awsCloudFrontSerializer,
+		auth: Auth{
+			cookieDomain:            auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
+			ticketSerializer:        ticketSerializer,
+			awsCloudFrontSerializer: awsCloudFrontSerializer,
+		},
 
 		log: Log{
 			level:  os.Getenv("LOG_LEVEL"),
@@ -226,10 +232,10 @@ func (server Server) LoggerFactory(r *http.Request) (applog.Logger, error) {
 
 func (server Server) AuthHandler() auth_handler.AuthHandler {
 	return auth_handler.AuthHandler{
-		CookieDomain:            server.authCookieDomain,
 		LoggerFactory:           server.LoggerFactory,
-		TicketSerializer:        server.ticketSerializer,
-		AwsCloudFrontSerializer: server.awsCloudFrontSerializer,
+		CookieDomain:            server.auth.cookieDomain,
+		TicketSerializer:        server.auth.ticketSerializer,
+		AwsCloudFrontSerializer: server.auth.awsCloudFrontSerializer,
 	}
 }
 
