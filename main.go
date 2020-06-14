@@ -67,7 +67,7 @@ func main() {
 
 	log.Fatal(listen(server, handler))
 }
-func listen(server *Server, handler http.Handler) error {
+func listen(server Server, handler http.Handler) error {
 	if os.Getenv("SERVER_MODE") == "backend" {
 		return http.ListenAndServe(
 			server.port,
@@ -90,44 +90,44 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s", data)
 }
-func authRenewHandler(server *Server) auth_handler.RenewHandler {
-	factory := func(r *http.Request) auth.RenewAuthenticator {
-		return server.NewAuthenticator(r)
+func authRenewHandler(server Server) auth_handler.RenewHandler {
+	authenticatorFactory := func(logger applog.Logger) auth.RenewAuthenticator {
+		return server.NewAuthenticator(logger)
 	}
 
 	return auth_handler.RenewHandler{
-		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: factory,
+		AuthHandler:          server.AuthHandler(),
+		AuthenticatorFactory: authenticatorFactory,
 	}
 }
-func authPasswordHandler(server *Server) auth_handler.PasswordHandler {
-	factory := func(r *http.Request) auth.PasswordAuthenticator {
-		return server.NewAuthenticator(r)
+func authPasswordHandler(server Server) auth_handler.PasswordHandler {
+	authenticatorFactory := func(logger applog.Logger) auth.PasswordAuthenticator {
+		return server.NewAuthenticator(logger)
 	}
 
 	return auth_handler.PasswordHandler{
-		CookieDomain:         server.authCookieDomain,
-		AuthenticatorFactory: factory,
+		AuthHandler:          server.AuthHandler(),
+		AuthenticatorFactory: authenticatorFactory,
 	}
 }
 
-func NewServer() (*Server, error) {
+func NewServer() (Server, error) {
 	ticketSerializer, err := NewTicketSerializer()
 	if err != nil {
-		return nil, err
+		return Server{}, err
 	}
 
 	awsCloudFrontSerializer, err := NewAwsCloudFrontSerializer()
 	if err != nil {
-		return nil, err
+		return Server{}, err
 	}
 
 	db, err := NewDB()
 	if err != nil {
-		return nil, err
+		return Server{}, err
 	}
 
-	return &Server{
+	return Server{
 		port:             ":8080",
 		authCookieDomain: auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
 
@@ -216,16 +216,24 @@ func NewPasswordEncrypter() password.PasswordEncrypter {
 
 // Authenticator interface methods (auth/renew, auth/password)
 type Authenticator struct {
-	server *Server
+	server Server
 	logger applog.Logger
 }
 
-func (server *Server) NewAuthenticator(r *http.Request) Authenticator {
-	logger, err := logger.NewLogger(server.log.level, server.log.logger, r)
-	if err != nil {
-		server.log.logger.Fatalf("failed initialize logger: %s", err)
-	}
+func (server Server) LoggerFactory(r *http.Request) (applog.Logger, error) {
+	return logger.NewLogger(server.log.level, server.log.logger, r)
+}
 
+func (server Server) AuthHandler() auth_handler.AuthHandler {
+	return auth_handler.AuthHandler{
+		CookieDomain:            server.authCookieDomain,
+		LoggerFactory:           server.LoggerFactory,
+		TicketSerializer:        server.ticketSerializer,
+		AwsCloudFrontSerializer: server.awsCloudFrontSerializer,
+	}
+}
+
+func (server Server) NewAuthenticator(logger applog.Logger) Authenticator {
 	return Authenticator{
 		server: server,
 		logger: logger,
@@ -234,14 +242,6 @@ func (server *Server) NewAuthenticator(r *http.Request) Authenticator {
 
 func (authenticator Authenticator) Logger() applog.Logger {
 	return authenticator.logger
-}
-
-func (authenticator Authenticator) TicketSerializer() token.TicketSerializer {
-	return authenticator.server.ticketSerializer
-}
-
-func (authenticator Authenticator) AwsCloudFrontSerializer() token.AwsCloudFrontSerializer {
-	return authenticator.server.awsCloudFrontSerializer
 }
 
 func (authenticator Authenticator) UserFactory() user.UserFactory {

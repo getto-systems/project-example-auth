@@ -15,8 +15,7 @@ import (
 
 type RenewHandler struct {
 	AuthHandler
-	CookieDomain         CookieDomain
-	AuthenticatorFactory func(*http.Request) auth.RenewAuthenticator
+	AuthenticatorFactory func(applog.Logger) auth.RenewAuthenticator
 }
 
 type RenewInput struct {
@@ -32,7 +31,11 @@ type RenewResponse struct {
 func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	logger := h.Logger()
+	logger, err := h.LoggerFactory(r)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
 
 	logger.Debug("handling auth/renew...")
 
@@ -44,7 +47,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	authenticator := h.AuthenticatorFactory(r)
+	authenticator := h.AuthenticatorFactory(logger)
 
 	ticket, err := auth.Renew(authenticator, param)
 	if err != nil {
@@ -52,7 +55,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := SerializeAuthToken(h, ticket)
+	token, err := h.SerializeAuthToken(logger, ticket)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
@@ -63,7 +66,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("auth renew ok: %v", param)
 
-	appToken, err := SerializeAppToken(h, ticket)
+	appToken, err := h.SerializeAppToken(logger, ticket)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
@@ -97,10 +100,7 @@ func (h RenewHandler) renewParam(r *http.Request, logger applog.Logger) (auth.Re
 
 	path := basic.Path(input.Path)
 
-	// TODO コピペしただけ
-	ticketSerializer := h.TicketSerializer()
-
-	ticket, err := ticketSerializer.Parse(renewToken, path)
+	ticket, err := h.TicketSerializer.Parse(renewToken, path)
 	if err != nil {
 		logger.Debugf("parse token error: %s; %s / $s", err, renewToken, path)
 		return auth.RenewParam{}, ErrRenewTokenParseFailed

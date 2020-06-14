@@ -144,20 +144,19 @@ func (token Token) String() string {
 	)
 }
 
-type AuthHandler interface {
-	Logger() applog.Logger
-	TicketSerializer() token.TicketSerializer
-	AwsCloudFrontSerializer() token.AwsCloudFrontSerializer
+type AuthHandler struct {
+	CookieDomain            CookieDomain
+	LoggerFactory           func(*http.Request) (applog.Logger, error)
+	TicketSerializer        token.TicketSerializer
+	AwsCloudFrontSerializer token.AwsCloudFrontSerializer
 }
 
-func SerializeAuthToken(handler AuthHandler, ticket basic.Ticket) (Token, error) {
-	logger := handler.Logger()
-
+func (handler AuthHandler) SerializeAuthToken(logger applog.Logger, ticket basic.Ticket) (Token, error) {
 	logger.Debugf("serialize ticket: %v", ticket)
 
 	logger.Debug("serialize renew token...")
 
-	renewToken, err := handler.TicketSerializer().RenewToken(ticket)
+	renewToken, err := handler.TicketSerializer.RenewToken(ticket)
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
 		return Token{}, ErrRenewTokenSerializeFailed
@@ -165,7 +164,7 @@ func SerializeAuthToken(handler AuthHandler, ticket basic.Ticket) (Token, error)
 
 	logger.Debug("serialize aws cloudfront token...")
 
-	awsCloudFrontToken, err := handler.AwsCloudFrontSerializer().Token(ticket)
+	awsCloudFrontToken, err := handler.AwsCloudFrontSerializer.Token(ticket)
 	if err != nil {
 		logger.Errorf("aws cloudfront serialize error: %s; %v", err, ticket)
 		return Token{}, ErrAwsCloudFrontTokenSerializeFailed
@@ -181,12 +180,10 @@ func SerializeAuthToken(handler AuthHandler, ticket basic.Ticket) (Token, error)
 	}, nil
 }
 
-func SerializeAppToken(handler AuthHandler, ticket basic.Ticket) (token.AppToken, error) {
-	logger := handler.Logger()
-
+func (handler AuthHandler) SerializeAppToken(logger applog.Logger, ticket basic.Ticket) (token.AppToken, error) {
 	logger.Debugf("serialize ticket for app: %v", ticket)
 
-	appToken, err := handler.TicketSerializer().AppToken(ticket)
+	appToken, err := handler.TicketSerializer.AppToken(ticket)
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
 		return token.AppToken{}, ErrAppTokenSerializeFailed
