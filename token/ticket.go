@@ -2,7 +2,6 @@ package token
 
 import (
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/user"
 )
 
 type (
@@ -15,7 +14,7 @@ type (
 )
 
 type TicketSerializer interface {
-	Parse(RenewToken, basic.Path) (user.Ticket, error)
-	RenewToken(user.Ticket) (RenewToken, error)
-	AppToken(user.Ticket) (AppToken, error)
+	Parse(RenewToken, basic.Path) (basic.TicketData, error)
+	RenewToken(basic.TicketData) (RenewToken, error)
+	AppToken(basic.TicketData) (AppToken, error)
 }

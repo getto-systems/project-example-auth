@@ -35,10 +35,16 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 
 	ticketSerializer := authenticator.TicketSerializer()
 
-	ticket, err := ticketSerializer.Parse(param.RenewToken, param.Path)
+	ticketData, err := ticketSerializer.Parse(param.RenewToken, param.Path)
 	if err != nil {
 		logger.Debugf("parse token error: %s; %v", err, param)
 		return token.AppToken{}, ErrRenewTokenParseFailed
+	}
+
+	ticket, err := user.RestrictTicket(param.Path, ticketData)
+	if err != nil {
+		logger.Debugf("token check failed: %s; %v", err, param)
+		return token.AppToken{}, ErrRenewTokenCheckFailed
 	}
 
 	logger.Debugf("check renew required: %v/%s", ticket, param.RequestedAt)
@@ -66,7 +72,7 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 
 	logger.Debugf("serialize app token: %v", ticket)
 
-	appToken, err := ticketSerializer.AppToken(ticket)
+	appToken, err := ticketSerializer.AppToken(ticket.Data())
 	if err != nil {
 		logger.Errorf("app token serialize error: %s; %v", err, ticket)
 		return token.AppToken{}, ErrAppTokenSerializeFailed
