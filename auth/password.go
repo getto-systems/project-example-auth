@@ -37,7 +37,13 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	userPassword := authenticator.UserPasswordFactory().NewUserPassword(param.UserID)
 
-	err := userPassword.Match(param.Password)
+	password, err := userPassword.Password()
+	if err != nil {
+		logger.Auditf("user password not found: %s; %s", err, param.UserID)
+		return token.AppToken{}, ErrUserPasswordNotFound
+	}
+
+	err = password.Match(param.Password)
 	if err != nil {
 		logger.Auditf("password match failed: %s; %s", err, param.UserID)
 		return token.AppToken{}, ErrUserPasswordDidNotMatch

@@ -4,33 +4,49 @@ import (
 	"github.com/getto-systems/project-example-id/basic"
 )
 
+type Password struct {
+	enc    PasswordEncrypter
+	hashed basic.HashedPassword
+}
+
+func (p Password) Match(password basic.Password) error {
+	return p.enc.MatchPassword(p.hashed, password)
+}
+
+type PasswordEncrypter interface {
+	GeneratePassword(basic.Password) (basic.HashedPassword, error)
+	MatchPassword(basic.HashedPassword, basic.Password) error
+}
+
 type UserPassword struct {
 	db  UserPasswordRepository
-	enc UserPasswordEncrypter
+	enc PasswordEncrypter
 
 	userID basic.UserID
 }
 
 type UserPasswordRepository interface {
-	UserPassword(basic.UserID) basic.HashedPassword
+	UserPassword(basic.UserID) (basic.HashedPassword, error)
 }
 
-type UserPasswordEncrypter interface {
-	GenerateUserPassword(basic.Password) (basic.HashedPassword, error)
-	MatchUserPassword(basic.HashedPassword, basic.Password) error
-}
+func (p UserPassword) Password() (Password, error) {
+	hashed, err := p.db.UserPassword(p.userID)
+	if err != nil {
+		return Password{}, err
+	}
 
-func (p UserPassword) Match(password basic.Password) error {
-	hashed := p.db.UserPassword(p.userID)
-	return p.enc.MatchUserPassword(hashed, password)
+	return Password{
+		enc:    p.enc,
+		hashed: hashed,
+	}, nil
 }
 
 type UserPasswordFactory struct {
 	db  UserPasswordRepository
-	enc UserPasswordEncrypter
+	enc PasswordEncrypter
 }
 
-func NewUserPasswordFactory(db UserPasswordRepository, enc UserPasswordEncrypter) UserPasswordFactory {
+func NewUserPasswordFactory(db UserPasswordRepository, enc PasswordEncrypter) UserPasswordFactory {
 	return UserPasswordFactory{
 		db:  db,
 		enc: enc,

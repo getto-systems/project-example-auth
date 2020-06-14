@@ -13,17 +13,17 @@ var (
 	ErrPasswordTooLong = errors.New("password too long")
 )
 
-type UserPasswordEncrypter struct {
+type PasswordEncrypter struct {
 	cost int
 }
 
-func NewUserPasswordEncrypter(cost int) UserPasswordEncrypter {
-	return UserPasswordEncrypter{
+func NewPasswordEncrypter(cost int) PasswordEncrypter {
+	return PasswordEncrypter{
 		cost: cost,
 	}
 }
 
-func (enc UserPasswordEncrypter) GenerateUserPassword(password basic.Password) (basic.HashedPassword, error) {
+func (enc PasswordEncrypter) GeneratePassword(password basic.Password) (basic.HashedPassword, error) {
 	p, err := NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (enc UserPasswordEncrypter) GenerateUserPassword(password basic.Password) (
 	return p.generate(enc.cost)
 }
 
-func (enc UserPasswordEncrypter) MatchUserPassword(hashed basic.HashedPassword, password basic.Password) error {
+func (enc PasswordEncrypter) MatchPassword(hashed basic.HashedPassword, password basic.Password) error {
 	p, err := NewPassword(password)
 	if err != nil {
 		return err
