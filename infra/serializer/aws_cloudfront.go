@@ -3,9 +3,9 @@ package serializer
 import (
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
-	"github.com/getto-systems/project-example-id/basic"
-
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
+
+	"github.com/getto-systems/project-example-id/basic"
 
 	"time"
 )

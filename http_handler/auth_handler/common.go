@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
+
 	"github.com/getto-systems/project-example-id/auth"
 
 	"github.com/getto-systems/project-example-id/applog"
 
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
 
 	"errors"
 	"fmt"

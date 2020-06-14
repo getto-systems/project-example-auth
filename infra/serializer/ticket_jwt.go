@@ -6,9 +6,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/basic"
-
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
+
+	"github.com/getto-systems/project-example-id/basic"
 
 	"errors"
 	"time"
