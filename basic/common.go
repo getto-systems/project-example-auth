@@ -13,6 +13,13 @@ type (
 	RequestedAt time.Time
 	Expires     time.Time
 	Second      int64
+
+	TicketData struct {
+		UserID     UserID
+		Roles      Roles
+		Authorized RequestedAt
+		Expires    Expires
+	}
 )
 
 func (requestedAt RequestedAt) Add(seconds Second) Expires {

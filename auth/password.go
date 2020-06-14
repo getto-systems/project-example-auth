@@ -66,7 +66,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	logger.Debugf("serialize app token: %v", ticket)
 
-	appToken, err := authenticator.TicketSerializer().AppToken(ticket)
+	appToken, err := authenticator.TicketSerializer().AppToken(ticket.Data())
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
 		return token.AppToken{}, ErrAppTokenSerializeFailed

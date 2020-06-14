@@ -31,6 +31,7 @@ func (token Token) String() string {
 
 var (
 	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
+	ErrRenewTokenCheckFailed             = errors.New("ticket token check failed")
 	ErrUserPasswordNotFound              = errors.New("user password not found")
 	ErrUserPasswordDidNotMatch           = errors.New("user password did not match")
 	ErrUserAccessDenied                  = errors.New("user access denied")
@@ -52,7 +53,7 @@ func handleTicket(authenticator Authenticator, ticket user.Ticket, handler Token
 
 	logger.Debug("serialize renew token...")
 
-	renewToken, err := authenticator.TicketSerializer().RenewToken(ticket)
+	renewToken, err := authenticator.TicketSerializer().RenewToken(ticket.Data())
 	if err != nil {
 		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
 		return ErrRenewTokenSerializeFailed
@@ -60,7 +61,7 @@ func handleTicket(authenticator Authenticator, ticket user.Ticket, handler Token
 
 	logger.Debug("serialize aws cloudfront token...")
 
-	awsCloudFrontToken, err := authenticator.AwsCloudFrontSerializer().Token(ticket)
+	awsCloudFrontToken, err := authenticator.AwsCloudFrontSerializer().Token(ticket.Data())
 	if err != nil {
 		logger.Errorf("aws cloudfront serialize error: %s; %v", err, ticket)
 		return ErrAwsCloudFrontTokenSerializeFailed

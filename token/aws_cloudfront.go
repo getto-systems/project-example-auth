@@ -1,13 +1,13 @@
 package token
 
 import (
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-id/basic"
 
 	"fmt"
 )
 
 type AwsCloudFrontSerializer interface {
-	Token(user.Ticket) (AwsCloudFrontToken, error)
+	Token(basic.TicketData) (AwsCloudFrontToken, error)
 }
 
 type AwsCloudFrontToken struct {

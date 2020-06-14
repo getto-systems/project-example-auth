@@ -58,16 +58,17 @@ func (ticket Ticket) UserID() basic.UserID {
 	return ticket.userID
 }
 
-func (ticket Ticket) Roles() basic.Roles {
-	return ticket.roles
-}
-
-func (ticket Ticket) Authorized() basic.RequestedAt {
-	return ticket.authorized
-}
-
 func (ticket Ticket) Expires() basic.Expires {
 	return ticket.expires
+}
+
+func (ticket Ticket) Data() basic.TicketData {
+	return basic.TicketData{
+		UserID:     ticket.userID,
+		Roles:      ticket.roles,
+		Authorized: ticket.authorized,
+		Expires:    ticket.expires,
+	}
 }
 
 func (ticket Ticket) String() string {
@@ -87,7 +88,7 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (Tick
 	authorized := requestedAt
 	expires := requestedAt.Add(expireDuration)
 
-	return RestrictTicket(path, TicketData{
+	return RestrictTicket(path, basic.TicketData{
 		UserID:     userID,
 		Roles:      roles,
 		Authorized: authorized,
@@ -95,7 +96,7 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (Tick
 	})
 }
 
-func RestrictTicket(path basic.Path, data TicketData) (Ticket, error) {
+func RestrictTicket(path basic.Path, data basic.TicketData) (Ticket, error) {
 	if !isAccessible(data.Roles, path) {
 		return Ticket{}, fmt.Errorf("%s is not accessible as role: %v", path, data.Roles)
 	}
@@ -106,13 +107,6 @@ func RestrictTicket(path basic.Path, data TicketData) (Ticket, error) {
 		authorized: data.Authorized,
 		expires:    data.Expires,
 	}, nil
-}
-
-type TicketData struct {
-	UserID     basic.UserID
-	Roles      basic.Roles
-	Authorized basic.RequestedAt
-	Expires    basic.Expires
 }
 
 func isAccessible(roles basic.Roles, path basic.Path) bool {
