@@ -39,7 +39,7 @@ func NewUserFactory(db UserRepository) UserFactory {
 	return UserFactory{db}
 }
 
-func (f UserFactory) NewUser(userID basic.UserID) User {
+func (f UserFactory) New(userID basic.UserID) User {
 	return User{f.db, userID}
 }
 

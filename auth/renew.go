@@ -46,7 +46,7 @@ func Renew(authenticator RenewAuthenticator, param RenewParam, handler TokenHand
 	if ticket.IsRenewRequired(param.RequestedAt) {
 		logger.Debugf("renew token: %v/%s", ticket, param.RequestedAt)
 
-		user := authenticator.UserFactory().NewUser(ticket.UserID())
+		user := authenticator.UserFactory().New(ticket.UserID())
 
 		new_ticket, err := user.NewTicket(param.Path, param.RequestedAt)
 		if err != nil {

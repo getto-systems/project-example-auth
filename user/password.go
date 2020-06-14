@@ -53,7 +53,7 @@ func NewUserPasswordFactory(db UserPasswordRepository, enc PasswordEncrypter) Us
 	}
 }
 
-func (f UserPasswordFactory) NewUserPassword(userID basic.UserID) UserPassword {
+func (f UserPasswordFactory) New(userID basic.UserID) UserPassword {
 	return UserPassword{
 		db:     f.db,
 		enc:    f.enc,
