@@ -35,7 +35,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 
 	logger.Debugf("password auth: %v", param)
 
-	userPassword := authenticator.UserPasswordFactory().NewUserPassword(param.UserID)
+	userPassword := authenticator.UserPasswordFactory().New(param.UserID)
 
 	password, err := userPassword.Password()
 	if err != nil {
@@ -49,7 +49,7 @@ func Password(authenticator PasswordAuthenticator, param PasswordParam, handler 
 		return token.AppToken{}, ErrUserPasswordDidNotMatch
 	}
 
-	user := authenticator.UserFactory().NewUser(param.UserID)
+	user := authenticator.UserFactory().New(param.UserID)
 
 	logger.Debugf("new ticket: %v", param)
 
