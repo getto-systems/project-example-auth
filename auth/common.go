@@ -8,7 +8,7 @@ import (
 
 var (
 	ErrUserPasswordNotFound    = errors.New("user password not found")
-	ErrUserPasswordDidNotMatch = errors.New("user password did not match")
+	ErrUserPasswordMatchFailed = errors.New("user password match failed")
 	ErrUserAccessDenied        = errors.New("user access denied")
 )
 
