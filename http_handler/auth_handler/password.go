@@ -14,8 +14,8 @@ import (
 )
 
 type PasswordHandler struct {
-	CookieDomain         CookieDomain
-	AuthenticatorFactory func(*http.Request) auth.PasswordAuthenticator
+	AuthHandler
+	AuthenticatorFactory func(applog.Logger) auth.PasswordAuthenticator
 }
 
 type PasswordInput struct {
@@ -33,9 +33,11 @@ type PasswordResponse struct {
 func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	authenticator := h.AuthenticatorFactory(r)
-
-	logger := authenticator.Logger()
+	logger, err := h.LoggerFactory(r)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
 
 	logger.Debug("handling auth/password...")
 
@@ -47,10 +49,29 @@ func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	appToken, err := auth.Password(authenticator, param, func(token auth.Token) {
-		logger.Debugf("set ticket cookie: %v", token)
-		setAuthTokenCookie(w, h.CookieDomain, token)
-	})
+	authenticator := h.AuthenticatorFactory(logger)
+
+	ticket, err := auth.Password(authenticator, param)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
+
+	token, err := h.SerializeAuthToken(logger, ticket)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
+
+	logger.Debugf("set ticket cookie: %v", token)
+	setAuthTokenCookie(w, h.CookieDomain, token)
+
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
+
+	appToken, err := h.SerializeAppToken(logger, ticket)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return

@@ -14,8 +14,8 @@ import (
 )
 
 type RenewHandler struct {
-	CookieDomain         CookieDomain
-	AuthenticatorFactory func(*http.Request) auth.RenewAuthenticator
+	AuthHandler
+	AuthenticatorFactory func(applog.Logger) auth.RenewAuthenticator
 }
 
 type RenewInput struct {
@@ -31,13 +31,15 @@ type RenewResponse struct {
 func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	authenticator := h.AuthenticatorFactory(r)
-
-	logger := authenticator.Logger()
+	logger, err := h.LoggerFactory(r)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
 
 	logger.Debug("handling auth/renew...")
 
-	param, err := renewParam(r, logger)
+	param, err := h.renewParam(r, logger)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
@@ -45,16 +47,30 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("body parsed: %v", param)
 
-	appToken, err := auth.Renew(authenticator, param, func(token auth.Token) {
-		logger.Debugf("set ticket cookie: %v", token)
-		setAuthTokenCookie(w, h.CookieDomain, token)
-	})
+	authenticator := h.AuthenticatorFactory(logger)
+
+	ticket, err := auth.Renew(authenticator, param)
 	if err != nil {
 		w.WriteHeader(httpStatusCode(err))
 		return
 	}
 
+	token, err := h.SerializeAuthToken(logger, ticket)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
+
+	logger.Debugf("set ticket cookie: %v", token)
+	setAuthTokenCookie(w, h.CookieDomain, token)
+
 	logger.Debugf("auth renew ok: %v", param)
+
+	appToken, err := h.SerializeAppToken(logger, ticket)
+	if err != nil {
+		w.WriteHeader(httpStatusCode(err))
+		return
+	}
 
 	jsonResponse(w, RenewResponse{
 		UserID:   string(appToken.UserID),
@@ -63,7 +79,7 @@ func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) {
+func (h RenewHandler) renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) {
 	if r.Body == nil {
 		logger.Info("body not sent error")
 		return auth.RenewParam{}, ErrBodyNotSent
@@ -82,10 +98,18 @@ func renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) 
 		return auth.RenewParam{}, ErrTicketCookieNotSent
 	}
 
+	path := basic.Path(input.Path)
+
+	ticket, err := h.TicketSerializer.Parse(renewToken, path)
+	if err != nil {
+		logger.Debugf("parse token error: %s; %s / $s", err, renewToken, path)
+		return auth.RenewParam{}, ErrRenewTokenParseFailed
+	}
+
 	return auth.RenewParam{
 		RequestedAt: http_handler.RequestedAt(),
 
-		RenewToken: renewToken,
-		Path:       basic.Path(input.Path),
+		Ticket: ticket,
+		Path:   path,
 	}, nil
 }

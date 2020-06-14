@@ -4,7 +4,8 @@ import (
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
 	"github.com/getto-systems/project-example-id/basic"
-	"github.com/getto-systems/project-example-id/token"
+
+	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
 
 	"time"
 )
@@ -23,7 +24,7 @@ func NewAwsCloudFrontSerializer(pem []byte, resource string, keyPairID token.Aws
 	}
 }
 
-func (serializer AwsCloudFrontSerializer) Token(ticket basic.TicketData) (token.AwsCloudFrontToken, error) {
+func (serializer AwsCloudFrontSerializer) Token(ticket basic.Ticket) (token.AwsCloudFrontToken, error) {
 	signature, err := serializer.privateKey.Sign(serializer.resource, time.Time(ticket.Expires))
 	if err != nil {
 		return token.AwsCloudFrontToken{}, err
