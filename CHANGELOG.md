@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version : 0.3.0
+
+- fix: log message : See merge request getto-systems-base/labo/project-example/id!69
+- refactor: errors : See merge request getto-systems-base/labo/project-example/id!68
+- refactor: TicketInfo : See merge request getto-systems-base/labo/project-example/id!67
+- refactor: Token : See merge request getto-systems-base/labo/project-example/id!66
+- refactor: TicketData : See merge request getto-systems-base/labo/project-example/id!65
+- refactor: Factory method name : See merge request getto-systems-base/labo/project-example/id!64
+- refactor: Password : See merge request getto-systems-base/labo/project-example/id!63
+
+
 ## Version : 0.2.1
 
 - refactor: variable name : See merge request getto-systems-base/labo/project-example/id!61
