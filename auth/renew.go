@@ -36,11 +36,9 @@ func Renew(authenticator RenewAuthenticator, param RenewParam) (basic.Ticket, er
 
 	ticket := param.Ticket
 
-	info := user.NewTicketInfo(ticket)
-
-	err := info.HasEnoughPermission(param.Path)
+	info, err := user.NewTicketInfo(ticket, param.Path)
 	if err != nil {
-		logger.Debugf("token check failed: %s; %v", err, param)
+		logger.Debugf("ticket check failed: %s; %v", err, param)
 		return basic.Ticket{}, err
 	}
 

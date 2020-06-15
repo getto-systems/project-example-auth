@@ -60,7 +60,7 @@ func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (basi
 		Expires:    expires,
 	}
 
-	err := NewTicketInfo(ticket).HasEnoughPermission(path)
+	_, err := NewTicketInfo(ticket, path)
 	if err != nil {
 		return basic.Ticket{}, err
 	}
@@ -72,15 +72,22 @@ type TicketInfo struct {
 	basic.Ticket
 }
 
-func NewTicketInfo(ticket basic.Ticket) TicketInfo {
-	return TicketInfo{ticket}
+func NewTicketInfo(ticket basic.Ticket, path basic.Path) (TicketInfo, error) {
+	info := TicketInfo{ticket}
+
+	err := info.hasEnoughPermission(path)
+	if err != nil {
+		return TicketInfo{}, err
+	}
+
+	return info, nil
 }
 
 func (ticket TicketInfo) IsRenewRequired(requestedAt basic.RequestedAt) bool {
 	return ticket.Expires.Before(requestedAt.Add(renewThreshold))
 }
 
-func (ticket TicketInfo) HasEnoughPermission(path basic.Path) error {
+func (ticket TicketInfo) hasEnoughPermission(path basic.Path) error {
 	for _, role := range ticket.Roles {
 		if role == super_role {
 			return nil
