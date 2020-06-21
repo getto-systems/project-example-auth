@@ -23,7 +23,7 @@ func NewPasswordEncrypter(cost int) PasswordEncrypter {
 	}
 }
 
-func (enc PasswordEncrypter) GeneratePassword(password basic.Password) (basic.HashedPassword, error) {
+func (enc PasswordEncrypter) GeneratePassword(password basic.RawPassword) (basic.HashedPassword, error) {
 	p, err := NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (enc PasswordEncrypter) GeneratePassword(password basic.Password) (basic.Ha
 	return p.generate(enc.cost)
 }
 
-func (enc PasswordEncrypter) MatchPassword(hashed basic.HashedPassword, password basic.Password) error {
+func (enc PasswordEncrypter) MatchPassword(hashed basic.HashedPassword, password basic.RawPassword) error {
 	p, err := NewPassword(password)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (enc PasswordEncrypter) MatchPassword(hashed basic.HashedPassword, password
 
 type Password []byte
 
-func NewPassword(password basic.Password) (Password, error) {
+func NewPassword(password basic.RawPassword) (Password, error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {

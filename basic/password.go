@@ -1,6 +1,6 @@
 package basic
 
 type (
-	Password       string
+	RawPassword    string
 	HashedPassword []byte
 )
