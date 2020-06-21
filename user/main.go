@@ -1,52 +1,52 @@
 package user
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type User struct {
 	pub UserEventPublisher
 
-	userID basic.UserID
+	userID data.UserID
 }
 
-func (user User) UserID() basic.UserID {
+func (user User) UserID() data.UserID {
 	return user.userID
 }
 
-func (user User) Authenticated(request basic.Request) {
+func (user User) Authenticated(request data.Request) {
 	user.pub.Authenticated(request, user.userID)
 }
 
-func (user User) TicketRenewing(request basic.Request) {
+func (user User) TicketRenewing(request data.Request) {
 	user.pub.TicketRenewing(request, user.userID)
 }
 
-func (user User) TicketRenewFailed(request basic.Request, err error) {
+func (user User) TicketRenewFailed(request data.Request, err error) {
 	user.pub.TicketRenewFailed(request, user.userID, err)
 }
 
-func (user User) TicketRenewed(request basic.Request) {
+func (user User) TicketRenewed(request data.Request) {
 	user.pub.TicketRenewed(request, user.userID)
 }
 
-func (user User) PasswordMatching(request basic.Request) {
+func (user User) PasswordMatching(request data.Request) {
 	user.pub.PasswordMatching(request, user.userID)
 }
 
-func (user User) PasswordMatchFailed(request basic.Request, err error) {
+func (user User) PasswordMatchFailed(request data.Request, err error) {
 	user.pub.PasswordMatchFailed(request, user.userID, err)
 }
 
-func (user User) TicketIssueFailed(request basic.Request, err error) {
+func (user User) TicketIssueFailed(request data.Request, err error) {
 	user.pub.TicketIssueFailed(request, user.userID, err)
 }
 
-func (user User) AuthorizeFailed(request basic.Request, resource basic.Resource, err error) {
+func (user User) AuthorizeFailed(request data.Request, resource data.Resource, err error) {
 	user.pub.AuthorizeFailed(request, user.userID, resource, err)
 }
 
-func (user User) Authorized(request basic.Request, resource basic.Resource) {
+func (user User) Authorized(request data.Request, resource data.Resource) {
 	user.pub.Authorized(request, user.userID, resource)
 }
 
@@ -54,29 +54,29 @@ type UnauthorizedUser struct {
 	pub UserEventPublisher
 }
 
-func (user UnauthorizedUser) Authorizing(request basic.Request, resource basic.Resource) {
+func (user UnauthorizedUser) Authorizing(request data.Request, resource data.Resource) {
 	user.pub.Authorizing(request, resource)
 }
 
-func (user UnauthorizedUser) AuthorizeTokenParseFailed(request basic.Request, resource basic.Resource, err error) {
+func (user UnauthorizedUser) AuthorizeTokenParseFailed(request data.Request, resource data.Resource, err error) {
 	user.pub.AuthorizeTokenParseFailed(request, resource, err)
 }
 
 type UserEventPublisher interface {
-	Authenticated(basic.Request, basic.UserID)
-	Authorized(basic.Request, basic.UserID, basic.Resource)
+	Authenticated(data.Request, data.UserID)
+	Authorized(data.Request, data.UserID, data.Resource)
 
-	TicketRenewing(basic.Request, basic.UserID)
-	TicketRenewFailed(basic.Request, basic.UserID, error)
-	TicketRenewed(basic.Request, basic.UserID)
+	TicketRenewing(data.Request, data.UserID)
+	TicketRenewFailed(data.Request, data.UserID, error)
+	TicketRenewed(data.Request, data.UserID)
 
-	PasswordMatching(basic.Request, basic.UserID)
-	PasswordMatchFailed(basic.Request, basic.UserID, error)
-	TicketIssueFailed(basic.Request, basic.UserID, error)
+	PasswordMatching(data.Request, data.UserID)
+	PasswordMatchFailed(data.Request, data.UserID, error)
+	TicketIssueFailed(data.Request, data.UserID, error)
 
-	Authorizing(basic.Request, basic.Resource)
-	AuthorizeTokenParseFailed(basic.Request, basic.Resource, error)
-	AuthorizeFailed(basic.Request, basic.UserID, basic.Resource, error)
+	Authorizing(data.Request, data.Resource)
+	AuthorizeTokenParseFailed(data.Request, data.Resource, error)
+	AuthorizeFailed(data.Request, data.UserID, data.Resource, error)
 }
 
 type UserEventHandler interface {
@@ -91,7 +91,7 @@ type UserFactory struct {
 	pub UserEventPublisher
 }
 
-func (f UserFactory) New(userID basic.UserID) User {
+func (f UserFactory) New(userID data.UserID) User {
 	return User{
 		pub:    f.pub,
 		userID: userID,

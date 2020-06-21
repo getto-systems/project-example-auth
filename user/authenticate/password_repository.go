@@ -3,7 +3,7 @@ package authenticate
 import (
 	"github.com/getto-systems/project-example-id/user"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type PasswordRepository struct {
@@ -13,10 +13,10 @@ type PasswordRepository struct {
 }
 
 type PasswordDB interface {
-	UserPassword(basic.UserID) (basic.HashedPassword, error)
+	UserPassword(data.UserID) (data.HashedPassword, error)
 }
 
-func (repo PasswordRepository) Find(userID basic.UserID) user.PasswordMatcher {
+func (repo PasswordRepository) Find(userID data.UserID) user.PasswordMatcher {
 	password, err := repo.db.UserPassword(userID)
 	if err != nil {
 		return repo.passwordMatcherFactory.NotFound(err)

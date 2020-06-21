@@ -1,7 +1,7 @@
 package subscriber
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type Logger interface {
@@ -22,13 +22,13 @@ func NewUserLogger(logger Logger) UserLogger {
 
 type Log struct {
 	Message  string
-	Request  basic.Request
-	UserID   basic.UserID
-	Resource basic.Resource
+	Request  data.Request
+	UserID   data.UserID
+	Resource data.Resource
 	Error    error
 }
 
-func (logger UserLogger) Authenticated(request basic.Request, userID basic.UserID) {
+func (logger UserLogger) Authenticated(request data.Request, userID data.UserID) {
 	logger.logger.Audit(Log{
 		Message: "authenticated",
 		Request: request,
@@ -36,7 +36,7 @@ func (logger UserLogger) Authenticated(request basic.Request, userID basic.UserI
 	})
 }
 
-func (logger UserLogger) Authorized(request basic.Request, userID basic.UserID, resource basic.Resource) {
+func (logger UserLogger) Authorized(request data.Request, userID data.UserID, resource data.Resource) {
 	logger.logger.Audit(Log{
 		Message:  "authorized",
 		Request:  request,
@@ -45,7 +45,7 @@ func (logger UserLogger) Authorized(request basic.Request, userID basic.UserID, 
 	})
 }
 
-func (logger UserLogger) TicketRenewed(request basic.Request, userID basic.UserID) {
+func (logger UserLogger) TicketRenewed(request data.Request, userID data.UserID) {
 	logger.logger.Audit(Log{
 		Message: "ticket renewed",
 		Request: request,
@@ -53,7 +53,7 @@ func (logger UserLogger) TicketRenewed(request basic.Request, userID basic.UserI
 	})
 }
 
-func (logger UserLogger) PasswordMatchFailed(request basic.Request, userID basic.UserID, err error) {
+func (logger UserLogger) PasswordMatchFailed(request data.Request, userID data.UserID, err error) {
 	logger.logger.Audit(Log{
 		Message: "password match failed",
 		Request: request,
@@ -62,7 +62,7 @@ func (logger UserLogger) PasswordMatchFailed(request basic.Request, userID basic
 	})
 }
 
-func (logger UserLogger) AuthorizeFailed(request basic.Request, userID basic.UserID, resource basic.Resource, err error) {
+func (logger UserLogger) AuthorizeFailed(request data.Request, userID data.UserID, resource data.Resource, err error) {
 	logger.logger.Audit(Log{
 		Message:  "authorize failed",
 		Request:  request,
@@ -72,7 +72,7 @@ func (logger UserLogger) AuthorizeFailed(request basic.Request, userID basic.Use
 	})
 }
 
-func (logger UserLogger) TicketRenewFailed(request basic.Request, userID basic.UserID, err error) {
+func (logger UserLogger) TicketRenewFailed(request data.Request, userID data.UserID, err error) {
 	logger.logger.Info(Log{
 		Message: "ticket renew failed",
 		Request: request,
@@ -81,7 +81,7 @@ func (logger UserLogger) TicketRenewFailed(request basic.Request, userID basic.U
 	})
 }
 
-func (logger UserLogger) TicketIssueFailed(request basic.Request, userID basic.UserID, err error) {
+func (logger UserLogger) TicketIssueFailed(request data.Request, userID data.UserID, err error) {
 	logger.logger.Info(Log{
 		Message: "ticket issue failed",
 		Request: request,
@@ -90,7 +90,7 @@ func (logger UserLogger) TicketIssueFailed(request basic.Request, userID basic.U
 	})
 }
 
-func (logger UserLogger) AuthorizeTokenParseFailed(request basic.Request, resource basic.Resource, err error) {
+func (logger UserLogger) AuthorizeTokenParseFailed(request data.Request, resource data.Resource, err error) {
 	logger.logger.Debug(Log{
 		Message:  "authorize token parse failed",
 		Request:  request,
@@ -99,7 +99,7 @@ func (logger UserLogger) AuthorizeTokenParseFailed(request basic.Request, resour
 	})
 }
 
-func (logger UserLogger) TicketRenewing(request basic.Request, userID basic.UserID) {
+func (logger UserLogger) TicketRenewing(request data.Request, userID data.UserID) {
 	logger.logger.Debug(Log{
 		Message: "ticket renewing",
 		Request: request,
@@ -107,7 +107,7 @@ func (logger UserLogger) TicketRenewing(request basic.Request, userID basic.User
 	})
 }
 
-func (logger UserLogger) PasswordMatching(request basic.Request, userID basic.UserID) {
+func (logger UserLogger) PasswordMatching(request data.Request, userID data.UserID) {
 	logger.logger.Debug(Log{
 		Message: "password matching",
 		Request: request,
@@ -115,7 +115,7 @@ func (logger UserLogger) PasswordMatching(request basic.Request, userID basic.Us
 	})
 }
 
-func (logger UserLogger) Authorizing(request basic.Request, resource basic.Resource) {
+func (logger UserLogger) Authorizing(request data.Request, resource data.Resource) {
 	logger.logger.Debug(Log{
 		Message:  "authorizing",
 		Request:  request,

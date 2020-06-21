@@ -1,23 +1,23 @@
 package user
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type PasswordMatcher interface {
-	Match(password basic.RawPassword) error
+	Match(password data.RawPassword) error
 }
 
 type userPasswordMatcher struct {
 	engine PasswordMatchEngine
-	hashed basic.HashedPassword
+	hashed data.HashedPassword
 }
 
 type PasswordMatchEngine interface {
-	MatchPassword(basic.HashedPassword, basic.RawPassword) error
+	MatchPassword(data.HashedPassword, data.RawPassword) error
 }
 
-func (m userPasswordMatcher) Match(password basic.RawPassword) error {
+func (m userPasswordMatcher) Match(password data.RawPassword) error {
 	return m.engine.MatchPassword(m.hashed, password)
 }
 
@@ -25,7 +25,7 @@ type notFoundPasswordMatcher struct {
 	err error
 }
 
-func (m notFoundPasswordMatcher) Match(password basic.RawPassword) error {
+func (m notFoundPasswordMatcher) Match(password data.RawPassword) error {
 	return m.err
 }
 
@@ -39,7 +39,7 @@ func NewPasswordMatcherFactory(engine PasswordMatchEngine) PasswordMatcherFactor
 	}
 }
 
-func (f PasswordMatcherFactory) New(hashed basic.HashedPassword) PasswordMatcher {
+func (f PasswordMatcherFactory) New(hashed data.HashedPassword) PasswordMatcher {
 	return userPasswordMatcher{
 		engine: f.engine,
 		hashed: hashed,

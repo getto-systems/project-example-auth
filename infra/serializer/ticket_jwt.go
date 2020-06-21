@@ -5,7 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"time"
 )
@@ -20,30 +20,30 @@ func NewTicketSerializer(jwt JWTSerializer) TicketSerializer {
 	}
 }
 
-func (serializer TicketSerializer) DecodeToken(token basic.Token) (basic.Ticket, error) {
+func (serializer TicketSerializer) DecodeToken(token data.Token) (data.Ticket, error) {
 	claims, err := serializer.jwt.Parse(string(token))
 	if err != nil {
-		return basic.Ticket{}, err
+		return data.Ticket{}, err
 	}
 
-	return basic.Ticket{
-		Profile: basic.Profile{
+	return data.Ticket{
+		Profile: data.Profile{
 			UserID: parseUserID(claims["sub"]),
 			Roles:  parseRoles(claims["aud"]),
 		},
-		AuthenticatedAt: basic.AuthenticatedAt(parseTime(claims["iat"])),
-		Expires:         basic.Expires(parseTime(claims["exp"])),
+		AuthenticatedAt: data.AuthenticatedAt(parseTime(claims["iat"])),
+		Expires:         data.Expires(parseTime(claims["exp"])),
 	}, nil
 }
-func parseUserID(raw interface{}) basic.UserID {
+func parseUserID(raw interface{}) data.UserID {
 	userID, ok := raw.(string)
 	if !ok {
-		return basic.UserID("")
+		return data.UserID("")
 	}
 
-	return basic.UserID(userID)
+	return data.UserID(userID)
 }
-func parseRoles(raw interface{}) basic.Roles {
+func parseRoles(raw interface{}) data.Roles {
 	arr, ok := raw.([]interface{})
 	if !ok {
 		return nil
@@ -72,7 +72,7 @@ func parseTime(raw interface{}) time.Time {
 	return time.Unix(unixSecond, 0)
 }
 
-func (serializer TicketSerializer) Serialize(ticket basic.Ticket) (basic.Token, error) {
+func (serializer TicketSerializer) Serialize(ticket data.Ticket) (data.Token, error) {
 	token, err := serializer.jwt.Serialize(jwt.MapClaims{
 		"sub": ticket.Profile.UserID,
 		"aud": ticket.Profile.Roles,
@@ -84,5 +84,5 @@ func (serializer TicketSerializer) Serialize(ticket basic.Ticket) (basic.Token, 
 		return nil, err
 	}
 
-	return basic.Token(token), nil
+	return data.Token(token), nil
 }

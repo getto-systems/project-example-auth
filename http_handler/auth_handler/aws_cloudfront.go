@@ -1,7 +1,7 @@
 package auth_handler
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"fmt"
 )
@@ -28,10 +28,10 @@ type AwsCloudFrontIssuer struct {
 }
 
 type AwsCloudFrontSerializer interface {
-	Serialize(basic.Ticket) (AwsCloudFrontToken, error)
+	Serialize(data.Ticket) (AwsCloudFrontToken, error)
 }
 
-func (iss AwsCloudFrontIssuer) Authorized(ticket basic.Ticket) (AwsCloudFrontTicket, error) {
+func (iss AwsCloudFrontIssuer) Authorized(ticket data.Ticket) (AwsCloudFrontTicket, error) {
 	token, err := iss.serializer.Serialize(ticket)
 	if err != nil {
 		return AwsCloudFrontTicket{}, err

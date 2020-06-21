@@ -1,4 +1,4 @@
-package basic
+package data
 
 import (
 	"fmt"

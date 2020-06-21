@@ -1,13 +1,13 @@
 package user
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"errors"
 )
 
 var (
-	expireDuration = basic.Second(30)
+	expireDuration = data.Second(30)
 )
 
 var (
@@ -16,19 +16,19 @@ var (
 
 type Issuer struct {
 	serializer TicketSerializer
-	profile    basic.Profile
-	original   basic.Ticket
+	profile    data.Profile
+	original   data.Ticket
 }
 
 type TicketSerializer interface {
-	Serialize(basic.Ticket) (basic.Token, error)
+	Serialize(data.Ticket) (data.Token, error)
 }
 
-func (iss Issuer) Authenticated(requestedAt basic.RequestedAt) (basic.Token, error) {
+func (iss Issuer) Authenticated(requestedAt data.RequestedAt) (data.Token, error) {
 	expires := requestedAt.Expires(expireDuration)
-	authenticatedAt := basic.AuthenticatedAt(requestedAt)
+	authenticatedAt := data.AuthenticatedAt(requestedAt)
 
-	token, err := iss.serializer.Serialize(basic.Ticket{
+	token, err := iss.serializer.Serialize(data.Ticket{
 		Profile:         iss.profile,
 		AuthenticatedAt: authenticatedAt,
 		Expires:         expires,
@@ -40,14 +40,14 @@ func (iss Issuer) Authenticated(requestedAt basic.RequestedAt) (basic.Token, err
 	return token, nil
 }
 
-func (iss Issuer) Renew(requestedAt basic.RequestedAt) (basic.Token, error) {
+func (iss Issuer) Renew(requestedAt data.RequestedAt) (data.Token, error) {
 	if iss.original.Expires.Expired(requestedAt) {
 		return nil, ErrTicketAlreadyExpired
 	}
 
 	expires := requestedAt.Expires(expireDuration)
 
-	return iss.serializer.Serialize(basic.Ticket{
+	return iss.serializer.Serialize(data.Ticket{
 		Profile:         iss.profile,
 		AuthenticatedAt: iss.original.AuthenticatedAt,
 		Expires:         expires,
@@ -58,14 +58,14 @@ type IssuerFactory struct {
 	serializer TicketSerializer
 }
 
-func (f IssuerFactory) New(profile basic.Profile) Issuer {
+func (f IssuerFactory) New(profile data.Profile) Issuer {
 	return Issuer{
 		serializer: f.serializer,
 		profile:    profile,
 	}
 }
 
-func (f IssuerFactory) FromTicket(ticketInfo basic.Ticket) Issuer {
+func (f IssuerFactory) FromTicket(ticketInfo data.Ticket) Issuer {
 	return Issuer{
 		serializer: f.serializer,
 		profile:    ticketInfo.Profile,
@@ -85,10 +85,10 @@ type TicketAuthorizer struct {
 }
 
 type TokenDecoder interface {
-	DecodeToken(basic.Token) (basic.Ticket, error)
+	DecodeToken(data.Token) (data.Ticket, error)
 }
 type TicketPolicyChecker interface {
-	HasEnoughPermission(basic.Ticket, basic.Request, basic.Resource) error
+	HasEnoughPermission(data.Ticket, data.Request, data.Resource) error
 }
 
 func NewTicketAuthorizer(decoder TokenDecoder, checker TicketPolicyChecker) TicketAuthorizer {
@@ -98,10 +98,10 @@ func NewTicketAuthorizer(decoder TokenDecoder, checker TicketPolicyChecker) Tick
 	}
 }
 
-func (authorizer TicketAuthorizer) DecodeToken(token basic.Token) (basic.Ticket, error) {
+func (authorizer TicketAuthorizer) DecodeToken(token data.Token) (data.Ticket, error) {
 	return authorizer.decoder.DecodeToken(token)
 }
 
-func (authorizer TicketAuthorizer) HasEnoughPermission(ticket basic.Ticket, request basic.Request, resource basic.Resource) error {
+func (authorizer TicketAuthorizer) HasEnoughPermission(ticket data.Ticket, request data.Request, resource data.Resource) error {
 	return authorizer.checker.HasEnoughPermission(ticket, request, resource)
 }

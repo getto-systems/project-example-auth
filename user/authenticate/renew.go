@@ -3,7 +3,7 @@ package authenticate
 import (
 	"github.com/getto-systems/project-example-id/user"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"errors"
 )
@@ -16,10 +16,10 @@ type RenewAuthenticator struct {
 	issuerRepository IssuerRepository
 
 	user    user.User
-	request basic.Request
+	request data.Request
 }
 
-func (authenticator RenewAuthenticator) RenewTicket(ticket basic.Ticket) (basic.Token, error) {
+func (authenticator RenewAuthenticator) RenewTicket(ticket data.Ticket) (data.Token, error) {
 	authenticator.ticketRenewing()
 
 	issuer := authenticator.issuerRepository.New(ticket)
@@ -52,7 +52,7 @@ type RenewAuthenticatorFactory struct {
 	userFactory      user.UserFactory
 }
 
-func (f RenewAuthenticatorFactory) New(userID basic.UserID, request basic.Request) RenewAuthenticator {
+func (f RenewAuthenticatorFactory) New(userID data.UserID, request data.Request) RenewAuthenticator {
 	return RenewAuthenticator{
 		issuerRepository: f.issuerRepository,
 

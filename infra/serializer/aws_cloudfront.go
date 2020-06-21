@@ -5,7 +5,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"time"
 )
@@ -22,7 +22,7 @@ func NewAwsCloudFrontSerializer(pem []byte, resource string) AwsCloudFrontSerial
 	}
 }
 
-func (serializer AwsCloudFrontSerializer) Serialize(ticket basic.Ticket) (auth_handler.AwsCloudFrontToken, error) {
+func (serializer AwsCloudFrontSerializer) Serialize(ticket data.Ticket) (auth_handler.AwsCloudFrontToken, error) {
 	signature, err := serializer.privateKey.Sign(serializer.resource, time.Time(ticket.Expires))
 	if err != nil {
 		return auth_handler.AwsCloudFrontToken{}, err
