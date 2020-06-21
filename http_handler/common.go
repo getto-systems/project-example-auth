@@ -9,3 +9,7 @@ import (
 func RequestedAt() basic.RequestedAt {
 	return basic.RequestedAt(time.Now().UTC())
 }
+
+type Logger interface {
+	Debugf(basic.Request, string, ...interface{})
+}

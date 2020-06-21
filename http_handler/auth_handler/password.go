@@ -1,22 +1,10 @@
 package auth_handler
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/getto-systems/project-example-id/http_handler"
-
-	"github.com/getto-systems/project-example-id/auth"
-
-	"github.com/getto-systems/project-example-id/applog"
+	"github.com/getto-systems/project-example-id/user/authenticate"
 
 	"github.com/getto-systems/project-example-id/basic"
 )
-
-type PasswordHandler struct {
-	AuthHandler
-	AuthenticatorFactory func(applog.Logger) auth.PasswordAuthenticator
-}
 
 type PasswordInput struct {
 	Path     string `json:"path"`
@@ -24,86 +12,60 @@ type PasswordInput struct {
 	Password string `json:"password"`
 }
 
-type PasswordResponse struct {
-	UserID   string   `json:"user_id"`
-	Roles    []string `json:"roles"`
-	AppToken string   `json:"app_token"`
+type PasswordParam struct {
+	UserID   basic.UserID
+	Password basic.RawPassword
+	Resource basic.Resource
 }
 
-func (h PasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type PasswordHandler struct {
+	AuthHandler
 
-	logger, err := h.LoggerFactory(r)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debug("handling auth/password...")
-
-	param, err := passwordParam(r, logger)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debugf("body parsed: %v", param)
-
-	authenticator := h.AuthenticatorFactory(logger)
-
-	ticket, err := auth.Password(authenticator, param)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	token, err := h.SerializeAuthToken(logger, ticket)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debugf("set ticket cookie: %v", token)
-	setAuthTokenCookie(w, h.CookieDomain, token)
-
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	appToken, err := h.SerializeAppToken(logger, ticket)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Auditf("auth password success: %v", param)
-
-	jsonResponse(w, PasswordResponse{
-		UserID:   string(appToken.UserID),
-		Roles:    []string(appToken.Roles),
-		AppToken: appToken.Token,
-	})
+	AuthenticatorFactory authenticate.PasswordAuthenticatorFactory
 }
 
-func passwordParam(r *http.Request, logger applog.Logger) (auth.PasswordParam, error) {
-	if r.Body == nil {
-		logger.Info("body not sent error")
-		return auth.PasswordParam{}, ErrBodyNotSent
+func (h PasswordHandler) Handle() {
+	h.Logger.Debugf(h.Request, "handling auth/password")
+
+	param, err := h.param()
+	if err != nil {
+		h.errorResponse(err)
+		return
 	}
 
+	token, err := h.AuthenticatorFactory.New(param.UserID, h.Request).MatchPassword(param.Password)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	authorizer := h.AuthorizerFactory.New(token, h.Request)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	ticket, err := authorizer.IsAccessible(param.Resource)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	h.response(ticket, token)
+}
+
+func (h PasswordHandler) param() (PasswordParam, error) {
 	var input PasswordInput
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := h.parseBody(&input)
 	if err != nil {
-		logger.Info("body parse error")
-		return auth.PasswordParam{}, ErrBodyParseFailed
+		return PasswordParam{}, err
 	}
 
-	return auth.PasswordParam{
-		RequestedAt: http_handler.RequestedAt(),
-
+	return PasswordParam{
 		UserID:   basic.UserID(input.UserID),
-		Password: basic.Password(input.Password),
-		Path:     basic.Path(input.Path),
+		Password: basic.RawPassword(input.Password),
+		Resource: basic.Resource{
+			Path: basic.Path(input.Path),
+		},
 	}, nil
 }

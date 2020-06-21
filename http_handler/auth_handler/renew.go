@@ -1,115 +1,69 @@
 package auth_handler
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/getto-systems/project-example-id/http_handler"
-
-	"github.com/getto-systems/project-example-id/auth"
-
-	"github.com/getto-systems/project-example-id/applog"
+	"github.com/getto-systems/project-example-id/user/authenticate"
 
 	"github.com/getto-systems/project-example-id/basic"
 )
-
-type RenewHandler struct {
-	AuthHandler
-	AuthenticatorFactory func(applog.Logger) auth.RenewAuthenticator
-}
 
 type RenewInput struct {
 	Path string `json:"path"`
 }
 
-type RenewResponse struct {
-	UserID   string   `json:"user_id"`
-	Roles    []string `json:"roles"`
-	AppToken string   `json:"app_token"`
+type RenewParam struct {
+	Resource basic.Resource
+	Token    basic.Token
 }
 
-func (h RenewHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type RenewHandler struct {
+	AuthHandler
 
-	logger, err := h.LoggerFactory(r)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debug("handling auth/renew...")
-
-	param, err := h.renewParam(r, logger)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debugf("body parsed: %v", param)
-
-	authenticator := h.AuthenticatorFactory(logger)
-
-	ticket, err := auth.Renew(authenticator, param)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	token, err := h.SerializeAuthToken(logger, ticket)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	logger.Debugf("set ticket cookie: %v", token)
-	setAuthTokenCookie(w, h.CookieDomain, token)
-
-	logger.Debugf("auth renew ok: %v", param)
-
-	appToken, err := h.SerializeAppToken(logger, ticket)
-	if err != nil {
-		w.WriteHeader(httpStatusCode(err))
-		return
-	}
-
-	jsonResponse(w, RenewResponse{
-		UserID:   string(appToken.UserID),
-		Roles:    []string(appToken.Roles),
-		AppToken: appToken.Token,
-	})
+	AuthenticatorFactory authenticate.RenewAuthenticatorFactory
 }
 
-func (h RenewHandler) renewParam(r *http.Request, logger applog.Logger) (auth.RenewParam, error) {
-	if r.Body == nil {
-		logger.Info("body not sent error")
-		return auth.RenewParam{}, ErrBodyNotSent
+func (h RenewHandler) Handle() {
+	h.Logger.Debugf(h.Request, "handling auth/renew")
+
+	param, err := h.param()
+	if err != nil {
+		h.errorResponse(err)
+		return
 	}
 
+	authorizer := h.AuthorizerFactory.New(param.Token, h.Request)
+
+	ticket, err := authorizer.IsAccessible(param.Resource)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	token, err := h.AuthenticatorFactory.New(ticket.Profile.UserID, h.Request).RenewTicket(ticket)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	h.response(ticket, token)
+}
+
+func (h RenewHandler) param() (RenewParam, error) {
 	var input RenewInput
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := h.parseBody(&input)
 	if err != nil {
-		logger.Info("body parse error")
-		return auth.RenewParam{}, ErrBodyParseFailed
+		return RenewParam{}, err
 	}
 
-	renewToken, err := getRenewToken(r)
+	token, err := h.getToken()
 	if err != nil {
-		logger.Info("ticket cookie not sent error")
-		return auth.RenewParam{}, ErrTicketCookieNotSent
+		h.Logger.Debugf(h.Request, "token cookie not found error: %s", err)
+		return RenewParam{}, ErrTokenCookieNotFound
 	}
 
-	path := basic.Path(input.Path)
-
-	ticket, err := h.TicketSerializer.Parse(renewToken, path)
-	if err != nil {
-		logger.Debugf("parse token error: %s; %s / $s", err, renewToken, path)
-		return auth.RenewParam{}, ErrRenewTokenParseFailed
-	}
-
-	return auth.RenewParam{
-		RequestedAt: http_handler.RequestedAt(),
-
-		Ticket: ticket,
-		Path:   path,
+	return RenewParam{
+		Token: token,
+		Resource: basic.Resource{
+			Path: basic.Path(input.Path),
+		},
 	}, nil
 }

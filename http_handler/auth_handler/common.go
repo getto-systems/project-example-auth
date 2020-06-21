@@ -4,195 +4,183 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/http_handler/auth_handler/token"
+	"github.com/getto-systems/project-example-id/http_handler"
 
-	"github.com/getto-systems/project-example-id/auth"
-
-	"github.com/getto-systems/project-example-id/applog"
+	"github.com/getto-systems/project-example-id/user/authenticate"
+	"github.com/getto-systems/project-example-id/user/authorize"
 
 	"github.com/getto-systems/project-example-id/basic"
 
 	"errors"
 	"fmt"
-	"time"
 )
 
 const COOKIE_AUTH_TOKEN = "Getto-Example-Auth-Token"
 
+type AuthHandler struct {
+	Logger http_handler.Logger
+
+	HttpResponseWriter http.ResponseWriter
+	HttpRequest        *http.Request
+
+	CookieDomain CookieDomain
+
+	AwsCloudFrontIssuer AwsCloudFrontIssuer
+	AppIssuer           AppIssuer
+
+	Request basic.Request
+
+	AuthorizerFactory authorize.AuthorizerFactory
+}
+
 type CookieDomain string
 
 var (
-	ErrBodyNotSent                       = errors.New("body not sent")
-	ErrBodyParseFailed                   = errors.New("body parse failed")
-	ErrTicketCookieNotSent               = errors.New("ticket cookie not sent")
-	ErrRenewTokenParseFailed             = errors.New("ticket token parse failed")
-	ErrRenewTokenSerializeFailed         = errors.New("renew token serialize failed")
-	ErrAwsCloudFrontTokenSerializeFailed = errors.New("aws cloudfront token serialize failed")
-	ErrAppTokenSerializeFailed           = errors.New("app token serialize failed")
+	ErrEmptyBody           = errors.New("empty body")
+	ErrBodyParseFailed     = errors.New("body parse failed")
+	ErrTokenCookieNotFound = errors.New("token cookie not found")
 )
 
-func jsonResponse(w http.ResponseWriter, response interface{}) {
-	data, err := json.Marshal(response)
+func Request(r *http.Request) basic.Request {
+	return basic.Request{
+		RequestedAt: http_handler.RequestedAt(),
+		Route: basic.Route{
+			RemoteAddr: basic.RemoteAddr(r.RemoteAddr),
+		},
+	}
+}
+
+func (h AuthHandler) parseBody(input interface{}) error {
+	if h.HttpRequest.Body == nil {
+		h.Logger.Debugf(h.Request, "empty body error")
+		return ErrEmptyBody
+	}
+
+	err := json.NewDecoder(h.HttpRequest.Body).Decode(&input)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		h.Logger.Debugf(h.Request, "body parse error: %s", err)
+		return ErrBodyParseFailed
+	}
+
+	return nil
+}
+
+func (h AuthHandler) response(ticket basic.Ticket, token basic.Token) {
+	awsCloudFrontTicket, err := h.AwsCloudFrontIssuer.Authorized(ticket)
+	if err != nil {
+		h.errorResponse(err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", data)
+	appToken, err := h.AppIssuer.Authorized(ticket)
+	if err != nil {
+		h.errorResponse(err)
+		return
+	}
+
+	h.setTokenCookie(token, ticket.Expires)
+	h.setAwsCloudFrontCookie(awsCloudFrontTicket, ticket.Expires)
+
+	h.jsonResponse(appToken)
 }
 
-func httpStatusCode(err error) int {
+func (h AuthHandler) jsonResponse(response interface{}) {
+	h.HttpResponseWriter.Header().Set("Content-Type", "application/json")
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		h.HttpResponseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	h.HttpResponseWriter.WriteHeader(http.StatusOK)
+	fmt.Fprintf(h.HttpResponseWriter, "%s", data)
+}
+
+func (h AuthHandler) errorResponse(err error) {
+	h.HttpResponseWriter.Header().Set("Content-Type", "application/json")
+
 	switch err {
 
 	case
-		ErrBodyNotSent,
+		ErrEmptyBody,
 		ErrBodyParseFailed:
 
-		return http.StatusBadRequest
+		h.HttpResponseWriter.WriteHeader(http.StatusBadRequest)
 
 	case
-		ErrTicketCookieNotSent,
-		ErrRenewTokenParseFailed,
-		auth.ErrUserPasswordNotFound,
-		auth.ErrUserPasswordMatchFailed:
+		ErrTokenCookieNotFound,
+		authenticate.ErrPasswordMatchFailed,
+		authenticate.ErrTicketRenewFailed,
+		authorize.ErrAuthorizeTokenParseFailed:
 
-		return http.StatusUnauthorized
+		h.HttpResponseWriter.WriteHeader(http.StatusUnauthorized)
 
-	case auth.ErrUserAccessDenied:
-		return http.StatusForbidden
+	case authorize.ErrAuthorizeFailed:
+		h.HttpResponseWriter.WriteHeader(http.StatusForbidden)
 
 	default:
-		return http.StatusInternalServerError
+		h.Logger.Debugf(h.Request, "internal server error: %s", err)
+		h.HttpResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-type Cookie struct {
-	Name  string
-	Value string
-}
-
-type CookieSetter struct {
-	ResponseWriter http.ResponseWriter
-	CookieDomain   CookieDomain
-	Expires        basic.Expires
-}
-
-func setAuthTokenCookie(w http.ResponseWriter, cookieDomain CookieDomain, token Token) {
-	setter := CookieSetter{
-		ResponseWriter: w,
-		CookieDomain:   cookieDomain,
-		Expires:        token.Expires,
-	}
-	setter.setTicketCookie(token.RenewToken)
-	setter.setAwsCloudFrontCookie(token.AwsCloudFrontToken)
-}
-
-func getRenewToken(r *http.Request) (token.RenewToken, error) {
-	cookie, err := r.Cookie(COOKIE_AUTH_TOKEN)
+func (h AuthHandler) getToken() (basic.Token, error) {
+	cookie, err := h.HttpRequest.Cookie(COOKIE_AUTH_TOKEN)
 	if err != nil {
 		return nil, err
 	}
 
-	return token.RenewToken(cookie.Value), nil
+	return basic.Token(cookie.Value), nil
 }
 
-type Token struct {
-	Expires basic.Expires
-
-	RenewToken         token.RenewToken
-	AwsCloudFrontToken token.AwsCloudFrontToken
-}
-
-func (token Token) String() string {
-	return fmt.Sprintf(
-		"Token{Expires: %s, RenewToken:%s, AwsCloudFrontToken:%s}",
-		token.Expires,
-		token.RenewToken,
-		token.AwsCloudFrontToken,
-	)
-}
-
-type AuthHandler struct {
-	LoggerFactory           func(*http.Request) (applog.Logger, error)
-	CookieDomain            CookieDomain
-	TicketSerializer        token.TicketSerializer
-	AwsCloudFrontSerializer token.AwsCloudFrontSerializer
-}
-
-func (handler AuthHandler) SerializeAuthToken(logger applog.Logger, ticket basic.Ticket) (Token, error) {
-	logger.Debugf("serialize ticket: %v", ticket)
-
-	logger.Debug("serialize renew token...")
-
-	renewToken, err := handler.TicketSerializer.RenewToken(ticket)
-	if err != nil {
-		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return Token{}, ErrRenewTokenSerializeFailed
-	}
-
-	logger.Debug("serialize aws cloudfront token...")
-
-	awsCloudFrontToken, err := handler.AwsCloudFrontSerializer.Token(ticket)
-	if err != nil {
-		logger.Errorf("aws cloudfront serialize error: %s; %v", err, ticket)
-		return Token{}, ErrAwsCloudFrontTokenSerializeFailed
-	}
-
-	logger.Debug("handling ticket token...")
-
-	return Token{
-		Expires: ticket.Expires,
-
-		RenewToken:         renewToken,
-		AwsCloudFrontToken: awsCloudFrontToken,
-	}, nil
-}
-
-func (handler AuthHandler) SerializeAppToken(logger applog.Logger, ticket basic.Ticket) (token.AppToken, error) {
-	logger.Debugf("serialize ticket for app: %v", ticket)
-
-	appToken, err := handler.TicketSerializer.AppToken(ticket)
-	if err != nil {
-		logger.Errorf("ticket serialize error: %s; %v", err, ticket)
-		return token.AppToken{}, ErrAppTokenSerializeFailed
-	}
-
-	return appToken, nil
-}
-
-func (setter CookieSetter) setTicketCookie(renewToken token.RenewToken) {
-	setter.setCookie(&Cookie{
+func (h AuthHandler) setTokenCookie(token basic.Token, expires basic.Expires) {
+	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
 		Name:  COOKIE_AUTH_TOKEN,
-		Value: string(renewToken),
-	})
-}
+		Value: string(token),
 
-func (setter CookieSetter) setAwsCloudFrontCookie(token token.AwsCloudFrontToken) {
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Key-Pair-Id",
-		Value: string(token.KeyPairID),
-	})
-
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Policy",
-		Value: string(token.Policy),
-	})
-
-	setter.setCookie(&Cookie{
-		Name:  "CloudFront-Signature",
-		Value: string(token.Signature),
-	})
-}
-
-func (setter CookieSetter) setCookie(cookie *Cookie) {
-	http.SetCookie(setter.ResponseWriter, &http.Cookie{
-		Name:  cookie.Name,
-		Value: cookie.Value,
-
-		Domain:  string(setter.CookieDomain),
+		Domain:  string(h.CookieDomain),
 		Path:    "/",
-		Expires: time.Time(setter.Expires),
+		Expires: expires.Time(),
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
+}
+
+func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires basic.Expires) {
+	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+		Name:  "CloudFront-Key-Pair-Id",
+		Value: string(ticket.KeyPairID),
+
+		Domain:  string(h.CookieDomain),
+		Path:    "/",
+		Expires: expires.Time(),
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
+	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+		Name:  "CloudFront-Policy",
+		Value: string(ticket.Token.Policy),
+
+		Domain:  string(h.CookieDomain),
+		Path:    "/",
+		Expires: expires.Time(),
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
+	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+		Name:  "CloudFront-Signature",
+		Value: string(ticket.Token.Signature),
+
+		Domain:  string(h.CookieDomain),
+		Path:    "/",
+		Expires: expires.Time(),
 
 		Secure:   true,
 		HttpOnly: true,

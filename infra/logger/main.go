@@ -2,57 +2,103 @@ package logger
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
+	"fmt"
 	"log"
-	"net/http"
 	"time"
 
-	"github.com/getto-systems/applog-go"
+	"github.com/getto-systems/project-example-id/user/subscriber"
+
+	"github.com/getto-systems/project-example-id/basic"
 )
 
-type LogEntry struct {
-	Time      string `json:"time"`
-	Level     string `json:"level"`
-	Message   string `json:"message"`
-	RemoteIP  string `json:"remote_ip"`
-	RequestID string `json:"request_id"`
+type Log struct {
+	Time     string      `json:"time"`
+	Level    string      `json:"level"`
+	Message  string      `json:"message"`
+	Request  RequestLog  `json:"request"`
+	UserID   string      `json:"user_id,omitempty"`
+	Resource ResourceLog `json:"resource,omitempty"`
+	Error    string      `json:"error,omitempty"`
 }
 
-func NewLogger(level string, logger *log.Logger, r *http.Request) (applog.Logger, error) {
-	randomID, err := uuid.NewRandom()
+type ResourceLog struct {
+	Path string `json:"path"`
+}
+type RouteLog struct {
+	RemoteAddr string `json:"remote_addr"`
+}
+type RequestLog struct {
+	RequestedAt string   `json:"requested_at"`
+	Route       RouteLog `json:"route"`
+}
+
+type Logger struct {
+	logger *log.Logger
+}
+
+func (logger Logger) Audit(log subscriber.Log) {
+	logger.json("AUDIT", format(log))
+}
+
+func (logger Logger) Info(log subscriber.Log) {
+	logger.json("INFO", format(log))
+}
+
+func (logger Logger) Debug(log subscriber.Log) {
+	logger.json("DEBUG", format(log))
+}
+
+func (logger Logger) Debugf(request basic.Request, format string, v ...interface{}) {
+	logger.json("DEBUG", Log{
+		Message: fmt.Sprintf(format, v...),
+		Request: requestLog(request),
+	})
+}
+
+func (logger Logger) json(level string, log Log) {
+	logger.logger.Println(jsonMessage(level, log))
+}
+
+func NewLogger(level string, logger *log.Logger) Logger {
+	return Logger{
+		logger: leveledLogger(level, logger),
+	}
+}
+func leveledLogger(level string, logger *log.Logger) *log.Logger {
+	return logger
+}
+
+func format(log subscriber.Log) Log {
+	return Log{
+		Time:     time.Now().UTC().String(),
+		Message:  log.Message,
+		Request:  requestLog(log.Request),
+		UserID:   string(log.UserID),
+		Resource: resourceLog(log.Resource),
+		Error:    log.Error.Error(),
+	}
+}
+func jsonMessage(level string, log Log) []byte {
+	log.Level = level
+	data, err := json.Marshal(log)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	requestID := randomID.String()
-	remoteIP := r.RemoteAddr
-
-	entry := func(level string, message string) string {
-		data, err := json.Marshal(LogEntry{
-			Time:      time.Now().UTC().String(),
-			Level:     level,
-			Message:   message,
-			RemoteIP:  remoteIP,
-			RequestID: requestID,
-		})
-		if err != nil {
-			return err.Error()
-		}
-
-		return string(data)
-	}
-
-	return leveledLogger(level, logger, entry), nil
+	return data
 }
-func leveledLogger(level string, output applog.Output, entry applog.Entry) applog.Logger {
-	switch level {
-	case "DEBUG":
-		return applog.NewDebugLogger(output, entry)
-	case "INFO":
-		return applog.NewInfoLogger(output, entry)
-	case "WARNING":
-		return applog.NewWarnLogger(output, entry)
-	default:
-		return applog.NewErrorLogger(output, entry)
+
+func requestLog(request basic.Request) RequestLog {
+	return RequestLog{
+		RequestedAt: request.RequestedAt.String(),
+		Route: RouteLog{
+			RemoteAddr: string(request.Route.RemoteAddr),
+		},
+	}
+}
+
+func resourceLog(resource basic.Resource) ResourceLog {
+	return ResourceLog{
+		Path: string(resource.Path),
 	}
 }

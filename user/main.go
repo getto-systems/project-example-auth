@@ -1,102 +1,111 @@
 package user
 
 import (
-	"strings"
-
 	"github.com/getto-systems/project-example-id/basic"
-
-	"errors"
-	"fmt"
-)
-
-var (
-	expireDuration = basic.Second(30)
-	renewThreshold = basic.Second(5)
-
-	ErrTicketHasNotEnoughPermission = errors.New("ticket has not enough permission")
-)
-
-const (
-	super_role = "admin"
 )
 
 type User struct {
-	db UserRepository
+	pub UserEventPublisher
 
 	userID basic.UserID
-}
-
-type UserRepository interface {
-	UserRoles(basic.UserID) basic.Roles
 }
 
 func (user User) UserID() basic.UserID {
 	return user.userID
 }
 
-type UserFactory struct {
-	db UserRepository
+func (user User) Authenticated(request basic.Request) {
+	user.pub.Authenticated(request, user.userID)
 }
 
-func NewUserFactory(db UserRepository) UserFactory {
-	return UserFactory{db}
+func (user User) TicketRenewing(request basic.Request) {
+	user.pub.TicketRenewing(request, user.userID)
+}
+
+func (user User) TicketRenewFailed(request basic.Request, err error) {
+	user.pub.TicketRenewFailed(request, user.userID, err)
+}
+
+func (user User) TicketRenewed(request basic.Request) {
+	user.pub.TicketRenewed(request, user.userID)
+}
+
+func (user User) PasswordMatching(request basic.Request) {
+	user.pub.PasswordMatching(request, user.userID)
+}
+
+func (user User) PasswordMatchFailed(request basic.Request, err error) {
+	user.pub.PasswordMatchFailed(request, user.userID, err)
+}
+
+func (user User) TicketIssueFailed(request basic.Request, err error) {
+	user.pub.TicketIssueFailed(request, user.userID, err)
+}
+
+func (user User) AuthorizeFailed(request basic.Request, resource basic.Resource, err error) {
+	user.pub.AuthorizeFailed(request, user.userID, resource, err)
+}
+
+func (user User) Authorized(request basic.Request, resource basic.Resource) {
+	user.pub.Authorized(request, user.userID, resource)
+}
+
+type UnauthorizedUser struct {
+	pub UserEventPublisher
+}
+
+func (user UnauthorizedUser) Authorizing(request basic.Request, resource basic.Resource) {
+	user.pub.Authorizing(request, resource)
+}
+
+func (user UnauthorizedUser) AuthorizeTokenParseFailed(request basic.Request, resource basic.Resource, err error) {
+	user.pub.AuthorizeTokenParseFailed(request, resource, err)
+}
+
+type UserEventPublisher interface {
+	Authenticated(basic.Request, basic.UserID)
+	Authorized(basic.Request, basic.UserID, basic.Resource)
+
+	TicketRenewing(basic.Request, basic.UserID)
+	TicketRenewFailed(basic.Request, basic.UserID, error)
+	TicketRenewed(basic.Request, basic.UserID)
+
+	PasswordMatching(basic.Request, basic.UserID)
+	PasswordMatchFailed(basic.Request, basic.UserID, error)
+	TicketIssueFailed(basic.Request, basic.UserID, error)
+
+	Authorizing(basic.Request, basic.Resource)
+	AuthorizeTokenParseFailed(basic.Request, basic.Resource, error)
+	AuthorizeFailed(basic.Request, basic.UserID, basic.Resource, error)
+}
+
+type UserEventHandler interface {
+	UserEventPublisher
+}
+
+type UserEventSubscriber interface {
+	Subscribe(UserEventHandler)
+}
+
+type UserFactory struct {
+	pub UserEventPublisher
 }
 
 func (f UserFactory) New(userID basic.UserID) User {
-	return User{f.db, userID}
-}
-
-func (user User) NewTicket(path basic.Path, requestedAt basic.RequestedAt) (basic.Ticket, error) {
-	userID := user.userID
-	roles := user.db.UserRoles(userID)
-
-	authorized := requestedAt
-	expires := requestedAt.Add(expireDuration)
-
-	ticket := basic.Ticket{
-		UserID:     userID,
-		Roles:      roles,
-		Authorized: authorized,
-		Expires:    expires,
+	return User{
+		pub:    f.pub,
+		userID: userID,
 	}
+}
 
-	_, err := NewTicketInfo(ticket, path)
-	if err != nil {
-		return basic.Ticket{}, err
+func (f UserFactory) Unauthorized() UnauthorizedUser {
+	return UnauthorizedUser{
+		pub: f.pub,
 	}
-
-	return ticket, nil
 }
 
-type TicketInfo struct {
-	basic.Ticket
-}
-
-func NewTicketInfo(ticket basic.Ticket, path basic.Path) (TicketInfo, error) {
-	info := TicketInfo{ticket}
-
-	err := info.hasEnoughPermission(path)
-	if err != nil {
-		return TicketInfo{}, err
+func NewUserFactory(pub UserEventPublisher) UserFactory {
+	return UserFactory{
+		pub: pub,
 	}
-
-	return info, nil
-}
-
-func (ticket TicketInfo) IsRenewRequired(requestedAt basic.RequestedAt) bool {
-	return ticket.Expires.Before(requestedAt.Add(renewThreshold))
-}
-
-func (ticket TicketInfo) hasEnoughPermission(path basic.Path) error {
-	for _, role := range ticket.Roles {
-		if role == super_role {
-			return nil
-		}
-
-		if strings.HasPrefix(fmt.Sprintf("/%s/", role), string(path)) {
-			return nil
-		}
-	}
-
-	return ErrTicketHasNotEnoughPermission
 }
