@@ -9,7 +9,7 @@ import (
 	"github.com/getto-systems/project-example-id/user/authenticate"
 	"github.com/getto-systems/project-example-id/user/authorize"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"errors"
 	"fmt"
@@ -28,7 +28,7 @@ type AuthHandler struct {
 	AwsCloudFrontIssuer AwsCloudFrontIssuer
 	AppIssuer           AppIssuer
 
-	Request basic.Request
+	Request data.Request
 
 	AuthorizerFactory authorize.AuthorizerFactory
 }
@@ -41,11 +41,11 @@ var (
 	ErrTokenCookieNotFound = errors.New("token cookie not found")
 )
 
-func Request(r *http.Request) basic.Request {
-	return basic.Request{
+func Request(r *http.Request) data.Request {
+	return data.Request{
 		RequestedAt: http_handler.RequestedAt(),
-		Route: basic.Route{
-			RemoteAddr: basic.RemoteAddr(r.RemoteAddr),
+		Route: data.Route{
+			RemoteAddr: data.RemoteAddr(r.RemoteAddr),
 		},
 	}
 }
@@ -65,7 +65,7 @@ func (h AuthHandler) parseBody(input interface{}) error {
 	return nil
 }
 
-func (h AuthHandler) response(ticket basic.Ticket, token basic.Token) {
+func (h AuthHandler) response(ticket data.Ticket, token data.Token) {
 	awsCloudFrontTicket, err := h.AwsCloudFrontIssuer.Authorized(ticket)
 	if err != nil {
 		h.errorResponse(err)
@@ -125,16 +125,16 @@ func (h AuthHandler) errorResponse(err error) {
 	}
 }
 
-func (h AuthHandler) getToken() (basic.Token, error) {
+func (h AuthHandler) getToken() (data.Token, error) {
 	cookie, err := h.HttpRequest.Cookie(COOKIE_AUTH_TOKEN)
 	if err != nil {
 		return nil, err
 	}
 
-	return basic.Token(cookie.Value), nil
+	return data.Token(cookie.Value), nil
 }
 
-func (h AuthHandler) setTokenCookie(token basic.Token, expires basic.Expires) {
+func (h AuthHandler) setTokenCookie(token data.Token, expires data.Expires) {
 	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
 		Name:  COOKIE_AUTH_TOKEN,
 		Value: string(token),
@@ -149,7 +149,7 @@ func (h AuthHandler) setTokenCookie(token basic.Token, expires basic.Expires) {
 	})
 }
 
-func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires basic.Expires) {
+func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires data.Expires) {
 	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
 		Name:  "CloudFront-Key-Pair-Id",
 		Value: string(ticket.KeyPairID),

@@ -1,7 +1,7 @@
 package auth_handler
 
 import (
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type (
@@ -18,10 +18,10 @@ type AppIssuer struct {
 }
 
 type AppTicketSerializer interface {
-	Serialize(basic.Ticket) (AppToken, error)
+	Serialize(data.Ticket) (AppToken, error)
 }
 
-func (iss AppIssuer) Authorized(ticket basic.Ticket) (AppTicket, error) {
+func (iss AppIssuer) Authorized(ticket data.Ticket) (AppTicket, error) {
 	token, err := iss.serializer.Serialize(ticket)
 	if err != nil {
 		return AppTicket{}, err

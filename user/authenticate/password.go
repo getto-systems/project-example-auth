@@ -3,7 +3,7 @@ package authenticate
 import (
 	"github.com/getto-systems/project-example-id/user"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"errors"
 )
@@ -18,10 +18,10 @@ type PasswordAuthenticator struct {
 	issuerRepository   IssuerRepository
 
 	user    user.User
-	request basic.Request
+	request data.Request
 }
 
-func (authenticator PasswordAuthenticator) MatchPassword(password basic.RawPassword) (basic.Token, error) {
+func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPassword) (data.Token, error) {
 	authenticator.passwordMatching()
 
 	passwordMatcher := authenticator.passwordMatcher()
@@ -82,7 +82,7 @@ func NewPasswordAuthenticatorFactory(passwordRepository PasswordRepository, issu
 	}
 }
 
-func (f PasswordAuthenticatorFactory) New(userID basic.UserID, request basic.Request) PasswordAuthenticator {
+func (f PasswordAuthenticatorFactory) New(userID data.UserID, request data.Request) PasswordAuthenticator {
 	return PasswordAuthenticator{
 		passwordRepository: f.passwordRepository,
 		issuerRepository:   f.issuerRepository,

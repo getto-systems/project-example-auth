@@ -3,7 +3,7 @@ package auth_handler
 import (
 	"github.com/getto-systems/project-example-id/user/authenticate"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type RenewInput struct {
@@ -11,8 +11,8 @@ type RenewInput struct {
 }
 
 type RenewParam struct {
-	Resource basic.Resource
-	Token    basic.Token
+	Resource data.Resource
+	Token    data.Token
 }
 
 type RenewHandler struct {
@@ -62,8 +62,8 @@ func (h RenewHandler) param() (RenewParam, error) {
 
 	return RenewParam{
 		Token: token,
-		Resource: basic.Resource{
-			Path: basic.Path(input.Path),
+		Resource: data.Resource{
+			Path: data.Path(input.Path),
 		},
 	}, nil
 }

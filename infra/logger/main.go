@@ -8,7 +8,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/user/subscriber"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type Log struct {
@@ -48,7 +48,7 @@ func (logger Logger) Debug(log subscriber.Log) {
 	logger.json("DEBUG", format(log))
 }
 
-func (logger Logger) Debugf(request basic.Request, format string, v ...interface{}) {
+func (logger Logger) Debugf(request data.Request, format string, v ...interface{}) {
 	logger.json("DEBUG", Log{
 		Message: fmt.Sprintf(format, v...),
 		Request: requestLog(request),
@@ -65,6 +65,7 @@ func NewLogger(level string, logger *log.Logger) Logger {
 	}
 }
 func leveledLogger(level string, logger *log.Logger) *log.Logger {
+	// TODO applog に差し替え
 	return logger
 }
 
@@ -88,7 +89,7 @@ func jsonMessage(level string, log Log) []byte {
 	return data
 }
 
-func requestLog(request basic.Request) RequestLog {
+func requestLog(request data.Request) RequestLog {
 	return RequestLog{
 		RequestedAt: request.RequestedAt.String(),
 		Route: RouteLog{
@@ -97,7 +98,7 @@ func requestLog(request basic.Request) RequestLog {
 	}
 }
 
-func resourceLog(resource basic.Resource) ResourceLog {
+func resourceLog(resource data.Resource) ResourceLog {
 	return ResourceLog{
 		Path: string(resource.Path),
 	}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"time"
 )
@@ -22,7 +22,7 @@ func NewAppSerializer(jwt JWTSerializer) AppSerializer {
 	}
 }
 
-func (serializer AppSerializer) Serialize(ticket basic.Ticket) (auth_handler.AppToken, error) {
+func (serializer AppSerializer) Serialize(ticket data.Ticket) (auth_handler.AppToken, error) {
 	token, err := serializer.jwt.Serialize(jwt.MapClaims{
 		"sub": ticket.Profile.UserID,
 		"aud": ticket.Profile.Roles,

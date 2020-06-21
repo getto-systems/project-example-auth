@@ -3,7 +3,7 @@ package authorize
 import (
 	"github.com/getto-systems/project-example-id/user"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 
 	"errors"
 )
@@ -20,24 +20,24 @@ type Authorizer struct {
 	unauthorized user.UnauthorizedUser
 	user         user.User
 
-	token   basic.Token
-	ticket  basic.Ticket
-	request basic.Request
+	token   data.Token
+	ticket  data.Ticket
+	request data.Request
 }
 
-func (authorizer Authorizer) IsAccessible(resource basic.Resource) (basic.Ticket, error) {
+func (authorizer Authorizer) IsAccessible(resource data.Resource) (data.Ticket, error) {
 	authorizer.authorizing(resource)
 
 	err := authorizer.parseToken()
 	if err != nil {
 		authorizer.authorizeTokenParseFailed(resource, err)
-		return basic.Ticket{}, ErrAuthorizeTokenParseFailed
+		return data.Ticket{}, ErrAuthorizeTokenParseFailed
 	}
 
 	err = authorizer.hasEnoughPermission(resource)
 	if err != nil {
 		authorizer.authorizeFailed(resource, err)
-		return basic.Ticket{}, ErrAuthorizeFailed
+		return data.Ticket{}, ErrAuthorizeFailed
 	}
 
 	authorizer.authorized(resource)
@@ -57,23 +57,23 @@ func (authorizer Authorizer) parseToken() error {
 	return nil
 }
 
-func (authorizer Authorizer) hasEnoughPermission(resource basic.Resource) error {
+func (authorizer Authorizer) hasEnoughPermission(resource data.Resource) error {
 	return authorizer.ticketAuthorizer.HasEnoughPermission(authorizer.ticket, authorizer.request, resource)
 }
 
-func (authorizer Authorizer) authorizing(resource basic.Resource) {
+func (authorizer Authorizer) authorizing(resource data.Resource) {
 	authorizer.unauthorized.Authorizing(authorizer.request, resource)
 }
 
-func (authorizer Authorizer) authorizeTokenParseFailed(resource basic.Resource, err error) {
+func (authorizer Authorizer) authorizeTokenParseFailed(resource data.Resource, err error) {
 	authorizer.unauthorized.AuthorizeTokenParseFailed(authorizer.request, resource, err)
 }
 
-func (authorizer Authorizer) authorizeFailed(resource basic.Resource, err error) {
+func (authorizer Authorizer) authorizeFailed(resource data.Resource, err error) {
 	authorizer.user.AuthorizeFailed(authorizer.request, resource, err)
 }
 
-func (authorizer Authorizer) authorized(resource basic.Resource) {
+func (authorizer Authorizer) authorized(resource data.Resource) {
 	authorizer.user.Authorized(authorizer.request, resource)
 }
 
@@ -89,7 +89,7 @@ func NewAuthorizerFactory(ticketAuthorizer user.TicketAuthorizer, userFactory us
 	}
 }
 
-func (f AuthorizerFactory) New(token basic.Token, request basic.Request) Authorizer {
+func (f AuthorizerFactory) New(token data.Token, request data.Request) Authorizer {
 	return Authorizer{
 		ticketAuthorizer: f.ticketAuthorizer,
 		userFactory:      f.userFactory,

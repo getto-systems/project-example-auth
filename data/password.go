@@ -1,4 +1,4 @@
-package basic
+package data
 
 type (
 	RawPassword    string

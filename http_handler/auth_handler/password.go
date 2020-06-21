@@ -3,7 +3,7 @@ package auth_handler
 import (
 	"github.com/getto-systems/project-example-id/user/authenticate"
 
-	"github.com/getto-systems/project-example-id/basic"
+	"github.com/getto-systems/project-example-id/data"
 )
 
 type PasswordInput struct {
@@ -13,9 +13,9 @@ type PasswordInput struct {
 }
 
 type PasswordParam struct {
-	UserID   basic.UserID
-	Password basic.RawPassword
-	Resource basic.Resource
+	UserID   data.UserID
+	Password data.RawPassword
+	Resource data.Resource
 }
 
 type PasswordHandler struct {
@@ -62,10 +62,10 @@ func (h PasswordHandler) param() (PasswordParam, error) {
 	}
 
 	return PasswordParam{
-		UserID:   basic.UserID(input.UserID),
-		Password: basic.RawPassword(input.Password),
-		Resource: basic.Resource{
-			Path: basic.Path(input.Path),
+		UserID:   data.UserID(input.UserID),
+		Password: data.RawPassword(input.Password),
+		Resource: data.Resource{
+			Path: data.Path(input.Path),
 		},
 	}, nil
 }
