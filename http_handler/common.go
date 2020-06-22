@@ -11,5 +11,6 @@ func RequestedAt() data.RequestedAt {
 }
 
 type Logger interface {
-	Debugf(*data.Request, string, ...interface{})
+	DebugMessage(*data.Request, string)
+	DebugError(*data.Request, string, error)
 }

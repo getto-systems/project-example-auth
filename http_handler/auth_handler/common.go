@@ -52,13 +52,13 @@ func Request(r *http.Request) data.Request {
 
 func (h AuthHandler) parseBody(input interface{}) error {
 	if h.HttpRequest.Body == nil {
-		h.Logger.Debugf(&h.Request, "empty body error")
+		h.Logger.DebugError(&h.Request, "empty body error", nil)
 		return ErrEmptyBody
 	}
 
 	err := json.NewDecoder(h.HttpRequest.Body).Decode(&input)
 	if err != nil {
-		h.Logger.Debugf(&h.Request, "body parse error: %s", err)
+		h.Logger.DebugError(&h.Request, "body parse error: %s", err)
 		return ErrBodyParseFailed
 	}
 
@@ -120,7 +120,7 @@ func (h AuthHandler) errorResponse(err error) {
 		h.HttpResponseWriter.WriteHeader(http.StatusForbidden)
 
 	default:
-		h.Logger.Debugf(&h.Request, "internal server error: %s", err)
+		h.Logger.DebugError(&h.Request, "internal server error: %s", err)
 		h.HttpResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 }

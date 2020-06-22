@@ -1,7 +1,6 @@
 package data
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -73,21 +72,4 @@ func (expires Expires) Time() time.Time {
 
 func (authenticatedAt AuthenticatedAt) String() string {
 	return time.Time(authenticatedAt).String()
-}
-
-func (profile Profile) String() string {
-	return fmt.Sprintf(
-		"Profile{UserID:%s, Roles:%s}",
-		profile.UserID,
-		profile.Roles,
-	)
-}
-
-func (info Ticket) String() string {
-	return fmt.Sprintf(
-		"Ticket{Profile:%s, Authorized:%s, Expires:%s}",
-		info.Profile,
-		info.AuthenticatedAt.String(),
-		info.Expires.String(),
-	)
 }

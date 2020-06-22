@@ -207,7 +207,7 @@ func NewAppLogger() logger.Logger {
 func NewAwsCloudFrontIssuer(appLogger logger.Logger) (auth_handler.AwsCloudFrontIssuer, error) {
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
-		appLogger.Debugf(nil, "aws cloudfront private key read failed: %s", err)
+		appLogger.DebugError(nil, "aws cloudfront private key read failed: %s", err)
 		return auth_handler.AwsCloudFrontIssuer{}, err
 	}
 
@@ -224,7 +224,7 @@ func NewAwsCloudFrontIssuer(appLogger logger.Logger) (auth_handler.AwsCloudFront
 func NewAppIssuer(appLogger logger.Logger) (auth_handler.AppIssuer, error) {
 	pem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
 	if err != nil {
-		appLogger.Debugf(nil, "app private key read failed: %s", err)
+		appLogger.DebugError(nil, "app private key read failed: %s", err)
 		return auth_handler.AppIssuer{}, err
 	}
 
@@ -232,7 +232,7 @@ func NewAppIssuer(appLogger logger.Logger) (auth_handler.AppIssuer, error) {
 		PrivateKey: pem,
 	})
 	if err != nil {
-		appLogger.Debugf(nil, "app key parse failed: %s", err)
+		appLogger.DebugError(nil, "app key parse failed: %s", err)
 		return auth_handler.AppIssuer{}, err
 	}
 
@@ -250,13 +250,13 @@ func NewPubSub() (*pubsub.SyncPubSub, error) {
 func NewTicketSerializer(appLogger logger.Logger) (serializer.TicketSerializer, error) {
 	privateKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PRIVATE_KEY"))
 	if err != nil {
-		appLogger.Debugf(nil, "ticket private key read failed: %s", err)
+		appLogger.DebugError(nil, "ticket private key read failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 
 	publicKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PUBLIC_KEY"))
 	if err != nil {
-		appLogger.Debugf(nil, "ticket public key read failed: %s", err)
+		appLogger.DebugError(nil, "ticket public key read failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 
@@ -265,7 +265,7 @@ func NewTicketSerializer(appLogger logger.Logger) (serializer.TicketSerializer, 
 		PublicKey:  publicKeyPem,
 	})
 	if err != nil {
-		appLogger.Debugf(nil, "ticket key parse failed: %s", err)
+		appLogger.DebugError(nil, "ticket key parse failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 

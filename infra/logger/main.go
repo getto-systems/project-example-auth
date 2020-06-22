@@ -63,11 +63,15 @@ func (logger Logger) Debug(entry subscriber.Log) {
 	logger.logger.Debug(jsonMessage("DEBUG", format(entry)))
 }
 
-func (logger Logger) Debugf(request *data.Request, format string, v ...interface{}) {
+func (logger Logger) DebugMessage(request *data.Request, message string) {
 	logger.logger.Debug(jsonMessage("DEBUG", Log{
-		Message: fmt.Sprintf(format, v...),
+		Message: message,
 		Request: requestLog(request),
 	}))
+}
+
+func (logger Logger) DebugError(request *data.Request, format string, err error) {
+	logger.DebugMessage(request, fmt.Sprintf(format, err))
 }
 
 func NewLogger(level string, logger *log.Logger) Logger {
