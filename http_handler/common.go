@@ -1,9 +1,9 @@
 package http_handler
 
 import (
-	"github.com/getto-systems/project-example-id/data"
-
 	"time"
+
+	"github.com/getto-systems/project-example-id/data"
 )
 
 func RequestedAt() data.RequestedAt {

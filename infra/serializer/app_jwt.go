@@ -2,14 +2,13 @@ package serializer
 
 import (
 	"log"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
 	"github.com/getto-systems/project-example-id/data"
-
-	"time"
 )
 
 type AppSerializer struct {
