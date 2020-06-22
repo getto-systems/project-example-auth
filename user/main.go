@@ -31,11 +31,11 @@ func (user User) UserID() data.UserID {
 	return user.user.UserID
 }
 
-type UnauthorizedUser struct {
+type UnknownUser struct {
 	pub UserEventPublisher
 }
 
-func (user UnauthorizedUser) Authenticated(ticket data.Ticket) AuthenticatedUser {
+func (user UnknownUser) Authenticated(ticket data.Ticket) AuthenticatedUser {
 	return AuthenticatedUser{
 		pub:    user.pub,
 		ticket: ticket,
@@ -78,11 +78,11 @@ func (user User) TicketIssueFailed(request data.Request, err error) {
 	user.pub.TicketIssueFailed(request, user.user, err)
 }
 
-func (user UnauthorizedUser) Authorizing(request data.Request, resource data.Resource) {
+func (user UnknownUser) Authorizing(request data.Request, resource data.Resource) {
 	user.pub.Authorizing(request, resource)
 }
 
-func (user UnauthorizedUser) AuthorizeTokenParseFailed(request data.Request, resource data.Resource, err error) {
+func (user UnknownUser) AuthorizeTokenParseFailed(request data.Request, resource data.Resource, err error) {
 	user.pub.AuthorizeTokenParseFailed(request, resource, err)
 }
 
@@ -132,8 +132,8 @@ func (f UserFactory) New(userID data.UserID) User {
 	}
 }
 
-func (f UserFactory) Unauthorized() UnauthorizedUser {
-	return UnauthorizedUser{
+func (f UserFactory) Unauthorized() UnknownUser {
+	return UnknownUser{
 		pub: f.pub,
 	}
 }

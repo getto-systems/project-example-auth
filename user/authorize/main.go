@@ -16,7 +16,7 @@ var (
 type Authorizer struct {
 	ticketAuthorizer user.TicketAuthorizer
 
-	user    user.UnauthorizedUser
+	user    user.UnknownUser
 	request data.Request
 }
 
