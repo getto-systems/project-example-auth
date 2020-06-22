@@ -39,13 +39,13 @@ func (h PasswordHandler) Handle() {
 		return
 	}
 
-	authorizer := h.AuthorizerFactory.New(token, h.Request)
+	authorizer := h.AuthorizerFactory.New(h.Request)
 	if err != nil {
 		h.errorResponse(err)
 		return
 	}
 
-	ticket, err := authorizer.IsAccessible(param.Resource)
+	ticket, err := authorizer.HasEnoughPermission(token, param.Resource)
 	if err != nil {
 		h.errorResponse(err)
 		return

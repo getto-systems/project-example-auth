@@ -9,7 +9,7 @@ type (
 	UserID string
 	Roles  []string
 
-	AuthenticatedUser struct {
+	User struct {
 		UserID UserID
 	}
 

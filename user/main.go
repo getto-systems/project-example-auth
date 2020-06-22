@@ -4,54 +4,78 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
+type AuthenticatedUser struct {
+	pub UserEventPublisher
+
+	ticket data.Ticket
+}
+
+func (user AuthenticatedUser) Ticket() data.Ticket {
+	return user.ticket
+}
+
 type User struct {
 	pub UserEventPublisher
 
-	userID data.UserID
+	user data.User
+}
+
+func (user User) Authenticated(ticket data.Ticket) AuthenticatedUser {
+	return AuthenticatedUser{
+		pub:    user.pub,
+		ticket: ticket,
+	}
 }
 
 func (user User) UserID() data.UserID {
-	return user.userID
-}
-
-func (user User) Authenticated(request data.Request, profile data.Profile) {
-	user.pub.Authenticated(request, user.userID, profile)
-}
-
-func (user User) Authorized(request data.Request, profile data.Profile, resource data.Resource) {
-	user.pub.Authorized(request, user.userID, profile, resource)
-}
-
-func (user User) TicketRenewing(request data.Request) {
-	user.pub.TicketRenewing(request, user.userID)
-}
-
-func (user User) TicketRenewFailed(request data.Request, err error) {
-	user.pub.TicketRenewFailed(request, user.userID, err)
-}
-
-func (user User) TicketRenewed(request data.Request) {
-	user.pub.TicketRenewed(request, user.userID)
-}
-
-func (user User) PasswordMatching(request data.Request) {
-	user.pub.PasswordMatching(request, user.userID)
-}
-
-func (user User) PasswordMatchFailed(request data.Request, err error) {
-	user.pub.PasswordMatchFailed(request, user.userID, err)
-}
-
-func (user User) TicketIssueFailed(request data.Request, err error) {
-	user.pub.TicketIssueFailed(request, user.userID, err)
-}
-
-func (user User) AuthorizeFailed(request data.Request, resource data.Resource, err error) {
-	user.pub.AuthorizeFailed(request, user.userID, resource, err)
+	return user.user.UserID
 }
 
 type UnauthorizedUser struct {
 	pub UserEventPublisher
+}
+
+func (user UnauthorizedUser) Authenticated(ticket data.Ticket) AuthenticatedUser {
+	return AuthenticatedUser{
+		pub:    user.pub,
+		ticket: ticket,
+	}
+}
+
+func (user AuthenticatedUser) Authenticated(request data.Request) {
+	user.pub.Authenticated(request, user.ticket)
+}
+
+func (user AuthenticatedUser) Authorized(request data.Request, resource data.Resource) {
+	user.pub.Authorized(request, user.ticket, resource)
+}
+
+func (user AuthenticatedUser) AuthorizeFailed(request data.Request, resource data.Resource, err error) {
+	user.pub.AuthorizeFailed(request, user.ticket, resource, err)
+}
+
+func (user AuthenticatedUser) TicketRenewing(request data.Request) {
+	user.pub.TicketRenewing(request, user.ticket)
+}
+
+func (user AuthenticatedUser) TicketRenewFailed(request data.Request, err error) {
+	user.pub.TicketRenewFailed(request, user.ticket, err)
+}
+
+func (user AuthenticatedUser) TicketRenewed(request data.Request) {
+	user.pub.TicketRenewed(request, user.ticket)
+}
+
+func (user User) PasswordMatching(request data.Request) {
+	user.pub.PasswordMatching(request, user.user)
+}
+
+func (user User) PasswordMatchFailed(request data.Request, err error) {
+	user.pub.PasswordMatchFailed(request, user.user, err)
+}
+
+func (user User) TicketIssueFailed(request data.Request, err error) {
+	user.pub.TicketIssueFailed(request, user.user, err)
 }
 
 func (user UnauthorizedUser) Authorizing(request data.Request, resource data.Resource) {
@@ -63,20 +87,21 @@ func (user UnauthorizedUser) AuthorizeTokenParseFailed(request data.Request, res
 }
 
 type UserEventPublisher interface {
-	Authenticated(data.Request, data.UserID, data.Profile)
-	Authorized(data.Request, data.UserID, data.Profile, data.Resource)
+	Authenticated(data.Request, data.Ticket)
+	Authorized(data.Request, data.Ticket, data.Resource)
+	AuthorizeFailed(data.Request, data.Ticket, data.Resource, error)
 
-	TicketRenewing(data.Request, data.UserID)
-	TicketRenewFailed(data.Request, data.UserID, error)
-	TicketRenewed(data.Request, data.UserID)
+	TicketRenewing(data.Request, data.Ticket)
+	TicketRenewFailed(data.Request, data.Ticket, error)
+	TicketRenewed(data.Request, data.Ticket)
 
-	PasswordMatching(data.Request, data.UserID)
-	PasswordMatchFailed(data.Request, data.UserID, error)
-	TicketIssueFailed(data.Request, data.UserID, error)
+	PasswordMatching(data.Request, data.User)
+	PasswordMatchFailed(data.Request, data.User, error)
+
+	TicketIssueFailed(data.Request, data.User, error)
 
 	Authorizing(data.Request, data.Resource)
 	AuthorizeTokenParseFailed(data.Request, data.Resource, error)
-	AuthorizeFailed(data.Request, data.UserID, data.Resource, error)
 }
 
 type UserEventHandler interface {
@@ -91,10 +116,19 @@ type UserFactory struct {
 	pub UserEventPublisher
 }
 
+func (f UserFactory) Authenticated(ticket data.Ticket) AuthenticatedUser {
+	return AuthenticatedUser{
+		pub:    f.pub,
+		ticket: ticket,
+	}
+}
+
 func (f UserFactory) New(userID data.UserID) User {
 	return User{
-		pub:    f.pub,
-		userID: userID,
+		pub: f.pub,
+		user: data.User{
+			UserID: userID,
+		},
 	}
 }
 

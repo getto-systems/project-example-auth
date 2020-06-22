@@ -28,20 +28,22 @@ func (iss Issuer) Profile() data.Profile {
 	return iss.profile
 }
 
-func (iss Issuer) Authenticated(requestedAt data.RequestedAt) (data.Token, error) {
+func (iss Issuer) Authenticated(requestedAt data.RequestedAt) (data.Ticket, data.Token, error) {
 	expires := requestedAt.Expires(expireDuration)
 	authenticatedAt := data.AuthenticatedAt(requestedAt)
 
-	token, err := iss.serializer.Serialize(data.Ticket{
+	ticket := data.Ticket{
 		Profile:         iss.profile,
 		AuthenticatedAt: authenticatedAt,
 		Expires:         expires,
-	})
-	if err != nil {
-		return nil, err
 	}
 
-	return token, nil
+	token, err := iss.serializer.Serialize(ticket)
+	if err != nil {
+		return data.Ticket{}, nil, err
+	}
+
+	return ticket, token, nil
 }
 
 func (iss Issuer) Renew(requestedAt data.RequestedAt) (data.Token, error) {
