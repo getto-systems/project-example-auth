@@ -16,8 +16,8 @@ type PasswordDB interface {
 	UserPassword(data.UserID) (data.HashedPassword, error)
 }
 
-func (repo PasswordRepository) Find(userID data.UserID) user.PasswordMatcher {
-	password, err := repo.db.UserPassword(userID)
+func (repo PasswordRepository) Find(user user.User) user.PasswordMatcher {
+	password, err := repo.db.UserPassword(user.UserID())
 	if err != nil {
 		return repo.passwordMatcherFactory.NotFound(err)
 	}

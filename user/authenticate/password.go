@@ -24,7 +24,7 @@ type PasswordAuthenticator struct {
 func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPassword) (data.Token, error) {
 	authenticator.user.PasswordMatching(authenticator.request)
 
-	passwordMatcher := authenticator.passwordMatcher()
+	passwordMatcher := authenticator.passwordRepository.Find(authenticator.user)
 
 	err := passwordMatcher.Match(password)
 	if err != nil {
@@ -32,7 +32,7 @@ func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPasswo
 		return nil, ErrPasswordMatchFailed
 	}
 
-	issuer := authenticator.issuer()
+	issuer := authenticator.issuerRepository.Find(authenticator.user)
 	ticket, token, err := issuer.Authenticated(authenticator.request.RequestedAt)
 	if err != nil {
 		authenticator.user.TicketIssueFailed(authenticator.request, err)
@@ -43,14 +43,6 @@ func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPasswo
 	user.Authenticated(authenticator.request)
 
 	return token, nil
-}
-
-func (authenticator PasswordAuthenticator) passwordMatcher() user.PasswordMatcher {
-	return authenticator.passwordRepository.Find(authenticator.user.UserID())
-}
-
-func (authenticator PasswordAuthenticator) issuer() user.Issuer {
-	return authenticator.issuerRepository.Find(authenticator.user.UserID())
 }
 
 type PasswordAuthenticatorFactory struct {

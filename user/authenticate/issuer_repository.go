@@ -20,8 +20,8 @@ func (repo IssuerRepository) New(ticket data.Ticket) user.Issuer {
 	return repo.issuerFactory.FromTicket(ticket)
 }
 
-func (repo IssuerRepository) Find(userID data.UserID) user.Issuer {
-	profile, err := repo.db.UserProfile(userID)
+func (repo IssuerRepository) Find(user user.User) user.Issuer {
+	profile, err := repo.db.UserProfile(user.UserID())
 	if err != nil {
 		return repo.issuerFactory.New(data.Profile{})
 	}
