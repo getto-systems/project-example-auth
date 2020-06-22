@@ -2,8 +2,6 @@ package auth_handler
 
 import (
 	"github.com/getto-systems/project-example-id/data"
-
-	"fmt"
 )
 
 type (
@@ -48,12 +46,4 @@ func NewAwsCloudFrontIssuer(keyPairID AwsCloudFrontKeyPairID, serializer AwsClou
 		keyPairID:  keyPairID,
 		serializer: serializer,
 	}
-}
-
-func (token AwsCloudFrontToken) String() string {
-	return fmt.Sprintf(
-		"Token{Policy:%s, Signature:%s}",
-		token.Policy,
-		token.Signature,
-	)
 }

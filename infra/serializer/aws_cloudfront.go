@@ -1,13 +1,13 @@
 package serializer
 
 import (
+	"time"
+
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
 	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
 
 	"github.com/getto-systems/project-example-id/data"
-
-	"time"
 )
 
 type AwsCloudFrontSerializer struct {

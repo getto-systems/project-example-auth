@@ -3,12 +3,11 @@ package serializer
 import (
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/getto-systems/project-example-id/data"
-
-	"time"
 )
 
 type TicketSerializer struct {
