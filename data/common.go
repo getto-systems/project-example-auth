@@ -9,6 +9,10 @@ type (
 	UserID string
 	Roles  []string
 
+	AuthenticatedUser struct {
+		UserID UserID
+	}
+
 	Profile struct {
 		UserID UserID
 		Roles  Roles

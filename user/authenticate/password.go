@@ -39,7 +39,7 @@ func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPasswo
 		return nil, ErrTicketIssueFailed
 	}
 
-	authenticator.authenticated()
+	authenticator.authenticated(issuer.Profile())
 
 	return token, nil
 }
@@ -64,8 +64,8 @@ func (authenticator PasswordAuthenticator) ticketIssueFailed(err error) {
 	authenticator.user.TicketIssueFailed(authenticator.request, err)
 }
 
-func (authenticator PasswordAuthenticator) authenticated() {
-	authenticator.user.Authenticated(authenticator.request)
+func (authenticator PasswordAuthenticator) authenticated(profile data.Profile) {
+	authenticator.user.Authenticated(authenticator.request, profile)
 }
 
 type PasswordAuthenticatorFactory struct {

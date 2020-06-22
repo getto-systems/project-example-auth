@@ -14,8 +14,12 @@ func (user User) UserID() data.UserID {
 	return user.userID
 }
 
-func (user User) Authenticated(request data.Request) {
-	user.pub.Authenticated(request, user.userID)
+func (user User) Authenticated(request data.Request, profile data.Profile) {
+	user.pub.Authenticated(request, user.userID, profile)
+}
+
+func (user User) Authorized(request data.Request, profile data.Profile, resource data.Resource) {
+	user.pub.Authorized(request, user.userID, profile, resource)
 }
 
 func (user User) TicketRenewing(request data.Request) {
@@ -46,10 +50,6 @@ func (user User) AuthorizeFailed(request data.Request, resource data.Resource, e
 	user.pub.AuthorizeFailed(request, user.userID, resource, err)
 }
 
-func (user User) Authorized(request data.Request, resource data.Resource) {
-	user.pub.Authorized(request, user.userID, resource)
-}
-
 type UnauthorizedUser struct {
 	pub UserEventPublisher
 }
@@ -63,8 +63,8 @@ func (user UnauthorizedUser) AuthorizeTokenParseFailed(request data.Request, res
 }
 
 type UserEventPublisher interface {
-	Authenticated(data.Request, data.UserID)
-	Authorized(data.Request, data.UserID, data.Resource)
+	Authenticated(data.Request, data.UserID, data.Profile)
+	Authorized(data.Request, data.UserID, data.Profile, data.Resource)
 
 	TicketRenewing(data.Request, data.UserID)
 	TicketRenewFailed(data.Request, data.UserID, error)

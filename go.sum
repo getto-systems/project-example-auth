@@ -2,6 +2,8 @@ github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumC
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/getto-systems/applog-go v1.1.2 h1:gJHY0avNGh07I4jCRXkoYwtqo/LTNr2faOg7MEd+tvU=
 github.com/getto-systems/applog-go v1.1.2/go.mod h1:7jYE4dFSEl271Zky/iE7ABmBN1cbh0IaTm4Af5Cybx8=
+github.com/getto-systems/applog-go/v2 v2.0.1 h1:nlc35Fw+PFuQWMaqjsuprgT5StXMY/3d/FtPeJM83fc=
+github.com/getto-systems/applog-go/v2 v2.0.1/go.mod h1:bVKPmvAW0c0YgE1O6+K0Ih42par70dFHnF1qX8SP8Zg=
 github.com/getto-systems/aws_cloudfront_token-go v1.0.0 h1:19ptykp8MU9zCzB4Vn84Kx726p6pHoO8rHlFs16rI3U=
 github.com/getto-systems/aws_cloudfront_token-go v1.0.0/go.mod h1:Vx1H1s4474sk3GWFJcyKhKh3n0ewIe0cFdwvfh+bQbI=
 github.com/getto-systems/aws_cloudfront_token-go v1.1.0 h1:0t/QI62NvApRLTQg0TwWCIq3wk327meWvmbr8h4Iz/A=
