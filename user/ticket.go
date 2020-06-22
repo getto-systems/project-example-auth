@@ -24,6 +24,10 @@ type TicketSerializer interface {
 	Serialize(data.Ticket) (data.Token, error)
 }
 
+func (iss Issuer) Profile() data.Profile {
+	return iss.profile
+}
+
 func (iss Issuer) Authenticated(requestedAt data.RequestedAt) (data.Token, error) {
 	expires := requestedAt.Expires(expireDuration)
 	authenticatedAt := data.AuthenticatedAt(requestedAt)

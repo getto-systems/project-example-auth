@@ -18,15 +18,15 @@ func (sub *SyncPubSub) Subscribe(handler user.UserEventHandler) {
 	sub.handlers = append(sub.handlers, handler)
 }
 
-func (pub *SyncPubSub) Authenticated(request data.Request, userID data.UserID) {
+func (pub *SyncPubSub) Authenticated(request data.Request, userID data.UserID, profile data.Profile) {
 	for _, handler := range pub.handlers {
-		handler.Authenticated(request, userID)
+		handler.Authenticated(request, userID, profile)
 	}
 }
 
-func (pub *SyncPubSub) Authorized(request data.Request, userID data.UserID, resource data.Resource) {
+func (pub *SyncPubSub) Authorized(request data.Request, userID data.UserID, profile data.Profile, resource data.Resource) {
 	for _, handler := range pub.handlers {
-		handler.Authorized(request, userID, resource)
+		handler.Authorized(request, userID, profile, resource)
 	}
 }
 

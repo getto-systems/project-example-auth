@@ -25,7 +25,7 @@ type Authorizer struct {
 	request data.Request
 }
 
-func (authorizer Authorizer) IsAccessible(resource data.Resource) (data.Ticket, error) {
+func (authorizer *Authorizer) IsAccessible(resource data.Resource) (data.Ticket, error) {
 	authorizer.authorizing(resource)
 
 	err := authorizer.parseToken()
@@ -45,7 +45,7 @@ func (authorizer Authorizer) IsAccessible(resource data.Resource) (data.Ticket, 
 	return authorizer.ticket, nil
 }
 
-func (authorizer Authorizer) parseToken() error {
+func (authorizer *Authorizer) parseToken() error {
 	ticket, err := authorizer.ticketAuthorizer.DecodeToken(authorizer.token)
 	if err != nil {
 		return ErrAuthorizeTokenParseFailed
@@ -57,24 +57,24 @@ func (authorizer Authorizer) parseToken() error {
 	return nil
 }
 
-func (authorizer Authorizer) hasEnoughPermission(resource data.Resource) error {
+func (authorizer *Authorizer) hasEnoughPermission(resource data.Resource) error {
 	return authorizer.ticketAuthorizer.HasEnoughPermission(authorizer.ticket, authorizer.request, resource)
 }
 
-func (authorizer Authorizer) authorizing(resource data.Resource) {
+func (authorizer *Authorizer) authorizing(resource data.Resource) {
 	authorizer.unauthorized.Authorizing(authorizer.request, resource)
 }
 
-func (authorizer Authorizer) authorizeTokenParseFailed(resource data.Resource, err error) {
+func (authorizer *Authorizer) authorizeTokenParseFailed(resource data.Resource, err error) {
 	authorizer.unauthorized.AuthorizeTokenParseFailed(authorizer.request, resource, err)
 }
 
-func (authorizer Authorizer) authorizeFailed(resource data.Resource, err error) {
+func (authorizer *Authorizer) authorizeFailed(resource data.Resource, err error) {
 	authorizer.user.AuthorizeFailed(authorizer.request, resource, err)
 }
 
-func (authorizer Authorizer) authorized(resource data.Resource) {
-	authorizer.user.Authorized(authorizer.request, resource)
+func (authorizer *Authorizer) authorized(resource data.Resource) {
+	authorizer.user.Authorized(authorizer.request, authorizer.ticket.Profile, resource)
 }
 
 type AuthorizerFactory struct {
@@ -89,8 +89,8 @@ func NewAuthorizerFactory(ticketAuthorizer user.TicketAuthorizer, userFactory us
 	}
 }
 
-func (f AuthorizerFactory) New(token data.Token, request data.Request) Authorizer {
-	return Authorizer{
+func (f AuthorizerFactory) New(token data.Token, request data.Request) *Authorizer {
+	return &Authorizer{
 		ticketAuthorizer: f.ticketAuthorizer,
 		userFactory:      f.userFactory,
 
