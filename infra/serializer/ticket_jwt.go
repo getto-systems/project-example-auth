@@ -2,6 +2,7 @@ package serializer
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 
@@ -63,21 +64,27 @@ func parseRoles(raw interface{}) data.Roles {
 	return roles
 }
 func parseTime(raw interface{}) time.Time {
-	unixSecond, ok := raw.(int64)
+	timeString, ok := raw.(string)
 	if !ok {
 		var defaultTime time.Time
 		return defaultTime
 	}
 
-	return time.Unix(unixSecond, 0)
+	unix, err := strconv.Atoi(timeString)
+	if err != nil {
+		var defaultTime time.Time
+		return defaultTime
+	}
+
+	return time.Unix(int64(unix), 0)
 }
 
 func (serializer TicketSerializer) Serialize(ticket data.Ticket) (data.Token, error) {
 	token, err := serializer.jwt.Serialize(jwt.MapClaims{
 		"sub": ticket.Profile.UserID,
 		"aud": ticket.Profile.Roles,
-		"iat": time.Time(ticket.AuthenticatedAt).Unix(),
-		"exp": time.Time(ticket.Expires).Unix(),
+		"iat": strconv.Itoa(int(time.Time(ticket.AuthenticatedAt).Unix())),
+		"exp": strconv.Itoa(int(time.Time(ticket.Expires).Unix())),
 	})
 	if err != nil {
 		log.Println("ticket token sign error")

@@ -55,7 +55,7 @@ func (requestedAt RequestedAt) Expires(seconds Second) Expires {
 }
 
 func (expires Expires) Expired(now RequestedAt) bool {
-	return time.Time(now).Before(time.Time(expires))
+	return time.Time(expires).Before(time.Time(now))
 }
 
 func (requestedAt RequestedAt) String() string {
