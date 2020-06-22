@@ -60,11 +60,7 @@ func (expires Expires) Expired(now RequestedAt) bool {
 }
 
 func (requestedAt RequestedAt) String() string {
-	return requestedAt.Time().String()
-}
-
-func (requestedAt RequestedAt) Time() time.Time {
-	return time.Time(requestedAt)
+	return time.Time(requestedAt).String()
 }
 
 func (expires Expires) String() string {
@@ -76,11 +72,7 @@ func (expires Expires) Time() time.Time {
 }
 
 func (authenticatedAt AuthenticatedAt) String() string {
-	return authenticatedAt.Time().String()
-}
-
-func (authenticatedAt AuthenticatedAt) Time() time.Time {
-	return time.Time(authenticatedAt)
+	return time.Time(authenticatedAt).String()
 }
 
 func (profile Profile) String() string {
