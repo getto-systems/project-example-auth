@@ -63,10 +63,10 @@ func (logger Logger) Debug(entry subscriber.Log) {
 	logger.logger.Debug(jsonMessage("DEBUG", format(entry)))
 }
 
-func (logger Logger) Debugf(request data.Request, format string, v ...interface{}) {
+func (logger Logger) Debugf(request *data.Request, format string, v ...interface{}) {
 	logger.logger.Debug(jsonMessage("DEBUG", Log{
 		Message: fmt.Sprintf(format, v...),
-		Request: requestLog(&request),
+		Request: requestLog(request),
 	}))
 }
 

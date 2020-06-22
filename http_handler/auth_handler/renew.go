@@ -22,7 +22,7 @@ type RenewHandler struct {
 }
 
 func (h RenewHandler) Handle() {
-	h.Logger.Debugf(h.Request, "handling auth/renew")
+	h.Logger.Debugf(&h.Request, "handling auth/renew")
 
 	param, err := h.param()
 	if err != nil {
@@ -56,7 +56,7 @@ func (h RenewHandler) param() (RenewParam, error) {
 
 	token, err := h.getToken()
 	if err != nil {
-		h.Logger.Debugf(h.Request, "token cookie not found error: %s", err)
+		h.Logger.Debugf(&h.Request, "token cookie not found error: %s", err)
 		return RenewParam{}, ErrTokenCookieNotFound
 	}
 
