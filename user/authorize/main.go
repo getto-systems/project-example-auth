@@ -15,66 +15,44 @@ var (
 
 type Authorizer struct {
 	ticketAuthorizer user.TicketAuthorizer
-	userFactory      user.UserFactory
 
-	unauthorized user.UnauthorizedUser
-	user         user.User
-
-	token   data.Token
-	ticket  data.Ticket
+	user    user.UnauthorizedUser
 	request data.Request
 }
 
-func (authorizer *Authorizer) IsAccessible(resource data.Resource) (data.Ticket, error) {
-	authorizer.authorizing(resource)
+func (authorizer *Authorizer) HasEnoughPermission(token data.Token, resource data.Resource) (data.Ticket, error) {
+	authorizer.user.Authorizing(authorizer.request, resource)
 
-	err := authorizer.parseToken()
+	ticket, err := authorizer.parseToken(token)
 	if err != nil {
-		authorizer.authorizeTokenParseFailed(resource, err)
+		authorizer.user.AuthorizeTokenParseFailed(authorizer.request, resource, err)
 		return data.Ticket{}, ErrAuthorizeTokenParseFailed
 	}
 
-	err = authorizer.hasEnoughPermission(resource)
+	user := authorizer.user.Authenticated(ticket)
+
+	err = authorizer.hasEnoughPermission(ticket, resource)
 	if err != nil {
-		authorizer.authorizeFailed(resource, err)
+		user.AuthorizeFailed(authorizer.request, resource, err)
 		return data.Ticket{}, ErrAuthorizeFailed
 	}
 
-	authorizer.authorized(resource)
+	user.Authorized(authorizer.request, resource)
 
-	return authorizer.ticket, nil
+	return ticket, nil
 }
 
-func (authorizer *Authorizer) parseToken() error {
-	ticket, err := authorizer.ticketAuthorizer.DecodeToken(authorizer.token)
+func (authorizer *Authorizer) parseToken(token data.Token) (data.Ticket, error) {
+	ticket, err := authorizer.ticketAuthorizer.DecodeToken(token)
 	if err != nil {
-		return ErrAuthorizeTokenParseFailed
+		return data.Ticket{}, ErrAuthorizeTokenParseFailed
 	}
 
-	authorizer.ticket = ticket
-	authorizer.user = authorizer.userFactory.New(ticket.Profile.UserID)
-
-	return nil
+	return ticket, nil
 }
 
-func (authorizer *Authorizer) hasEnoughPermission(resource data.Resource) error {
-	return authorizer.ticketAuthorizer.HasEnoughPermission(authorizer.ticket, authorizer.request, resource)
-}
-
-func (authorizer *Authorizer) authorizing(resource data.Resource) {
-	authorizer.unauthorized.Authorizing(authorizer.request, resource)
-}
-
-func (authorizer *Authorizer) authorizeTokenParseFailed(resource data.Resource, err error) {
-	authorizer.unauthorized.AuthorizeTokenParseFailed(authorizer.request, resource, err)
-}
-
-func (authorizer *Authorizer) authorizeFailed(resource data.Resource, err error) {
-	authorizer.user.AuthorizeFailed(authorizer.request, resource, err)
-}
-
-func (authorizer *Authorizer) authorized(resource data.Resource) {
-	authorizer.user.Authorized(authorizer.request, authorizer.ticket.Profile, resource)
+func (authorizer *Authorizer) hasEnoughPermission(ticket data.Ticket, resource data.Resource) error {
+	return authorizer.ticketAuthorizer.HasEnoughPermission(ticket, authorizer.request, resource)
 }
 
 type AuthorizerFactory struct {
@@ -89,14 +67,11 @@ func NewAuthorizerFactory(ticketAuthorizer user.TicketAuthorizer, userFactory us
 	}
 }
 
-func (f AuthorizerFactory) New(token data.Token, request data.Request) *Authorizer {
-	return &Authorizer{
+func (f AuthorizerFactory) New(request data.Request) Authorizer {
+	return Authorizer{
 		ticketAuthorizer: f.ticketAuthorizer,
-		userFactory:      f.userFactory,
 
-		unauthorized: f.userFactory.Unauthorized(),
-
-		token:   token,
+		user:    f.userFactory.Unauthorized(),
 		request: request,
 	}
 }

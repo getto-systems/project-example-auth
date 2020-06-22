@@ -14,25 +14,31 @@ import (
 )
 
 type Log struct {
-	Time              string                `json:"time"`
-	Level             string                `json:"level"`
-	Message           string                `json:"message"`
-	Request           *RequestLog           `json:"request"`
-	AuthenticatedUser *AuthenticatedUserLog `json:"authenticated_user,omitempty"`
-	Profile           *ProfileLog           `json:"profile,omitempty"`
-	Resource          *ResourceLog          `json:"resource,omitempty"`
-	Error             string                `json:"error,omitempty"`
+	Time     string       `json:"time"`
+	Level    string       `json:"level"`
+	Message  string       `json:"message"`
+	Request  *RequestLog  `json:"request"`
+	User     *UserLog     `json:"user,omitempty"`
+	Ticket   *TicketLog   `json:"ticket,omitempty"`
+	Resource *ResourceLog `json:"resource,omitempty"`
+	Error    string       `json:"error,omitempty"`
 }
 
 type RequestLog struct {
 	RequestedAt string   `json:"requested_at"`
 	Route       RouteLog `json:"route"`
 }
-type AuthenticatedUserLog struct {
+type UserLog struct {
 	UserID string `json:"user_id"`
 }
+type TicketLog struct {
+	Profile         ProfileLog `json:"profile"`
+	AuthenticatedAt string     `json:"authenticated_at"`
+	Expires         string     `json:"expires"`
+}
 type ProfileLog struct {
-	Roles []string `json:"roles"`
+	UserID string   `json:"user_id"`
+	Roles  []string `json:"roles"`
 }
 type ResourceLog struct {
 	Path string `json:"path"`
@@ -90,12 +96,12 @@ func format(log subscriber.Log) Log {
 		entry.Request = requestLog(log.Request)
 	}
 
-	if log.AuthenticatedUser != nil {
-		entry.AuthenticatedUser = userLog(log.AuthenticatedUser)
+	if log.User != nil {
+		entry.User = userLog(log.User)
 	}
 
-	if log.Profile != nil {
-		entry.Profile = profileLog(log.Profile)
+	if log.Ticket != nil {
+		entry.Ticket = ticketLog(log.Ticket)
 	}
 
 	if log.Resource != nil {
@@ -127,15 +133,24 @@ func requestLog(request *data.Request) *RequestLog {
 	}
 }
 
-func userLog(user *data.AuthenticatedUser) *AuthenticatedUserLog {
-	return &AuthenticatedUserLog{
+func userLog(user *data.User) *UserLog {
+	return &UserLog{
 		UserID: string(user.UserID),
 	}
 }
 
-func profileLog(profile *data.Profile) *ProfileLog {
-	return &ProfileLog{
-		Roles: profile.Roles,
+func ticketLog(ticket *data.Ticket) *TicketLog {
+	return &TicketLog{
+		Profile:         profileLog(ticket.Profile),
+		AuthenticatedAt: ticket.AuthenticatedAt.String(),
+		Expires:         ticket.Expires.String(),
+	}
+}
+
+func profileLog(profile data.Profile) ProfileLog {
+	return ProfileLog{
+		UserID: string(profile.UserID),
+		Roles:  profile.Roles,
 	}
 }
 

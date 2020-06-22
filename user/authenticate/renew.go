@@ -15,36 +15,37 @@ var (
 type RenewAuthenticator struct {
 	issuerRepository IssuerRepository
 
-	user    user.User
+	authenticatedUser user.AuthenticatedUser
+
 	request data.Request
 }
 
 func (authenticator RenewAuthenticator) RenewTicket(ticket data.Ticket) (data.Token, error) {
-	authenticator.ticketRenewing()
+	authenticator.fireTicketRenewing()
 
 	issuer := authenticator.issuerRepository.New(ticket)
 
 	token, err := issuer.Renew(authenticator.request.RequestedAt)
 	if err != nil {
-		authenticator.ticketRenewFailed(err)
+		authenticator.fireTicketRenewFailed(err)
 		return nil, ErrTicketRenewFailed
 	}
 
-	authenticator.ticketRenewed()
+	authenticator.fireTicketRenewed()
 
 	return token, nil
 }
 
-func (authenticator RenewAuthenticator) ticketRenewing() {
-	authenticator.user.TicketRenewing(authenticator.request)
+func (authenticator RenewAuthenticator) fireTicketRenewing() {
+	authenticator.authenticatedUser.TicketRenewing(authenticator.request)
 }
 
-func (authenticator RenewAuthenticator) ticketRenewFailed(err error) {
-	authenticator.user.TicketRenewFailed(authenticator.request, err)
+func (authenticator RenewAuthenticator) fireTicketRenewFailed(err error) {
+	authenticator.authenticatedUser.TicketRenewFailed(authenticator.request, err)
 }
 
-func (authenticator RenewAuthenticator) ticketRenewed() {
-	authenticator.user.TicketRenewed(authenticator.request)
+func (authenticator RenewAuthenticator) fireTicketRenewed() {
+	authenticator.authenticatedUser.TicketRenewed(authenticator.request)
 }
 
 type RenewAuthenticatorFactory struct {
@@ -52,12 +53,12 @@ type RenewAuthenticatorFactory struct {
 	userFactory      user.UserFactory
 }
 
-func (f RenewAuthenticatorFactory) New(userID data.UserID, request data.Request) RenewAuthenticator {
+func (f RenewAuthenticatorFactory) New(ticket data.Ticket, request data.Request) RenewAuthenticator {
 	return RenewAuthenticator{
 		issuerRepository: f.issuerRepository,
 
-		user:    f.userFactory.New(userID),
-		request: request,
+		authenticatedUser: f.userFactory.Authenticated(ticket),
+		request:           request,
 	}
 }
 

@@ -30,15 +30,15 @@ func (h RenewHandler) Handle() {
 		return
 	}
 
-	authorizer := h.AuthorizerFactory.New(param.Token, h.Request)
+	authorizer := h.AuthorizerFactory.New(h.Request)
 
-	ticket, err := authorizer.IsAccessible(param.Resource)
+	ticket, err := authorizer.HasEnoughPermission(param.Token, param.Resource)
 	if err != nil {
 		h.errorResponse(err)
 		return
 	}
 
-	token, err := h.AuthenticatorFactory.New(ticket.Profile.UserID, h.Request).RenewTicket(ticket)
+	token, err := h.AuthenticatorFactory.New(ticket, h.Request).RenewTicket(ticket)
 	if err != nil {
 		h.errorResponse(err)
 		return

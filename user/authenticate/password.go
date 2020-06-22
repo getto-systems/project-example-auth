@@ -22,24 +22,25 @@ type PasswordAuthenticator struct {
 }
 
 func (authenticator PasswordAuthenticator) MatchPassword(password data.RawPassword) (data.Token, error) {
-	authenticator.passwordMatching()
+	authenticator.user.PasswordMatching(authenticator.request)
 
 	passwordMatcher := authenticator.passwordMatcher()
 
 	err := passwordMatcher.Match(password)
 	if err != nil {
-		authenticator.passwordMatchFailed(err)
+		authenticator.user.PasswordMatchFailed(authenticator.request, err)
 		return nil, ErrPasswordMatchFailed
 	}
 
 	issuer := authenticator.issuer()
-	token, err := issuer.Authenticated(authenticator.request.RequestedAt)
+	ticket, token, err := issuer.Authenticated(authenticator.request.RequestedAt)
 	if err != nil {
-		authenticator.ticketIssueFailed(err)
+		authenticator.user.TicketIssueFailed(authenticator.request, err)
 		return nil, ErrTicketIssueFailed
 	}
 
-	authenticator.authenticated(issuer.Profile())
+	user := authenticator.user.Authenticated(ticket)
+	user.Authenticated(authenticator.request)
 
 	return token, nil
 }
@@ -50,22 +51,6 @@ func (authenticator PasswordAuthenticator) passwordMatcher() user.PasswordMatche
 
 func (authenticator PasswordAuthenticator) issuer() user.Issuer {
 	return authenticator.issuerRepository.Find(authenticator.user.UserID())
-}
-
-func (authenticator PasswordAuthenticator) passwordMatching() {
-	authenticator.user.PasswordMatching(authenticator.request)
-}
-
-func (authenticator PasswordAuthenticator) passwordMatchFailed(err error) {
-	authenticator.user.PasswordMatchFailed(authenticator.request, err)
-}
-
-func (authenticator PasswordAuthenticator) ticketIssueFailed(err error) {
-	authenticator.user.TicketIssueFailed(authenticator.request, err)
-}
-
-func (authenticator PasswordAuthenticator) authenticated(profile data.Profile) {
-	authenticator.user.Authenticated(authenticator.request, profile)
 }
 
 type PasswordAuthenticatorFactory struct {
