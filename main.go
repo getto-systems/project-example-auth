@@ -135,12 +135,14 @@ func (server Server) authHandler(w http.ResponseWriter, r *http.Request) auth_ha
 }
 
 func NewServer() (Server, error) {
-	awsCloudFrontIssuer, err := NewAwsCloudFrontIssuer()
+	appLogger := NewAppLogger()
+
+	awsCloudFrontIssuer, err := NewAwsCloudFrontIssuer(appLogger)
 	if err != nil {
 		return Server{}, err
 	}
 
-	appIssuer, err := NewAppIssuer()
+	appIssuer, err := NewAppIssuer(appLogger)
 	if err != nil {
 		return Server{}, err
 	}
@@ -150,15 +152,13 @@ func NewServer() (Server, error) {
 		return Server{}, err
 	}
 
-	appLogger := NewAppLogger()
-
 	pubsub, err := NewPubSub()
 	if err != nil {
 		return Server{}, err
 	}
 	pubsub.Subscribe(subscriber.NewUserLogger(appLogger))
 
-	ticketSerializer, err := NewTicketSerializer()
+	ticketSerializer, err := NewTicketSerializer(appLogger)
 	if err != nil {
 		return Server{}, err
 	}
@@ -201,10 +201,13 @@ func NewServer() (Server, error) {
 		},
 	}, nil
 }
-func NewAwsCloudFrontIssuer() (auth_handler.AwsCloudFrontIssuer, error) {
+func NewAppLogger() logger.Logger {
+	return logger.NewLogger(os.Getenv("LOG_LEVEL"), log.New(os.Stdout, "", 0))
+}
+func NewAwsCloudFrontIssuer(appLogger logger.Logger) (auth_handler.AwsCloudFrontIssuer, error) {
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {
-		log.Printf("aws cloudfront private key read failed: %s", err)
+		appLogger.Debugf(nil, "aws cloudfront private key read failed: %s", err)
 		return auth_handler.AwsCloudFrontIssuer{}, err
 	}
 
@@ -218,10 +221,10 @@ func NewAwsCloudFrontIssuer() (auth_handler.AwsCloudFrontIssuer, error) {
 		serializer,
 	), nil
 }
-func NewAppIssuer() (auth_handler.AppIssuer, error) {
+func NewAppIssuer(appLogger logger.Logger) (auth_handler.AppIssuer, error) {
 	pem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
 	if err != nil {
-		log.Printf("app private key read failed: %s", err)
+		appLogger.Debugf(nil, "app private key read failed: %s", err)
 		return auth_handler.AppIssuer{}, err
 	}
 
@@ -229,7 +232,7 @@ func NewAppIssuer() (auth_handler.AppIssuer, error) {
 		PrivateKey: pem,
 	})
 	if err != nil {
-		log.Printf("app key parse failed: %s", err)
+		appLogger.Debugf(nil, "app key parse failed: %s", err)
 		return auth_handler.AppIssuer{}, err
 	}
 
@@ -241,22 +244,19 @@ func NewAppIssuer() (auth_handler.AppIssuer, error) {
 func NewDB() (*db.MemoryStore, error) {
 	return db.NewMemoryStore(), nil
 }
-func NewAppLogger() logger.Logger {
-	return logger.NewLogger(os.Getenv("LOG_LEVEL"), log.New(os.Stdout, "", 0))
-}
 func NewPubSub() (*pubsub.SyncPubSub, error) {
 	return pubsub.NewSyncPubSub(), nil
 }
-func NewTicketSerializer() (serializer.TicketSerializer, error) {
+func NewTicketSerializer(appLogger logger.Logger) (serializer.TicketSerializer, error) {
 	privateKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PRIVATE_KEY"))
 	if err != nil {
-		log.Printf("ticket private key read failed: %s", err)
+		appLogger.Debugf(nil, "ticket private key read failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 
 	publicKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PUBLIC_KEY"))
 	if err != nil {
-		log.Printf("ticket public key read failed: %s", err)
+		appLogger.Debugf(nil, "ticket public key read failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 
@@ -265,7 +265,7 @@ func NewTicketSerializer() (serializer.TicketSerializer, error) {
 		PublicKey:  publicKeyPem,
 	})
 	if err != nil {
-		log.Printf("ticket key parse failed: %s", err)
+		appLogger.Debugf(nil, "ticket key parse failed: %s", err)
 		return serializer.TicketSerializer{}, err
 	}
 

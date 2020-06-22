@@ -25,7 +25,7 @@ type PasswordHandler struct {
 }
 
 func (h PasswordHandler) Handle() {
-	h.Logger.Debugf(h.Request, "handling auth/password")
+	h.Logger.Debugf(&h.Request, "handling auth/password")
 
 	param, err := h.param()
 	if err != nil {
