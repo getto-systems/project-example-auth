@@ -10,10 +10,6 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-type TicketParam struct {
-	SignedTicket data.SignedTicket
-}
-
 type AuthByTicketHandler struct {
 	logger   http_handler.RequestLogger
 	response AuthResponse
@@ -34,13 +30,13 @@ func (h AuthByTicketHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.DebugMessage("handling auth/by_ticket")
 
-	param, err := ticketParam(r, logger)
+	signedTicket, err := h.param(r, logger)
 	if err != nil {
 		errorResponse(w, err, logger)
 		return
 	}
 
-	ticket, signedTicket, err := h.auth.Authenticate(request, param.SignedTicket)
+	ticket, signedTicket, err := h.auth.Authenticate(request, signedTicket)
 	if err != nil {
 		errorResponse(w, err, logger)
 		return
@@ -49,14 +45,12 @@ func (h AuthByTicketHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	h.response.write(w, ticket, signedTicket, logger)
 }
 
-func ticketParam(r *http.Request, logger http_handler.Logger) (TicketParam, error) {
+func (h AuthByTicketHandler) param(r *http.Request, logger http_handler.Logger) (data.SignedTicket, error) {
 	signedTicket, err := SignedTicket(r)
 	if err != nil {
 		logger.DebugError("signed ticket cookie not found error: %s", err)
-		return TicketParam{}, ErrSignedTicketCookieNotFound
+		return nil, ErrSignedTicketCookieNotFound
 	}
 
-	return TicketParam{
-		SignedTicket: signedTicket,
-	}, nil
+	return signedTicket, nil
 }

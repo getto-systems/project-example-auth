@@ -15,11 +15,6 @@ type PasswordInput struct {
 	Password string `json:"password"`
 }
 
-type PasswordParam struct {
-	UserID   data.UserID
-	Password data.RawPassword
-}
-
 type AuthByPasswordHandler struct {
 	logger   http_handler.RequestLogger
 	response AuthResponse
@@ -40,13 +35,13 @@ func (h AuthByPasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	logger.DebugMessage("handling auth/by_password")
 
-	param, err := passwordParam(r, logger)
+	userID, password, err := h.param(r, logger)
 	if err != nil {
 		errorResponse(w, err, logger)
 		return
 	}
 
-	ticket, signedTicket, err := h.auth.Authenticate(request, param.UserID, param.Password)
+	ticket, signedTicket, err := h.auth.Authenticate(request, userID, password)
 	if err != nil {
 		errorResponse(w, err, logger)
 		return
@@ -55,15 +50,12 @@ func (h AuthByPasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	h.response.write(w, ticket, signedTicket, logger)
 }
 
-func passwordParam(r *http.Request, logger http_handler.Logger) (PasswordParam, error) {
+func (h AuthByPasswordHandler) param(r *http.Request, logger http_handler.Logger) (data.UserID, data.RawPassword, error) {
 	var input PasswordInput
 	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return PasswordParam{}, err
+		return data.UserID(""), data.RawPassword(""), err
 	}
 
-	return PasswordParam{
-		UserID:   data.UserID(input.UserID),
-		Password: data.RawPassword(input.Password),
-	}, nil
+	return data.UserID(input.UserID), data.RawPassword(input.Password), nil
 }
