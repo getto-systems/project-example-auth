@@ -1,6 +1,8 @@
 package user
 
 import (
+	"github.com/getto-systems/project-example-id/ticket"
+
 	"github.com/getto-systems/project-example-id/data"
 )
 
@@ -8,7 +10,7 @@ type UserAuthenticated struct {
 	pub    UserAuthenticatedEventPublisher
 	repo   UserProfileRepository
 	policy UserPermissionPolicy
-	sign   TicketSign
+	sign   ticket.TicketSign
 
 	userID  data.UserID
 	request data.Request
@@ -18,7 +20,7 @@ func (user UserAuthenticated) IssueTicket() (data.Ticket, data.SignedTicket, err
 	profile := user.repo.Profile(user.request, user.userID)
 	profile.Roles = user.policy.Limit(user.request, profile.Roles)
 
-	ticket := NewTicket(user.request, profile)
+	ticket := ticket.NewTicket(user.request, profile)
 
 	signedTicket, err := user.sign.Sign(ticket)
 	if err != nil {
@@ -68,10 +70,10 @@ type UserAuthenticatedFactory struct {
 	pub    UserAuthenticatedEventPublisher
 	repo   UserProfileRepository
 	policy UserPermissionPolicy
-	sign   TicketSign
+	sign   ticket.TicketSign
 }
 
-func NewUserAuthenticatedFactory(pub UserAuthenticatedEventPublisher, db UserProfileDB, policy UserPermissionPolicy, sign TicketSign) UserAuthenticatedFactory {
+func NewUserAuthenticatedFactory(pub UserAuthenticatedEventPublisher, db UserProfileDB, policy UserPermissionPolicy, sign ticket.TicketSign) UserAuthenticatedFactory {
 	return UserAuthenticatedFactory{
 		pub: pub,
 		repo: UserProfileRepository{
