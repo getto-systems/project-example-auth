@@ -33,20 +33,13 @@ type Server struct {
 
 	logger logger.Logger
 
-	cookieDomain auth_handler.CookieDomain
-
-	issuer      Issuer
-	userFactory UserFactory
+	authResponse auth_handler.AuthResponse
+	userFactory  UserFactory
 }
 
 type Tls struct {
 	cert string
 	key  string
-}
-
-type Issuer struct {
-	awsCloudFront auth_handler.AwsCloudFrontIssuer
-	app           auth_handler.AppIssuer
 }
 
 type UserFactory struct {
@@ -81,8 +74,8 @@ func (server Server) routes() *mux.Router {
 
 	router.HandleFunc("/healthz", healthz).Methods("GET")
 
-	router.HandleFunc("/auth/ticket", server.AuthByTicket()).Methods("POST")
-	router.HandleFunc("/auth/password", server.AuthByPassword()).Methods("POST")
+	router.HandleFunc("/auth/ticket", server.AuthByTicket().Handle).Methods("POST")
+	router.HandleFunc("/auth/password", server.AuthByPassword().Handle).Methods("POST")
 
 	return router
 }
@@ -96,38 +89,13 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", data)
 }
 
-func (server Server) AuthByTicket() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		handler := auth_handler.AuthByTicket{
-			AuthHandler: server.authHandler(w, r),
-			Auth:        authenticate.NewAuthByTicket(server.userFactory.authenticated, server.userFactory.ticketAuth),
-		}
-		handler.Handle()
-	}
+func (server Server) AuthByTicket() auth_handler.AuthByTicketHandler {
+	auth := authenticate.NewAuthByTicket(server.userFactory.authenticated, server.userFactory.ticketAuth)
+	return auth_handler.NewAuthByTicketHandler(server.logger, server.authResponse, auth)
 }
-func (server Server) AuthByPassword() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		handler := auth_handler.AuthByPassword{
-			AuthHandler: server.authHandler(w, r),
-			Auth:        authenticate.NewAuthByPassword(server.userFactory.authenticated, server.userFactory.passwordAuth),
-		}
-		handler.Handle()
-	}
-}
-func (server Server) authHandler(w http.ResponseWriter, r *http.Request) auth_handler.AuthHandler {
-	return auth_handler.AuthHandler{
-		Logger: server.logger,
-
-		HttpResponseWriter: w,
-		HttpRequest:        r,
-
-		CookieDomain: server.cookieDomain,
-
-		AwsCloudFrontIssuer: server.issuer.awsCloudFront,
-		AppIssuer:           server.issuer.app,
-
-		Request: auth_handler.Request(r),
-	}
+func (server Server) AuthByPassword() auth_handler.AuthByPasswordHandler {
+	auth := authenticate.NewAuthByPassword(server.userFactory.authenticated, server.userFactory.passwordAuth)
+	return auth_handler.NewAuthByPasswordHandler(server.logger, server.authResponse, auth)
 }
 
 func NewServer() Server {
@@ -146,16 +114,10 @@ func NewServer() Server {
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		cookieDomain: auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
-
 		logger: appLogger,
 
-		issuer: Issuer{
-			awsCloudFront: NewAwsCloudFrontIssuer(),
-			app:           NewAppIssuer(),
-		},
-
-		userFactory: NewUserFactory(appLogger),
+		authResponse: NewAuthResponse(),
+		userFactory:  NewUserFactory(appLogger),
 	}
 }
 
@@ -163,6 +125,10 @@ func NewAppLogger() logger.Logger {
 	return logger.NewLogger(os.Getenv("LOG_LEVEL"), log.New(os.Stdout, "", 0))
 }
 
+func NewAuthResponse() auth_handler.AuthResponse {
+	cookieDomain := auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN"))
+	return auth_handler.NewAuthResponse(cookieDomain, NewAwsCloudFrontIssuer(), NewAppIssuer())
+}
 func NewAwsCloudFrontIssuer() auth_handler.AwsCloudFrontIssuer {
 	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
 	if err != nil {

@@ -14,13 +14,13 @@ import (
 )
 
 type Log struct {
-	Time    string      `json:"time"`
-	Level   string      `json:"level"`
-	Message string      `json:"message"`
-	Request *RequestLog `json:"request"`
-	User    *UserLog    `json:"user,omitempty"`
-	Ticket  *TicketLog  `json:"ticket,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Time    string     `json:"time"`
+	Level   string     `json:"level"`
+	Message string     `json:"message"`
+	Request RequestLog `json:"request"`
+	User    *UserLog   `json:"user,omitempty"`
+	Ticket  *TicketLog `json:"ticket,omitempty"`
+	Error   string     `json:"error,omitempty"`
 }
 
 type RequestLog struct {
@@ -62,14 +62,14 @@ func (logger Logger) Debug(entry subscriber.Log) {
 	logger.logger.Debug(jsonMessage("DEBUG", format(entry)))
 }
 
-func (logger Logger) DebugMessage(request *data.Request, message string) {
+func (logger Logger) DebugMessage(request data.Request, message string) {
 	logger.logger.Debug(jsonMessage("DEBUG", Log{
 		Message: message,
 		Request: requestLog(request),
 	}))
 }
 
-func (logger Logger) DebugError(request *data.Request, format string, err error) {
+func (logger Logger) DebugError(request data.Request, format string, err error) {
 	logger.DebugMessage(request, fmt.Sprintf(format, err))
 }
 
@@ -95,9 +95,7 @@ func format(log subscriber.Log) Log {
 		Message: log.Message,
 	}
 
-	if log.Request != nil {
-		entry.Request = requestLog(log.Request)
-	}
+	entry.Request = requestLog(log.Request)
 
 	if log.User != nil {
 		entry.User = userLog(log.User)
@@ -123,8 +121,8 @@ func jsonMessage(level string, log Log) string {
 	return string(data)
 }
 
-func requestLog(request *data.Request) *RequestLog {
-	return &RequestLog{
+func requestLog(request data.Request) RequestLog {
+	return RequestLog{
 		RequestedAt: request.RequestedAt.String(),
 		Route: RouteLog{
 			RemoteAddr: string(request.Route.RemoteAddr),
