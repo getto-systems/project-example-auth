@@ -84,8 +84,8 @@ func errorResponse(w http.ResponseWriter, err error, logger http_handler.Logger)
 	switch err {
 
 	case
-		ErrEmptyBody,
-		ErrBodyParseFailed:
+		http_handler.ErrEmptyBody,
+		http_handler.ErrBodyParseFailed:
 
 		w.WriteHeader(http.StatusBadRequest)
 
