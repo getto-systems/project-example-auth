@@ -41,7 +41,7 @@ type (
 	SignedTicket []byte
 )
 
-func Mimute(minutes int64) Second {
+func Minute(minutes int64) Second {
 	return Second(minutes * 60)
 }
 

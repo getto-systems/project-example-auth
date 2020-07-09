@@ -19,12 +19,7 @@ func (auth AuthByPassword) Authenticate(request data.Request, userID data.UserID
 	}
 
 	authenticatedUser := auth.authenticated.New(request, userID)
-	ticket, signedTicket, err := authenticatedUser.IssueTicket()
-	if err != nil {
-		return data.Ticket{}, nil, ErrTicketIssueFailed
-	}
-
-	return ticket, signedTicket, nil
+	return authenticatedUser.IssueTicket()
 }
 
 func NewAuthByPassword(authenticated user.UserAuthenticatedFactory, passwordAuth user.UserPasswordAuthFactory) AuthByPassword {

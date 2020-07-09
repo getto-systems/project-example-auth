@@ -4,10 +4,6 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-var (
-	ticketExpireDuration = data.Second(30)
-)
-
 type UserAuthenticated struct {
 	pub  UserAuthenticatedEventPublisher
 	repo UserProfileRepository
@@ -18,7 +14,8 @@ type UserAuthenticated struct {
 }
 
 func (user UserAuthenticated) IssueTicket() (data.Ticket, data.SignedTicket, error) {
-	ticket := user.repo.Ticket(user.request, user.userID)
+	profile := user.repo.Profile(user.request, user.userID)
+	ticket := NewTicket(user.request, profile)
 
 	signedTicket, err := user.sign.Sign(ticket)
 	if err != nil {
@@ -45,7 +42,7 @@ type UserProfileRepository struct {
 	policy UserPermissionPolicy
 }
 
-func (repo UserProfileRepository) Ticket(request data.Request, userID data.UserID) data.Ticket {
+func (repo UserProfileRepository) Profile(request data.Request, userID data.UserID) data.Profile {
 	profile, err := repo.db.FindUserProfile(userID)
 	if err != nil {
 		// no permission when profile not found
@@ -56,19 +53,7 @@ func (repo UserProfileRepository) Ticket(request data.Request, userID data.UserI
 
 	profile.Roles = repo.policy.Limit(request, profile.Roles)
 
-	return NewTicket(request, profile)
-}
-
-func NewTicket(request data.Request, profile data.Profile) data.Ticket {
-	requestedAt := request.RequestedAt
-	expires := requestedAt.Expires(ticketExpireDuration)
-	authenticatedAt := data.AuthenticatedAt(requestedAt)
-
-	return data.Ticket{
-		Profile:         profile,
-		AuthenticatedAt: authenticatedAt,
-		Expires:         expires,
-	}
+	return profile
 }
 
 type UserProfileDB interface {
