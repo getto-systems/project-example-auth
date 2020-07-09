@@ -5,9 +5,10 @@ import (
 )
 
 type UserAuthenticated struct {
-	pub  UserAuthenticatedEventPublisher
-	repo UserProfileRepository
-	sign TicketSign
+	pub    UserAuthenticatedEventPublisher
+	repo   UserProfileRepository
+	policy UserPermissionPolicy
+	sign   TicketSign
 
 	userID  data.UserID
 	request data.Request
@@ -15,6 +16,8 @@ type UserAuthenticated struct {
 
 func (user UserAuthenticated) IssueTicket() (data.Ticket, data.SignedTicket, error) {
 	profile := user.repo.Profile(user.request, user.userID)
+	profile.Roles = user.policy.Limit(user.request, profile.Roles)
+
 	ticket := NewTicket(user.request, profile)
 
 	signedTicket, err := user.sign.Sign(ticket)
@@ -38,8 +41,7 @@ type UserAuthenticatedEventHandler interface {
 }
 
 type UserProfileRepository struct {
-	db     UserProfileDB
-	policy UserPermissionPolicy
+	db UserProfileDB
 }
 
 func (repo UserProfileRepository) Profile(request data.Request, userID data.UserID) data.Profile {
@@ -50,8 +52,6 @@ func (repo UserProfileRepository) Profile(request data.Request, userID data.User
 			UserID: userID,
 		}
 	}
-
-	profile.Roles = repo.policy.Limit(request, profile.Roles)
 
 	return profile
 }
@@ -65,19 +65,20 @@ type UserPermissionPolicy interface {
 }
 
 type UserAuthenticatedFactory struct {
-	pub  UserAuthenticatedEventPublisher
-	repo UserProfileRepository
-	sign TicketSign
+	pub    UserAuthenticatedEventPublisher
+	repo   UserProfileRepository
+	policy UserPermissionPolicy
+	sign   TicketSign
 }
 
 func NewUserAuthenticatedFactory(pub UserAuthenticatedEventPublisher, db UserProfileDB, policy UserPermissionPolicy, sign TicketSign) UserAuthenticatedFactory {
 	return UserAuthenticatedFactory{
 		pub: pub,
 		repo: UserProfileRepository{
-			db:     db,
-			policy: policy,
+			db: db,
 		},
-		sign: sign,
+		policy: policy,
+		sign:   sign,
 	}
 }
 
