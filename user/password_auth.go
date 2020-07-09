@@ -15,7 +15,7 @@ type UserPasswordAuth struct {
 func (user UserPasswordAuth) Authenticate(password data.RawPassword) error {
 	user.pub.PasswordMatching(user.request, user.userID)
 
-	err := user.repo.NewPassword(user.userID).Match(password)
+	err := user.repo.Password(user.userID).Match(password)
 	if err != nil {
 		user.pub.PasswordMatchFailed(user.request, user.userID, err)
 		return err
@@ -38,7 +38,7 @@ type UserPasswordRepository struct {
 	matcher PasswordMatcher
 }
 
-func (repo UserPasswordRepository) NewPassword(userID data.UserID) Password {
+func (repo UserPasswordRepository) Password(userID data.UserID) Password {
 	hashed, err := repo.db.FindUserPassword(userID)
 	if err != nil {
 		// always fail when password not found

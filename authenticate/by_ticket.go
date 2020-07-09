@@ -19,12 +19,7 @@ func (auth AuthByTicket) Authenticate(request data.Request, signedTicket data.Si
 	}
 
 	authenticatedUser := auth.authenticated.New(request, ticket.Profile.UserID)
-	ticket, signedTicket, err = authenticatedUser.IssueTicket()
-	if err != nil {
-		return data.Ticket{}, nil, ErrTicketIssueFailed
-	}
-
-	return ticket, signedTicket, nil
+	return authenticatedUser.IssueTicket()
 }
 
 func NewAuthByTicket(authenticated user.UserAuthenticatedFactory, ticketAuth user.UserTicketAuthFactory) AuthByTicket {
