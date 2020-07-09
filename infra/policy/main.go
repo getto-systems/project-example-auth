@@ -1,20 +1,16 @@
 package policy
 
 import (
-	"github.com/getto-systems/project-example-id/policy"
-
 	"github.com/getto-systems/project-example-id/data"
 )
 
-type PolicyChecker struct {
+type Policy struct {
 }
 
-func NewPolicyChecker() PolicyChecker {
-	return PolicyChecker{}
+func NewPolicy() Policy {
+	return Policy{}
 }
 
-func (PolicyChecker) HasEnoughPermission(ticket data.Ticket, request data.Request, resource data.Resource) error {
-	path := policy.Path(resource.Path)
-	roles := policy.Roles(ticket.Profile.Roles)
-	return policy.NewPolicy(path).Correct(roles)
+func (policy Policy) Limit(request data.Request, roles data.Roles) data.Roles {
+	return roles
 }

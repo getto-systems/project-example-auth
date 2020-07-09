@@ -14,14 +14,13 @@ import (
 )
 
 type Log struct {
-	Time     string       `json:"time"`
-	Level    string       `json:"level"`
-	Message  string       `json:"message"`
-	Request  *RequestLog  `json:"request"`
-	User     *UserLog     `json:"user,omitempty"`
-	Ticket   *TicketLog   `json:"ticket,omitempty"`
-	Resource *ResourceLog `json:"resource,omitempty"`
-	Error    string       `json:"error,omitempty"`
+	Time    string      `json:"time"`
+	Level   string      `json:"level"`
+	Message string      `json:"message"`
+	Request *RequestLog `json:"request"`
+	User    *UserLog    `json:"user,omitempty"`
+	Ticket  *TicketLog  `json:"ticket,omitempty"`
+	Error   string      `json:"error,omitempty"`
 }
 
 type RequestLog struct {
@@ -108,10 +107,6 @@ func format(log subscriber.Log) Log {
 		entry.Ticket = ticketLog(log.Ticket)
 	}
 
-	if log.Resource != nil {
-		entry.Resource = resourceLog(log.Resource)
-	}
-
 	if log.Error != nil {
 		entry.Error = log.Error.Error()
 	}
@@ -155,11 +150,5 @@ func profileLog(profile data.Profile) ProfileLog {
 	return ProfileLog{
 		UserID: string(profile.UserID),
 		Roles:  profile.Roles,
-	}
-}
-
-func resourceLog(resource *data.Resource) *ResourceLog {
-	return &ResourceLog{
-		Path: string(resource.Path),
 	}
 }

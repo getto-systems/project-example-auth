@@ -22,12 +22,8 @@ type (
 	AuthenticatedAt time.Time
 	Second          int64
 
-	Path       string
 	RemoteAddr string
 
-	Resource struct {
-		Path Path
-	}
 	Route struct {
 		RemoteAddr RemoteAddr
 	}
@@ -36,12 +32,13 @@ type (
 		Route       Route
 	}
 
-	Token  []byte
 	Ticket struct {
 		Profile         Profile
 		AuthenticatedAt AuthenticatedAt
 		Expires         Expires
 	}
+
+	SignedTicket []byte
 )
 
 func Mimute(minutes int64) Second {
