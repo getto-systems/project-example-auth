@@ -1,4 +1,4 @@
-package user
+package ticket
 
 import (
 	"github.com/getto-systems/project-example-id/data"

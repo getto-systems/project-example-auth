@@ -1,12 +1,14 @@
 package user
 
 import (
+	"github.com/getto-systems/project-example-id/ticket"
+
 	"github.com/getto-systems/project-example-id/data"
 )
 
 type UserTicketAuth struct {
 	pub  UserTicketAuthEventPublisher
-	sign TicketSign
+	sign ticket.TicketSign
 
 	request data.Request
 }
@@ -39,10 +41,10 @@ type UserTicketAuthEventHandler interface {
 
 type UserTicketAuthFactory struct {
 	pub  UserTicketAuthEventPublisher
-	sign TicketSign
+	sign ticket.TicketSign
 }
 
-func NewUserTicketAuthFactory(pub UserTicketAuthEventPublisher, sign TicketSign) UserTicketAuthFactory {
+func NewUserTicketAuthFactory(pub UserTicketAuthEventPublisher, sign ticket.TicketSign) UserTicketAuthFactory {
 	return UserTicketAuthFactory{
 		pub:  pub,
 		sign: sign,
