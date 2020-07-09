@@ -6,8 +6,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/http_handler"
 
-	"github.com/getto-systems/project-example-id/user/authenticate"
-	"github.com/getto-systems/project-example-id/user/authorize"
+	"github.com/getto-systems/project-example-id/authenticate"
 
 	"github.com/getto-systems/project-example-id/data"
 
@@ -15,7 +14,7 @@ import (
 	"fmt"
 )
 
-const COOKIE_AUTH_TOKEN = "Getto-Example-Auth-Token"
+const COOKIE_SIGNED_TICKET = "Getto-Example-Auth-Signed-Ticket"
 
 type AuthHandler struct {
 	Logger http_handler.Logger
@@ -29,16 +28,14 @@ type AuthHandler struct {
 	AppIssuer           AppIssuer
 
 	Request data.Request
-
-	AuthorizerFactory authorize.AuthorizerFactory
 }
 
 type CookieDomain string
 
 var (
-	ErrEmptyBody           = errors.New("empty body")
-	ErrBodyParseFailed     = errors.New("body parse failed")
-	ErrTokenCookieNotFound = errors.New("token cookie not found")
+	ErrEmptyBody                  = errors.New("empty body")
+	ErrBodyParseFailed            = errors.New("body parse failed")
+	ErrSignedTicketCookieNotFound = errors.New("signed ticket cookie not found")
 )
 
 func Request(r *http.Request) data.Request {
@@ -65,7 +62,7 @@ func (h AuthHandler) parseBody(input interface{}) error {
 	return nil
 }
 
-func (h AuthHandler) response(ticket data.Ticket, token data.Token) {
+func (h AuthHandler) response(ticket data.Ticket, signedTicket data.SignedTicket) {
 	awsCloudFrontTicket, err := h.AwsCloudFrontIssuer.Authorized(ticket)
 	if err != nil {
 		h.errorResponse(err)
@@ -78,7 +75,7 @@ func (h AuthHandler) response(ticket data.Ticket, token data.Token) {
 		return
 	}
 
-	h.setTokenCookie(token, ticket.Expires)
+	h.setSignedTicketCookie(signedTicket, ticket.Expires)
 	h.setAwsCloudFrontCookie(awsCloudFrontTicket, ticket.Expires)
 
 	h.jsonResponse(appToken)
@@ -109,15 +106,11 @@ func (h AuthHandler) errorResponse(err error) {
 		h.HttpResponseWriter.WriteHeader(http.StatusBadRequest)
 
 	case
-		ErrTokenCookieNotFound,
-		authenticate.ErrPasswordMatchFailed,
-		authenticate.ErrTicketRenewFailed,
-		authorize.ErrAuthorizeTokenParseFailed:
+		ErrSignedTicketCookieNotFound,
+		authenticate.ErrTicketAuthFailed,
+		authenticate.ErrPasswordAuthFailed:
 
 		h.HttpResponseWriter.WriteHeader(http.StatusUnauthorized)
-
-	case authorize.ErrAuthorizeFailed:
-		h.HttpResponseWriter.WriteHeader(http.StatusForbidden)
 
 	default:
 		h.Logger.DebugError(&h.Request, "internal server error: %s", err)
@@ -125,19 +118,19 @@ func (h AuthHandler) errorResponse(err error) {
 	}
 }
 
-func (h AuthHandler) getToken() (data.Token, error) {
-	cookie, err := h.HttpRequest.Cookie(COOKIE_AUTH_TOKEN)
+func (h AuthHandler) getSignedTicket() (data.SignedTicket, error) {
+	cookie, err := h.HttpRequest.Cookie(COOKIE_SIGNED_TICKET)
 	if err != nil {
 		return nil, err
 	}
 
-	return data.Token(cookie.Value), nil
+	return data.SignedTicket(cookie.Value), nil
 }
 
-func (h AuthHandler) setTokenCookie(token data.Token, expires data.Expires) {
+func (h AuthHandler) setSignedTicketCookie(signedTicket data.SignedTicket, expires data.Expires) {
 	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
-		Name:  COOKIE_AUTH_TOKEN,
-		Value: string(token),
+		Name:  COOKIE_SIGNED_TICKET,
+		Value: string(signedTicket),
 
 		Domain:  string(h.CookieDomain),
 		Path:    "/",

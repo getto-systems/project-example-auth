@@ -1,7 +1,6 @@
 package serializer
 
 import (
-	"log"
 	"strconv"
 	"time"
 
@@ -20,8 +19,8 @@ func NewTicketSerializer(jwt JWTSerializer) TicketSerializer {
 	}
 }
 
-func (serializer TicketSerializer) DecodeToken(token data.Token) (data.Ticket, error) {
-	claims, err := serializer.jwt.Parse(string(token))
+func (serializer TicketSerializer) Parse(signedTicket data.SignedTicket) (data.Ticket, error) {
+	claims, err := serializer.jwt.Parse(string(signedTicket))
 	if err != nil {
 		return data.Ticket{}, err
 	}
@@ -78,7 +77,7 @@ func parseTime(raw interface{}) time.Time {
 	return time.Unix(int64(unix), 0)
 }
 
-func (serializer TicketSerializer) Serialize(ticket data.Ticket) (data.Token, error) {
+func (serializer TicketSerializer) Sign(ticket data.Ticket) (data.SignedTicket, error) {
 	token, err := serializer.jwt.Serialize(jwt.MapClaims{
 		"sub": ticket.Profile.UserID,
 		"aud": ticket.Profile.Roles,
@@ -86,9 +85,8 @@ func (serializer TicketSerializer) Serialize(ticket data.Ticket) (data.Token, er
 		"exp": strconv.Itoa(int(time.Time(ticket.Expires).Unix())),
 	})
 	if err != nil {
-		log.Println("ticket token sign error")
 		return nil, err
 	}
 
-	return data.Token(token), nil
+	return data.SignedTicket(token), nil
 }

@@ -7,79 +7,59 @@ import (
 )
 
 type SyncPubSub struct {
-	handlers []user.UserEventHandler
+	authenticated []user.UserAuthenticatedEventHandler
+	ticket        []user.UserTicketAuthEventHandler
+	password      []user.UserPasswordAuthEventHandler
 }
 
 func NewSyncPubSub() *SyncPubSub {
 	return &SyncPubSub{}
 }
 
-func (sub *SyncPubSub) Subscribe(handler user.UserEventHandler) {
-	sub.handlers = append(sub.handlers, handler)
+func (sub *SyncPubSub) SubscribeAuthenticated(handler user.UserAuthenticatedEventHandler) {
+	sub.authenticated = append(sub.authenticated, handler)
+}
+
+func (sub *SyncPubSub) SubscribeTicketAuth(handler user.UserTicketAuthEventHandler) {
+	sub.ticket = append(sub.ticket, handler)
+}
+
+func (sub *SyncPubSub) SubscribePasswordAuth(handler user.UserPasswordAuthEventHandler) {
+	sub.password = append(sub.password, handler)
 }
 
 func (pub *SyncPubSub) Authenticated(request data.Request, ticket data.Ticket) {
-	for _, handler := range pub.handlers {
+	for _, handler := range pub.authenticated {
 		handler.Authenticated(request, ticket)
 	}
 }
 
-func (pub *SyncPubSub) Authorized(request data.Request, ticket data.Ticket, resource data.Resource) {
-	for _, handler := range pub.handlers {
-		handler.Authorized(request, ticket, resource)
+func (pub *SyncPubSub) TicketIssueFailed(request data.Request, ticket data.Ticket, err error) {
+	for _, handler := range pub.authenticated {
+		handler.TicketIssueFailed(request, ticket, err)
 	}
 }
 
-func (pub *SyncPubSub) AuthorizeFailed(request data.Request, ticket data.Ticket, resource data.Resource, err error) {
-	for _, handler := range pub.handlers {
-		handler.AuthorizeFailed(request, ticket, resource, err)
+func (pub *SyncPubSub) SignedTicketParsing(request data.Request) {
+	for _, handler := range pub.ticket {
+		handler.SignedTicketParsing(request)
 	}
 }
 
-func (pub *SyncPubSub) TicketRenewing(request data.Request, ticket data.Ticket) {
-	for _, handler := range pub.handlers {
-		handler.TicketRenewing(request, ticket)
+func (pub *SyncPubSub) SignedTicketParseFailed(request data.Request, err error) {
+	for _, handler := range pub.ticket {
+		handler.SignedTicketParseFailed(request, err)
 	}
 }
 
-func (pub *SyncPubSub) TicketRenewFailed(request data.Request, ticket data.Ticket, err error) {
-	for _, handler := range pub.handlers {
-		handler.TicketRenewFailed(request, ticket, err)
+func (pub *SyncPubSub) PasswordMatching(request data.Request, userID data.UserID) {
+	for _, handler := range pub.password {
+		handler.PasswordMatching(request, userID)
 	}
 }
 
-func (pub *SyncPubSub) TicketRenewed(request data.Request, ticket data.Ticket) {
-	for _, handler := range pub.handlers {
-		handler.TicketRenewed(request, ticket)
-	}
-}
-
-func (pub *SyncPubSub) PasswordMatching(request data.Request, user data.User) {
-	for _, handler := range pub.handlers {
-		handler.PasswordMatching(request, user)
-	}
-}
-
-func (pub *SyncPubSub) PasswordMatchFailed(request data.Request, user data.User, err error) {
-	for _, handler := range pub.handlers {
-		handler.PasswordMatchFailed(request, user, err)
-	}
-}
-
-func (pub *SyncPubSub) TicketIssueFailed(request data.Request, user data.User, err error) {
-	for _, handler := range pub.handlers {
-		handler.TicketIssueFailed(request, user, err)
-	}
-}
-
-func (pub *SyncPubSub) Authorizing(request data.Request, resource data.Resource) {
-	for _, handler := range pub.handlers {
-		handler.Authorizing(request, resource)
-	}
-}
-
-func (pub *SyncPubSub) AuthorizeTokenParseFailed(request data.Request, resource data.Resource, err error) {
-	for _, handler := range pub.handlers {
-		handler.AuthorizeTokenParseFailed(request, resource, err)
+func (pub *SyncPubSub) PasswordMatchFailed(request data.Request, userID data.UserID, err error) {
+	for _, handler := range pub.password {
+		handler.PasswordMatchFailed(request, userID, err)
 	}
 }
