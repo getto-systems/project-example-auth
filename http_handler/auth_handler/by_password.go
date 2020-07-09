@@ -1,6 +1,10 @@
 package auth_handler
 
 import (
+	"net/http"
+
+	"github.com/getto-systems/project-example-id/http_handler"
+
 	"github.com/getto-systems/project-example-id/authenticate"
 
 	"github.com/getto-systems/project-example-id/data"
@@ -16,33 +20,44 @@ type PasswordParam struct {
 	Password data.RawPassword
 }
 
-type AuthByPassword struct {
-	AuthHandler
-
-	Auth authenticate.AuthByPassword
+type AuthByPasswordHandler struct {
+	logger   http_handler.RequestLogger
+	response AuthResponse
+	auth     authenticate.AuthByPassword
 }
 
-func (h AuthByPassword) Handle() {
-	h.Logger.DebugMessage(&h.Request, "handling auth/by_password")
+func NewAuthByPasswordHandler(logger http_handler.RequestLogger, response AuthResponse, auth authenticate.AuthByPassword) AuthByPasswordHandler {
+	return AuthByPasswordHandler{
+		logger:   logger,
+		response: response,
+		auth:     auth,
+	}
+}
 
-	param, err := h.param()
+func (h AuthByPasswordHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	request := http_handler.Request(r)
+	logger := http_handler.NewLogger(h.logger, request)
+
+	logger.DebugMessage("handling auth/by_password")
+
+	param, err := passwordParam(r, logger)
 	if err != nil {
-		h.errorResponse(err)
+		errorResponse(w, err, logger)
 		return
 	}
 
-	ticket, signedTicket, err := h.Auth.Authenticate(h.Request, param.UserID, param.Password)
+	ticket, signedTicket, err := h.auth.Authenticate(request, param.UserID, param.Password)
 	if err != nil {
-		h.errorResponse(err)
+		errorResponse(w, err, logger)
 		return
 	}
 
-	h.response(ticket, signedTicket)
+	h.response.write(w, ticket, signedTicket, logger)
 }
 
-func (h AuthByPassword) param() (PasswordParam, error) {
+func passwordParam(r *http.Request, logger http_handler.Logger) (PasswordParam, error) {
 	var input PasswordInput
-	err := h.parseBody(&input)
+	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
 		return PasswordParam{}, err
 	}

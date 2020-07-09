@@ -10,116 +10,35 @@ import (
 
 	"github.com/getto-systems/project-example-id/data"
 
-	"errors"
 	"fmt"
 )
 
 const COOKIE_SIGNED_TICKET = "Getto-Example-Auth-Signed-Ticket"
 
-type AuthHandler struct {
-	Logger http_handler.Logger
-
-	HttpResponseWriter http.ResponseWriter
-	HttpRequest        *http.Request
-
-	CookieDomain CookieDomain
-
-	AwsCloudFrontIssuer AwsCloudFrontIssuer
-	AppIssuer           AppIssuer
-
-	Request data.Request
+type AuthResponse struct {
+	cookieDomain CookieDomain
+	issuer       Issuer
 }
 
 type CookieDomain string
 
-var (
-	ErrEmptyBody                  = errors.New("empty body")
-	ErrBodyParseFailed            = errors.New("body parse failed")
-	ErrSignedTicketCookieNotFound = errors.New("signed ticket cookie not found")
-)
+type Issuer struct {
+	awsCloudFront AwsCloudFrontIssuer
+	app           AppIssuer
+}
 
-func Request(r *http.Request) data.Request {
-	return data.Request{
-		RequestedAt: http_handler.RequestedAt(),
-		Route: data.Route{
-			RemoteAddr: data.RemoteAddr(r.RemoteAddr),
+func NewAuthResponse(cookieDomain CookieDomain, awsCloudFront AwsCloudFrontIssuer, app AppIssuer) AuthResponse {
+	return AuthResponse{
+		cookieDomain: cookieDomain,
+		issuer: Issuer{
+			awsCloudFront: awsCloudFront,
+			app:           app,
 		},
 	}
 }
 
-func (h AuthHandler) parseBody(input interface{}) error {
-	if h.HttpRequest.Body == nil {
-		h.Logger.DebugError(&h.Request, "empty body error", nil)
-		return ErrEmptyBody
-	}
-
-	err := json.NewDecoder(h.HttpRequest.Body).Decode(&input)
-	if err != nil {
-		h.Logger.DebugError(&h.Request, "body parse error: %s", err)
-		return ErrBodyParseFailed
-	}
-
-	return nil
-}
-
-func (h AuthHandler) response(ticket data.Ticket, signedTicket data.SignedTicket) {
-	awsCloudFrontTicket, err := h.AwsCloudFrontIssuer.Authorized(ticket)
-	if err != nil {
-		h.errorResponse(err)
-		return
-	}
-
-	appToken, err := h.AppIssuer.Authorized(ticket)
-	if err != nil {
-		h.errorResponse(err)
-		return
-	}
-
-	h.setSignedTicketCookie(signedTicket, ticket.Expires)
-	h.setAwsCloudFrontCookie(awsCloudFrontTicket, ticket.Expires)
-
-	h.jsonResponse(appToken)
-}
-
-func (h AuthHandler) jsonResponse(response interface{}) {
-	h.HttpResponseWriter.Header().Set("Content-Type", "application/json")
-
-	data, err := json.Marshal(response)
-	if err != nil {
-		h.HttpResponseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	h.HttpResponseWriter.WriteHeader(http.StatusOK)
-	fmt.Fprintf(h.HttpResponseWriter, "%s", data)
-}
-
-func (h AuthHandler) errorResponse(err error) {
-	h.HttpResponseWriter.Header().Set("Content-Type", "application/json")
-
-	switch err {
-
-	case
-		ErrEmptyBody,
-		ErrBodyParseFailed:
-
-		h.HttpResponseWriter.WriteHeader(http.StatusBadRequest)
-
-	case
-		ErrSignedTicketCookieNotFound,
-		authenticate.ErrTicketAuthFailed,
-		authenticate.ErrPasswordAuthFailed:
-
-		h.HttpResponseWriter.WriteHeader(http.StatusUnauthorized)
-
-	default:
-		h.Logger.DebugError(&h.Request, "internal server error: %s", err)
-		h.HttpResponseWriter.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-func (h AuthHandler) getSignedTicket() (data.SignedTicket, error) {
-	cookie, err := h.HttpRequest.Cookie(COOKIE_SIGNED_TICKET)
+func SignedTicket(r *http.Request) (data.SignedTicket, error) {
+	cookie, err := r.Cookie(COOKIE_SIGNED_TICKET)
 	if err != nil {
 		return nil, err
 	}
@@ -127,12 +46,68 @@ func (h AuthHandler) getSignedTicket() (data.SignedTicket, error) {
 	return data.SignedTicket(cookie.Value), nil
 }
 
-func (h AuthHandler) setSignedTicketCookie(signedTicket data.SignedTicket, expires data.Expires) {
-	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+func (response AuthResponse) write(w http.ResponseWriter, ticket data.Ticket, signedTicket data.SignedTicket, logger http_handler.Logger) {
+	awsCloudFrontTicket, err := response.issuer.awsCloudFront.Authorized(ticket)
+	if err != nil {
+		errorResponse(w, err, logger)
+		return
+	}
+
+	appToken, err := response.issuer.app.Authorized(ticket)
+	if err != nil {
+		errorResponse(w, err, logger)
+		return
+	}
+
+	response.setSignedTicketCookie(w, signedTicket, ticket.Expires)
+	response.setAwsCloudFrontCookie(w, awsCloudFrontTicket, ticket.Expires)
+
+	jsonResponse(w, appToken)
+}
+
+func jsonResponse(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "%s", jsonData)
+}
+
+func errorResponse(w http.ResponseWriter, err error, logger http_handler.Logger) {
+	w.Header().Set("Content-Type", "application/json")
+
+	switch err {
+
+	case
+		ErrEmptyBody,
+		ErrBodyParseFailed:
+
+		w.WriteHeader(http.StatusBadRequest)
+
+	case
+		ErrSignedTicketCookieNotFound,
+		authenticate.ErrTicketAuthFailed,
+		authenticate.ErrPasswordAuthFailed:
+
+		w.WriteHeader(http.StatusUnauthorized)
+
+	default:
+		logger.DebugError("internal server error: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (response AuthResponse) setSignedTicketCookie(w http.ResponseWriter, signedTicket data.SignedTicket, expires data.Expires) {
+	http.SetCookie(w, &http.Cookie{
 		Name:  COOKIE_SIGNED_TICKET,
 		Value: string(signedTicket),
 
-		Domain:  string(h.CookieDomain),
+		Domain:  string(response.cookieDomain),
 		Path:    "/",
 		Expires: expires.Time(),
 
@@ -142,12 +117,12 @@ func (h AuthHandler) setSignedTicketCookie(signedTicket data.SignedTicket, expir
 	})
 }
 
-func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires data.Expires) {
-	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+func (response AuthResponse) setAwsCloudFrontCookie(w http.ResponseWriter, ticket AwsCloudFrontTicket, expires data.Expires) {
+	http.SetCookie(w, &http.Cookie{
 		Name:  "CloudFront-Key-Pair-Id",
 		Value: string(ticket.KeyPairID),
 
-		Domain:  string(h.CookieDomain),
+		Domain:  string(response.cookieDomain),
 		Path:    "/",
 		Expires: expires.Time(),
 
@@ -155,11 +130,11 @@ func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires 
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
-	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:  "CloudFront-Policy",
 		Value: string(ticket.Token.Policy),
 
-		Domain:  string(h.CookieDomain),
+		Domain:  string(response.cookieDomain),
 		Path:    "/",
 		Expires: expires.Time(),
 
@@ -167,11 +142,11 @@ func (h AuthHandler) setAwsCloudFrontCookie(ticket AwsCloudFrontTicket, expires 
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
-	http.SetCookie(h.HttpResponseWriter, &http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:  "CloudFront-Signature",
 		Value: string(ticket.Token.Signature),
 
-		Domain:  string(h.CookieDomain),
+		Domain:  string(response.cookieDomain),
 		Path:    "/",
 		Expires: expires.Time(),
 

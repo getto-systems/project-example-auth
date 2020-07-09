@@ -22,7 +22,7 @@ func NewUserLogger(logger Logger) UserLogger {
 
 type Log struct {
 	Message string
-	Request *data.Request
+	Request data.Request
 	User    *data.User
 	Ticket  *data.Ticket
 	Error   error
@@ -31,7 +31,7 @@ type Log struct {
 func (logger UserLogger) Authenticated(request data.Request, ticket data.Ticket) {
 	logger.logger.Audit(Log{
 		Message: "authenticated",
-		Request: &request,
+		Request: request,
 		Ticket:  &ticket,
 	})
 }
@@ -39,7 +39,7 @@ func (logger UserLogger) Authenticated(request data.Request, ticket data.Ticket)
 func (logger UserLogger) TicketIssueFailed(request data.Request, ticket data.Ticket, err error) {
 	logger.logger.Info(Log{
 		Message: "ticket issue failed",
-		Request: &request,
+		Request: request,
 		Ticket:  &ticket,
 		Error:   err,
 	})
@@ -48,14 +48,14 @@ func (logger UserLogger) TicketIssueFailed(request data.Request, ticket data.Tic
 func (logger UserLogger) SignedTicketParsing(request data.Request) {
 	logger.logger.Debug(Log{
 		Message: "signed ticket parsing",
-		Request: &request,
+		Request: request,
 	})
 }
 
 func (logger UserLogger) SignedTicketParseFailed(request data.Request, err error) {
 	logger.logger.Debug(Log{
 		Message: "signed ticket parse failed",
-		Request: &request,
+		Request: request,
 		Error:   err,
 	})
 }
@@ -63,7 +63,7 @@ func (logger UserLogger) SignedTicketParseFailed(request data.Request, err error
 func (logger UserLogger) PasswordMatching(request data.Request, userID data.UserID) {
 	logger.logger.Debug(Log{
 		Message: "password matching",
-		Request: &request,
+		Request: request,
 		User:    &data.User{UserID: userID},
 	})
 }
@@ -71,7 +71,7 @@ func (logger UserLogger) PasswordMatching(request data.Request, userID data.User
 func (logger UserLogger) PasswordMatchFailed(request data.Request, userID data.UserID, err error) {
 	logger.logger.Audit(Log{
 		Message: "password match failed",
-		Request: &request,
+		Request: request,
 		User:    &data.User{UserID: userID},
 		Error:   err,
 	})
