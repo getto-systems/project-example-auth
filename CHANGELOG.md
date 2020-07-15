@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## Version : 0.5.0
+
+- fix: gitlab ci : See merge request getto-systems-base/projects/example/id!89
+- version bumped: 0.4.0 : See merge request getto-systems-base/projects/example/id!88
+- fix: gitlab ci : See merge request getto-systems-base/projects/example/id!87
+- refactor : See merge request getto-systems-base/labo/project-example/id!86
+- refactor : See merge request getto-systems-base/labo/project-example/id!85
+- refactor : See merge request getto-systems-base/labo/project-example/id!84
+- refactor : See merge request getto-systems-base/labo/project-example/id!83
+- refactor : See merge request getto-systems-base/labo/project-example/id!82
+- refactor : See merge request getto-systems-base/labo/project-example/id!81
+- remove: user : See merge request getto-systems-base/labo/project-example/id!80
+- fix: ticket parse : See merge request getto-systems-base/labo/project-example/id!79
+- fix: logger : See merge request getto-systems-base/labo/project-example/id!78
+- remove: methods : See merge request getto-systems-base/labo/project-example/id!77
+- fix: logger : See merge request getto-systems-base/labo/project-example/id!76
+- refactor: Event Data : See merge request getto-systems-base/labo/project-example/id!75
+- fix: subscriber : See merge request getto-systems-base/labo/project-example/id!74
+- rename: data : See merge request getto-systems-base/labo/project-example/id!73
+- refactor : See merge request getto-systems-base/labo/project-example/id!72
+- refactor: TicketInfo : See merge request getto-systems-base/labo/project-example/id!71
+
+
 ## Version : 0.4.0
 
 - fix: gitlab ci : See merge request getto-systems-base/projects/example/id!87
