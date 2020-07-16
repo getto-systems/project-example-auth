@@ -5,14 +5,19 @@ import (
 )
 
 type ApiTokenIssuer struct {
-	pub    EventPublisher
+	pub    apiTokenIssueEventPublisher
 	signer ApiTokenSigner
 	repo   userRolesRepository
 }
 
+type apiTokenIssueEventPublisher interface {
+	IssueApiToken(data.Request, data.User, data.Roles, data.Expires)
+	IssueApiTokenFailed(data.Request, data.User, data.Roles, data.Expires, error)
+}
+
 func NewApiTokenIssuer(
-	pub EventPublisher,
-	db DB,
+	pub apiTokenIssueEventPublisher,
+	db apiTokenDB,
 	signer ApiTokenSigner,
 ) ApiTokenIssuer {
 	return ApiTokenIssuer{
@@ -43,7 +48,11 @@ type ApiTokenSigner interface {
 }
 
 type userRolesRepository struct {
-	db DB
+	db apiTokenDB
+}
+
+type apiTokenDB interface {
+	FindUserRoles(data.User) (data.Roles, error)
 }
 
 func (repo userRolesRepository) roles(user data.User) data.Roles {

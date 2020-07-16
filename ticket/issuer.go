@@ -11,15 +11,20 @@ const (
 )
 
 type Issuer struct {
-	pub        EventPublisher
+	pub        issueEventPublisher
 	signer     Signer
 	expiration Expiration
 	repo       issueRepository
 }
 
+type issueEventPublisher interface {
+	IssueTicket(data.Request, data.User, data.Expires, data.ExtendLimit)
+	IssueTicketFailed(data.Request, data.User, data.Expires, data.ExtendLimit, error)
+}
+
 func NewIssuer(
-	pub EventPublisher,
-	db DB,
+	pub issueEventPublisher,
+	db issueDB,
 	signer Signer,
 	expiration Expiration,
 	gen NonceGenerator,
@@ -58,11 +63,17 @@ type NonceGenerator interface {
 }
 
 type issueRepository struct {
-	db  DB
+	db  issueDB
 	gen NonceGenerator
 }
 
-func newIssueRepository(db DB, gen NonceGenerator) issueRepository {
+type issueDB interface {
+	RegisterTransaction(Nonce, func(Nonce) error) (Nonce, error)
+	RegisterTicket(Nonce, data.User, data.Expires, data.ExtendLimit) error
+	NonceExists(Nonce) bool
+}
+
+func newIssueRepository(db issueDB, gen NonceGenerator) issueRepository {
 	return issueRepository{
 		db:  db,
 		gen: gen,

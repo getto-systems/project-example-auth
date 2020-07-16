@@ -7,13 +7,18 @@ import (
 )
 
 type Shrinker struct {
-	pub  EventPublisher
+	pub  shrinkEventPublisher
 	repo shrinkRepository
 }
 
+type shrinkEventPublisher interface {
+	ShrinkTicket(data.Request, Nonce, data.User)
+	ShrinkTicketFailed(data.Request, Nonce, data.User, error)
+}
+
 func NewShrinker(
-	pub EventPublisher,
-	db DB,
+	pub shrinkEventPublisher,
+	db shrinkDB,
 ) Shrinker {
 	return Shrinker{
 		pub:  pub,
@@ -34,10 +39,15 @@ func (shrinker Shrinker) shrink(request data.Request, nonce Nonce, user data.Use
 }
 
 type shrinkRepository struct {
-	db DB
+	db shrinkDB
 }
 
-func newShrinkRepository(db DB) shrinkRepository {
+type shrinkDB interface {
+	TicketExists(Nonce, data.User) bool
+	ShrinkTicket(Nonce) error
+}
+
+func newShrinkRepository(db shrinkDB) shrinkRepository {
 	return shrinkRepository{
 		db: db,
 	}

@@ -5,13 +5,19 @@ import (
 )
 
 type Verifier struct {
-	pub  EventPublisher
+	pub  verifyEventPublisher
 	repo verifyRepository
 }
 
+type verifyEventPublisher interface {
+	VerifyPassword(data.Request, data.User)
+	VerifyPasswordFailed(data.Request, data.User, error)
+	AuthenticatedByPassword(data.Request, data.User)
+}
+
 func NewVerifier(
-	pub EventPublisher,
-	db DB,
+	pub verifyEventPublisher,
+	db verifyDB,
 	matcher Matcher,
 ) Verifier {
 	return Verifier{
@@ -35,11 +41,15 @@ func (verifier Verifier) verify(request data.Request, user data.User, password d
 }
 
 type verifyRepository struct {
-	db      DB
+	db      verifyDB
 	matcher Matcher
 }
 
-func newVerifyRepository(db DB, matcher Matcher) verifyRepository {
+type verifyDB interface {
+	FindUserPassword(data.User) (data.HashedPassword, error)
+}
+
+func newVerifyRepository(db verifyDB, matcher Matcher) verifyRepository {
 	return verifyRepository{
 		db:      db,
 		matcher: matcher,

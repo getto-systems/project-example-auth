@@ -7,11 +7,17 @@ import (
 )
 
 type Verifier struct {
-	pub    EventPublisher
+	pub    verifyEventPublisher
 	signer Signer
 }
 
-func NewVerifier(pub EventPublisher, signer Signer) Verifier {
+type verifyEventPublisher interface {
+	VerifyTicket(data.Request)
+	VerifyTicketFailed(data.Request, error)
+	AuthenticatedByTicket(data.Request, data.User)
+}
+
+func NewVerifier(pub verifyEventPublisher, signer Signer) Verifier {
 	return Verifier{
 		pub:    pub,
 		signer: signer,

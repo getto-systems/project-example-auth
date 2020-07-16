@@ -5,15 +5,20 @@ import (
 )
 
 type Extender struct {
-	pub        EventPublisher
+	pub        extendEventPublisher
 	signer     Signer
 	expiration Expiration
 	repo       extendRepository
 }
 
+type extendEventPublisher interface {
+	ExtendTicket(data.Request, Nonce, data.User, data.Expires)
+	ExtendTicketFailed(data.Request, Nonce, data.User, data.Expires, error)
+}
+
 func NewExtender(
-	pub EventPublisher,
-	db DB,
+	pub extendEventPublisher,
+	db extendDB,
 	signer Signer,
 	expiration Expiration,
 ) Extender {
@@ -46,10 +51,14 @@ func (extender Extender) extend(request data.Request, nonce Nonce, user data.Use
 }
 
 type extendRepository struct {
-	db DB
+	db extendDB
 }
 
-func newExtendRepository(db DB) extendRepository {
+type extendDB interface {
+	FindTicketExtendLimit(Nonce, data.User) (data.ExtendLimit, error)
+}
+
+func newExtendRepository(db extendDB) extendRepository {
 	return extendRepository{
 		db: db,
 	}

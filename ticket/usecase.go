@@ -32,24 +32,12 @@ type (
 )
 
 type EventPublisher interface {
-	IssueApiToken(data.Request, data.User, data.Roles, data.Expires)
-	IssueApiTokenFailed(data.Request, data.User, data.Roles, data.Expires, error)
-
-	IssueContentToken(data.Request, data.User, data.Expires)
-	IssueContentTokenFailed(data.Request, data.User, data.Expires, error)
-
-	ExtendTicket(data.Request, Nonce, data.User, data.Expires)
-	ExtendTicketFailed(data.Request, Nonce, data.User, data.Expires, error)
-
-	IssueTicket(data.Request, data.User, data.Expires, data.ExtendLimit)
-	IssueTicketFailed(data.Request, data.User, data.Expires, data.ExtendLimit, error)
-
-	ShrinkTicket(data.Request, Nonce, data.User)
-	ShrinkTicketFailed(data.Request, Nonce, data.User, error)
-
-	VerifyTicket(data.Request)
-	VerifyTicketFailed(data.Request, error)
-	AuthenticatedByTicket(data.Request, data.User)
+	apiTokenIssueEventPublisher
+	contentTokenIssueEventPublisher
+	extendEventPublisher
+	issueEventPublisher
+	shrinkEventPublisher
+	verifyEventPublisher
 }
 
 type EventHandler interface {
@@ -57,16 +45,10 @@ type EventHandler interface {
 }
 
 type DB interface {
-	FindUserRoles(data.User) (data.Roles, error)
-
-	FindTicketExtendLimit(Nonce, data.User) (data.ExtendLimit, error)
-
-	RegisterTransaction(Nonce, func(Nonce) error) (Nonce, error)
-	RegisterTicket(Nonce, data.User, data.Expires, data.ExtendLimit) error
-	NonceExists(Nonce) bool
-
-	TicketExists(Nonce, data.User) bool
-	ShrinkTicket(Nonce) error
+	apiTokenDB
+	extendDB
+	issueDB
+	shrinkDB
 }
 
 type TicketExtender struct {
