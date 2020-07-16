@@ -16,6 +16,10 @@ type extendEventPublisher interface {
 	ExtendTicketFailed(data.Request, Nonce, data.User, data.Expires, error)
 }
 
+type extendDB interface {
+	FindTicketExtendLimit(Nonce, data.User) (data.ExtendLimit, error)
+}
+
 func NewExtender(
 	pub extendEventPublisher,
 	db extendDB,
@@ -52,10 +56,6 @@ func (extender Extender) extend(request data.Request, nonce Nonce, user data.Use
 
 type extendRepository struct {
 	db extendDB
-}
-
-type extendDB interface {
-	FindTicketExtendLimit(Nonce, data.User) (data.ExtendLimit, error)
 }
 
 func newExtendRepository(db extendDB) extendRepository {

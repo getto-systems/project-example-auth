@@ -16,6 +16,11 @@ type shrinkEventPublisher interface {
 	ShrinkTicketFailed(data.Request, Nonce, data.User, error)
 }
 
+type shrinkDB interface {
+	TicketExists(Nonce, data.User) bool
+	ShrinkTicket(Nonce) error
+}
+
 func NewShrinker(
 	pub shrinkEventPublisher,
 	db shrinkDB,
@@ -40,11 +45,6 @@ func (shrinker Shrinker) shrink(request data.Request, nonce Nonce, user data.Use
 
 type shrinkRepository struct {
 	db shrinkDB
-}
-
-type shrinkDB interface {
-	TicketExists(Nonce, data.User) bool
-	ShrinkTicket(Nonce) error
 }
 
 func newShrinkRepository(db shrinkDB) shrinkRepository {

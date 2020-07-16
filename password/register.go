@@ -15,6 +15,10 @@ type registerEventPublisher interface {
 	PasswordRegistered(data.Request, data.User)
 }
 
+type registerDB interface {
+	RegisterUserPassword(data.User, data.HashedPassword) error
+}
+
 func NewRegister(
 	pub registerEventPublisher,
 	db registerDB,
@@ -43,10 +47,6 @@ func (register Register) register(request data.Request, user data.User, password
 type registerRepository struct {
 	db  registerDB
 	gen Generator
-}
-
-type registerDB interface {
-	RegisterUserPassword(data.User, data.HashedPassword) error
 }
 
 func newRegisterRepository(db registerDB, gen Generator) registerRepository {

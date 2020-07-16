@@ -22,6 +22,12 @@ type issueEventPublisher interface {
 	IssueTicketFailed(data.Request, data.User, data.Expires, data.ExtendLimit, error)
 }
 
+type issueDB interface {
+	RegisterTransaction(Nonce, func(Nonce) error) (Nonce, error)
+	RegisterTicket(Nonce, data.User, data.Expires, data.ExtendLimit) error
+	NonceExists(Nonce) bool
+}
+
 func NewIssuer(
 	pub issueEventPublisher,
 	db issueDB,
@@ -65,12 +71,6 @@ type NonceGenerator interface {
 type issueRepository struct {
 	db  issueDB
 	gen NonceGenerator
-}
-
-type issueDB interface {
-	RegisterTransaction(Nonce, func(Nonce) error) (Nonce, error)
-	RegisterTicket(Nonce, data.User, data.Expires, data.ExtendLimit) error
-	NonceExists(Nonce) bool
 }
 
 func newIssueRepository(db issueDB, gen NonceGenerator) issueRepository {

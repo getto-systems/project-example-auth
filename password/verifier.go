@@ -15,6 +15,10 @@ type verifyEventPublisher interface {
 	AuthenticatedByPassword(data.Request, data.User)
 }
 
+type verifyDB interface {
+	FindUserPassword(data.User) (data.HashedPassword, error)
+}
+
 func NewVerifier(
 	pub verifyEventPublisher,
 	db verifyDB,
@@ -43,10 +47,6 @@ func (verifier Verifier) verify(request data.Request, user data.User, password d
 type verifyRepository struct {
 	db      verifyDB
 	matcher Matcher
-}
-
-type verifyDB interface {
-	FindUserPassword(data.User) (data.HashedPassword, error)
 }
 
 func newVerifyRepository(db verifyDB, matcher Matcher) verifyRepository {
