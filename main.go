@@ -237,7 +237,7 @@ func NewTicketUsecase(appLogger logger.Logger) ticketUsecase {
 
 	expiration := NewExpiration()
 
-	gen := NewNonceGenerator()
+	gen := nonce_generator.NewNonceGenerator()
 
 	return ticketUsecase{
 		verifier: ticket.NewVerifier(pub, signer),
@@ -305,8 +305,4 @@ func NewExpiration() ticket.Expiration {
 		Expires:     data.Minute(5),
 		ExtendLimit: data.Day(14),
 	})
-}
-
-func NewNonceGenerator() nonce_generator.NonceGenerator {
-	return nonce_generator.NewNonceGenerator()
 }
