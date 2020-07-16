@@ -14,13 +14,8 @@ var (
 )
 
 type EventPublisher interface {
-	ValidatePassword(data.Request, data.User)
-	ValidatePasswordFailed(data.Request, data.User, error)
-	PasswordRegistered(data.Request, data.User)
-
-	VerifyPassword(data.Request, data.User)
-	VerifyPasswordFailed(data.Request, data.User, error)
-	AuthenticatedByPassword(data.Request, data.User)
+	registerEventPublisher
+	verifyEventPublisher
 }
 
 type EventHandler interface {
@@ -28,9 +23,8 @@ type EventHandler interface {
 }
 
 type DB interface {
-	RegisterUserPassword(data.User, data.HashedPassword) error
-
-	FindUserPassword(data.User) (data.HashedPassword, error)
+	registerDB
+	verifyDB
 }
 
 type PasswordVerifier struct {

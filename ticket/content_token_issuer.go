@@ -5,12 +5,17 @@ import (
 )
 
 type ContentTokenIssuer struct {
-	pub    EventPublisher
+	pub    contentTokenIssueEventPublisher
 	signer ContentTokenSigner
 }
 
+type contentTokenIssueEventPublisher interface {
+	IssueContentToken(data.Request, data.User, data.Expires)
+	IssueContentTokenFailed(data.Request, data.User, data.Expires, error)
+}
+
 func NewContentTokenIssuer(
-	pub EventPublisher,
+	pub contentTokenIssueEventPublisher,
 	signer ContentTokenSigner,
 ) ContentTokenIssuer {
 	return ContentTokenIssuer{

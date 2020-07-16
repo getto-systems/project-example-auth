@@ -5,13 +5,19 @@ import (
 )
 
 type Register struct {
-	pub  EventPublisher
+	pub  registerEventPublisher
 	repo registerRepository
 }
 
+type registerEventPublisher interface {
+	ValidatePassword(data.Request, data.User)
+	ValidatePasswordFailed(data.Request, data.User, error)
+	PasswordRegistered(data.Request, data.User)
+}
+
 func NewRegister(
-	pub EventPublisher,
-	db DB,
+	pub registerEventPublisher,
+	db registerDB,
 	gen Generator,
 ) Register {
 	return Register{
@@ -35,11 +41,15 @@ func (register Register) register(request data.Request, user data.User, password
 }
 
 type registerRepository struct {
-	db  DB
+	db  registerDB
 	gen Generator
 }
 
-func newRegisterRepository(db DB, gen Generator) registerRepository {
+type registerDB interface {
+	RegisterUserPassword(data.User, data.HashedPassword) error
+}
+
+func newRegisterRepository(db registerDB, gen Generator) registerRepository {
 	return registerRepository{
 		db:  db,
 		gen: gen,
