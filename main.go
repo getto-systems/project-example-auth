@@ -208,15 +208,20 @@ func NewPasswordUsecase(appLogger logger.Logger) passwordUsecase {
 	db := password_db.NewPasswordStore()
 	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
 
-	// test
-	p, err := encrypter.GeneratePassword("password")
-	if err == nil {
-		db.RegisterUserPassword(data.NewUser("admin"), p)
-	}
+	initAdminPassword(db, encrypter)
 
 	return passwordUsecase{
 		verifier: password.NewVerifier(pub, db, encrypter),
 		register: password.NewRegister(pub, db, encrypter),
+	}
+}
+func initAdminPassword(db password.DB, gen password.Generator) {
+	user_id := os.Getenv("ADMIN_ID")
+	password := os.Getenv("ADMIN_PASSWORD")
+
+	p, err := gen.GeneratePassword(data.RawPassword(password))
+	if err == nil {
+		db.RegisterUserPassword(data.NewUser(data.UserID(user_id)), p)
 	}
 }
 
