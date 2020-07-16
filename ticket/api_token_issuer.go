@@ -15,6 +15,10 @@ type apiTokenIssueEventPublisher interface {
 	IssueApiTokenFailed(data.Request, data.User, data.Roles, data.Expires, error)
 }
 
+type apiTokenDB interface {
+	FindUserRoles(data.User) (data.Roles, error)
+}
+
 func NewApiTokenIssuer(
 	pub apiTokenIssueEventPublisher,
 	db apiTokenDB,
@@ -49,10 +53,6 @@ type ApiTokenSigner interface {
 
 type userRolesRepository struct {
 	db apiTokenDB
-}
-
-type apiTokenDB interface {
-	FindUserRoles(data.User) (data.Roles, error)
 }
 
 func (repo userRolesRepository) roles(user data.User) data.Roles {
