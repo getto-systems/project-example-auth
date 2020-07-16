@@ -43,7 +43,7 @@ bump_version:
     - echo "https://$GITLAB_USER:$GITLAB_ACCESS_TOKEN@gitlab.com" > $HOME/.git-credentials
   script:
     - curl $TRELLIS_CI_BUMP_VERSION/bump_version.sh | bash
-    - curl $TRELLIS_CI_BUMP_VERSION/request.sh | bash -s -- ./.message/bump.sh
+    - curl $TRELLIS_CI_BUMP_VERSION/request.sh | bash -s -- ./.ci/message/bump.sh
 
 release:
   stage: release
@@ -84,7 +84,7 @@ release_build:
     - docker:dind
 
   script:
-    - ./scripts/deploy.sh
+    - ./.ci/deploy.sh
 
 release_success:
   stage: release_notify

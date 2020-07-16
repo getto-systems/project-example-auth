@@ -7,53 +7,76 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
-	"github.com/getto-systems/project-example-id/infra/db"
-	"github.com/getto-systems/project-example-id/infra/logger"
-	"github.com/getto-systems/project-example-id/infra/password"
-	"github.com/getto-systems/project-example-id/infra/policy"
-	"github.com/getto-systems/project-example-id/infra/pubsub"
-	"github.com/getto-systems/project-example-id/infra/serializer"
+	"github.com/getto-systems/project-example-id/adapter/logger"
+	"github.com/getto-systems/project-example-id/adapter/nonce_generator"
+	"github.com/getto-systems/project-example-id/adapter/password_encrypter"
+	"github.com/getto-systems/project-example-id/adapter/signer"
 
-	"github.com/getto-systems/project-example-id/http_handler/auth_handler"
+	"github.com/getto-systems/project-example-id/http_handler"
+	"github.com/getto-systems/project-example-id/http_handler/password_handler"
+	"github.com/getto-systems/project-example-id/http_handler/ticket_handler"
 
-	"github.com/getto-systems/project-example-id/authenticate"
+	"github.com/getto-systems/project-example-id/event_log"
 
-	"github.com/getto-systems/project-example-id/user"
-	"github.com/getto-systems/project-example-id/user/subscriber"
+	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/ticket"
+
+	password_db "github.com/getto-systems/project-example-id/password/db"
+	ticket_db "github.com/getto-systems/project-example-id/ticket/db"
+
+	password_pubsub "github.com/getto-systems/project-example-id/password/pubsub"
+	ticket_pubsub "github.com/getto-systems/project-example-id/ticket/pubsub"
+
+	"github.com/getto-systems/project-example-id/data"
 )
 
-type Server struct {
-	port string
+const (
+	HEADER_HANDLER = "X-Getto-Example-ID-Handler"
+)
 
-	cors cors.Options
-	tls  Tls
+type (
+	server struct {
+		port string
 
-	logger logger.Logger
+		cors cors.Options
+		tls  tls
 
-	authResponse auth_handler.AuthResponse
-	userFactory  UserFactory
-}
+		logger logger.Logger
 
-type Tls struct {
-	cert string
-	key  string
-}
+		response http_handler.Response
 
-type UserFactory struct {
-	authenticated user.UserAuthenticatedFactory
-	ticketAuth    user.UserTicketAuthFactory
-	passwordAuth  user.UserPasswordAuthFactory
-}
+		password passwordUsecase
+		ticket   ticketUsecase
+	}
+
+	tls struct {
+		cert string
+		key  string
+	}
+
+	passwordUsecase struct {
+		verifier password.Verifier
+		register password.Register
+	}
+
+	ticketUsecase struct {
+		verifier ticket.Verifier
+		extender ticket.Extender
+		shrinker ticket.Shrinker
+
+		issuer             ticket.Issuer
+		apiTokenIssuer     ticket.ApiTokenIssuer
+		contentTokenIssuer ticket.ContentTokenIssuer
+	}
+)
 
 func main() {
 	log.Fatal(NewServer().listen())
 }
-func (server Server) listen() error {
-	router := server.routes()
-	handler := cors.New(server.cors).Handler(router)
+func (server server) listen() error {
+	handler := server.handler()
 
 	if os.Getenv("SERVER_MODE") == "backend" {
 		return http.ListenAndServe(
@@ -65,59 +88,104 @@ func (server Server) listen() error {
 			server.port,
 			server.tls.cert,
 			server.tls.key,
-			handler,
+			cors.New(server.cors).Handler(handler),
 		)
 	}
 }
-func (server Server) routes() *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/healthz", healthz).Methods("GET")
-
-	router.HandleFunc("/auth/ticket", server.AuthByTicket().Handle).Methods("POST")
-	router.HandleFunc("/auth/password", server.AuthByPassword().Handle).Methods("POST")
-
+func (server server) handler() *http.ServeMux {
+	router := http.NewServeMux()
+	router.HandleFunc("/", server.http_handler)
 	return router
 }
 
-func healthz(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func (server server) http_handler(w http.ResponseWriter, r *http.Request) {
+	handler := r.Header.Get(HEADER_HANDLER)
 
-	data := "\"OK\""
+	switch handler {
+	case "password/verify":
+		server.password_verify().Handle(w, r)
+	case "password/register":
+		server.password_register().Handle(w, r)
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", data)
+	case "ticket/extend":
+		server.ticket_extend().Handle(w, r)
+
+	default:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "%s", "\"OK\"")
+	}
+}
+func (server server) password_verify() password_handler.Verify {
+	return password_handler.NewVerify(
+		server.logger,
+		server.response,
+		password.NewPasswordVerifier(
+			server.password.verifier,
+			ticket.NewTicketIssuer(server.ticket.issuer),
+			server.ticket.apiTokenIssuer,
+			server.ticket.contentTokenIssuer,
+		),
+	)
+}
+func (server server) password_register() password_handler.Register {
+	return password_handler.NewRegister(
+		server.logger,
+		server.response,
+		password.NewPasswordRegister(
+			ticket.NewTicketVerifier(server.ticket.verifier),
+			server.password.verifier,
+			server.password.register,
+		),
+	)
 }
 
-func (server Server) AuthByTicket() auth_handler.AuthByTicketHandler {
-	auth := authenticate.NewAuthByTicket(server.userFactory.authenticated, server.userFactory.ticketAuth)
-	return auth_handler.NewAuthByTicketHandler(server.logger, server.authResponse, auth)
+func (server server) ticket_extend() ticket_handler.Extend {
+	return ticket_handler.NewExtend(
+		server.logger,
+		server.response,
+		ticket.NewTicketExtender(
+			server.ticket.verifier,
+			server.ticket.extender,
+			server.ticket.apiTokenIssuer,
+			server.ticket.contentTokenIssuer,
+		),
+	)
 }
-func (server Server) AuthByPassword() auth_handler.AuthByPasswordHandler {
-	auth := authenticate.NewAuthByPassword(server.userFactory.authenticated, server.userFactory.passwordAuth)
-	return auth_handler.NewAuthByPasswordHandler(server.logger, server.authResponse, auth)
+func (server server) ticket_shrink() ticket_handler.Shrink {
+	return ticket_handler.NewShrink(
+		server.logger,
+		server.response,
+		ticket.NewTicketShrinker(
+			server.ticket.verifier,
+			server.ticket.shrinker,
+		),
+	)
 }
 
-func NewServer() Server {
+func NewServer() server {
 	appLogger := NewAppLogger()
 
-	return Server{
+	return server{
 		port: ":8080",
 
 		cors: cors.Options{
 			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
 			AllowedMethods:   []string{"POST"},
+			AllowedHeaders:   []string{HEADER_HANDLER},
 			AllowCredentials: true,
 		},
-		tls: Tls{
+		tls: tls{
 			cert: os.Getenv("TLS_CERT"),
 			key:  os.Getenv("TLS_KEY"),
 		},
 
 		logger: appLogger,
 
-		authResponse: NewAuthResponse(),
-		userFactory:  NewUserFactory(appLogger),
+		response: NewResponse(),
+
+		password: NewPasswordUsecase(appLogger),
+		ticket:   NewTicketUsecase(appLogger),
 	}
 }
 
@@ -125,75 +193,59 @@ func NewAppLogger() logger.Logger {
 	return logger.NewLogger(os.Getenv("LOG_LEVEL"), log.New(os.Stdout, "", 0))
 }
 
-func NewAuthResponse() auth_handler.AuthResponse {
-	cookieDomain := auth_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN"))
-	return auth_handler.NewAuthResponse(cookieDomain, NewAwsCloudFrontIssuer(), NewAppIssuer())
-}
-func NewAwsCloudFrontIssuer() auth_handler.AwsCloudFrontIssuer {
-	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
-	if err != nil {
-		log.Fatalf("aws cloudfront private key read failed: %s", err)
-	}
-
-	serializer := serializer.NewAwsCloudFrontSerializer(
-		pem,
-		os.Getenv("AWS_CLOUDFRONT_SECURE_URL"),
+func NewResponse() http_handler.Response {
+	cookie := http_handler.NewCookie(
+		http_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
+		http_handler.ContentTokenID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 	)
-
-	return auth_handler.NewAwsCloudFrontIssuer(
-		auth_handler.AwsCloudFrontKeyPairID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
-		serializer,
-	)
+	return http_handler.NewResponse(cookie)
 }
 
-func NewAppIssuer() auth_handler.AppIssuer {
-	pem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
-	if err != nil {
-		log.Fatalf("app private key read failed: %s", err)
+func NewPasswordUsecase(appLogger logger.Logger) passwordUsecase {
+	log := event_log.NewPasswordEventLogger(appLogger)
+	pub := password_pubsub.NewPasswordPubSub()
+	pub.Subscribe(log)
+	db := password_db.NewPasswordStore()
+	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
+
+	// test
+	p, err := encrypter.GeneratePassword("password")
+	if err == nil {
+		db.RegisterUserPassword(data.NewUser("admin"), p)
 	}
 
-	key, err := serializer.NewJWT_ES_512_Key(serializer.JWT_Pem{
-		PrivateKey: pem,
-	})
-	if err != nil {
-		log.Fatalf("app key parse failed: %s", err)
-	}
-
-	jwt := serializer.NewJWTSerializer(key)
-	app := serializer.NewAppSerializer(jwt)
-
-	return auth_handler.NewAppIssuer(app)
-}
-
-func NewUserFactory(appLogger logger.Logger) UserFactory {
-	db := NewDB()
-	pubsub := NewPubSub()
-	policy := NewPolicy()
-
-	userLogger := subscriber.NewUserLogger(appLogger)
-	pubsub.SubscribeAuthenticated(userLogger)
-	pubsub.SubscribeTicketAuth(userLogger)
-	pubsub.SubscribePasswordAuth(userLogger)
-
-	ticketSerializer := NewTicketSerializer()
-	passwordEncrypter := NewPasswordEncrypter()
-
-	return UserFactory{
-		authenticated: user.NewUserAuthenticatedFactory(pubsub, db, policy, ticketSerializer),
-		ticketAuth:    user.NewUserTicketAuthFactory(pubsub, ticketSerializer),
-		passwordAuth:  user.NewUserPasswordAuthFactory(pubsub, db, passwordEncrypter),
+	return passwordUsecase{
+		verifier: password.NewVerifier(pub, db, encrypter),
+		register: password.NewRegister(pub, db, encrypter),
 	}
 }
-func NewDB() *db.MemoryStore {
-	return db.NewMemoryStore()
+
+func NewTicketUsecase(appLogger logger.Logger) ticketUsecase {
+	log := event_log.NewTicketEventLogger(appLogger)
+	pub := ticket_pubsub.NewTicketPubSub()
+	pub.Subscribe(log)
+	db := ticket_db.NewTicketStore()
+
+	signer := NewTicketSigner()
+	apiTokenSigner := NewApiTokenSigner()
+	contentTokenSigner := NewContentTokenSigner()
+
+	expiration := NewExpiration()
+
+	gen := NewNonceGenerator()
+
+	return ticketUsecase{
+		verifier: ticket.NewVerifier(pub, signer),
+		extender: ticket.NewExtender(pub, db, signer, expiration),
+		shrinker: ticket.NewShrinker(pub, db),
+
+		issuer:             ticket.NewIssuer(pub, db, signer, expiration, gen),
+		apiTokenIssuer:     ticket.NewApiTokenIssuer(pub, db, apiTokenSigner),
+		contentTokenIssuer: ticket.NewContentTokenIssuer(pub, contentTokenSigner),
+	}
 }
-func NewPubSub() *pubsub.SyncPubSub {
-	return pubsub.NewSyncPubSub()
-}
-func NewPolicy() policy.Policy {
-	return policy.NewPolicy()
-}
-func NewTicketSerializer() serializer.TicketSerializer {
+
+func NewTicketSigner() signer.TicketSigner {
 	privateKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PRIVATE_KEY"))
 	if err != nil {
 		log.Fatalf("ticket private key read failed: %s", err)
@@ -204,7 +256,7 @@ func NewTicketSerializer() serializer.TicketSerializer {
 		log.Fatalf("ticket public key read failed: %s", err)
 	}
 
-	key, err := serializer.NewJWT_ES_512_Key(serializer.JWT_Pem{
+	key, err := signer.NewJWT_ES_512_Key(signer.JWT_Pem{
 		PrivateKey: privateKeyPem,
 		PublicKey:  publicKeyPem,
 	})
@@ -212,9 +264,44 @@ func NewTicketSerializer() serializer.TicketSerializer {
 		log.Fatalf("ticket key parse failed: %s", err)
 	}
 
-	jwt := serializer.NewJWTSerializer(key)
-	return serializer.NewTicketSerializer(jwt)
+	jwt := signer.NewJWTSigner(key)
+	return signer.NewTicketSigner(jwt)
 }
-func NewPasswordEncrypter() password.PasswordEncrypter {
-	return password.NewPasswordEncrypter(10) // bcrypt.DefaultCost
+func NewApiTokenSigner() signer.ApiTokenSigner {
+	pem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
+	if err != nil {
+		log.Fatalf("app private key read failed: %s", err)
+	}
+
+	key, err := signer.NewJWT_ES_512_Key(signer.JWT_Pem{
+		PrivateKey: pem,
+	})
+	if err != nil {
+		log.Fatalf("app key parse failed: %s", err)
+	}
+
+	jwt := signer.NewJWTSigner(key)
+	return signer.NewApiTokenSigner(jwt)
+}
+func NewContentTokenSigner() signer.ContentTokenSigner {
+	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
+	if err != nil {
+		log.Fatalf("aws cloudfront private key read failed: %s", err)
+	}
+
+	return signer.NewContentTokenSigner(
+		pem,
+		os.Getenv("AWS_CLOUDFRONT_SECURE_URL"),
+	)
+}
+
+func NewExpiration() ticket.Expiration {
+	return ticket.NewExpiration(ticket.ExpirationParam{
+		Expires:     data.Minute(5),
+		ExtendLimit: data.Day(14),
+	})
+}
+
+func NewNonceGenerator() nonce_generator.NonceGenerator {
+	return nonce_generator.NewNonceGenerator()
 }
