@@ -18,8 +18,6 @@ import (
 	"github.com/getto-systems/project-example-id/http_handler/password_handler"
 	"github.com/getto-systems/project-example-id/http_handler/ticket_handler"
 
-	"github.com/getto-systems/project-example-id/event_log"
-
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/ticket"
 
@@ -28,6 +26,9 @@ import (
 
 	password_pubsub "github.com/getto-systems/project-example-id/password/pubsub"
 	ticket_pubsub "github.com/getto-systems/project-example-id/ticket/pubsub"
+
+	password_event_log "github.com/getto-systems/project-example-id/password/event_log"
+	ticket_event_log "github.com/getto-systems/project-example-id/ticket/event_log"
 
 	"github.com/getto-systems/project-example-id/data"
 )
@@ -202,7 +203,7 @@ func NewResponse() http_handler.Response {
 }
 
 func NewPasswordUsecase(appLogger logger.Logger) passwordUsecase {
-	log := event_log.NewPasswordEventLogger(appLogger)
+	log := password_event_log.NewEventLogger(appLogger)
 	pub := password_pubsub.NewPasswordPubSub()
 	pub.Subscribe(log)
 	db := password_db.NewMemoryStore()
@@ -226,7 +227,7 @@ func initAdminPassword(db password.DB, gen password.Generator) {
 }
 
 func NewTicketUsecase(appLogger logger.Logger) ticketUsecase {
-	log := event_log.NewTicketEventLogger(appLogger)
+	log := ticket_event_log.NewEventLogger(appLogger)
 	pub := ticket_pubsub.NewTicketPubSub()
 	pub.Subscribe(log)
 	db := ticket_db.NewMemoryStore()
