@@ -10,8 +10,8 @@ type Register struct {
 }
 
 type registerEventPublisher interface {
-	ValidatePassword(data.Request, data.User)
-	ValidatePasswordFailed(data.Request, data.User, error)
+	RegisterPassword(data.Request, data.User)
+	RegisterPasswordFailed(data.Request, data.User, error)
 	PasswordRegistered(data.Request, data.User)
 }
 
@@ -31,11 +31,11 @@ func NewRegister(
 }
 
 func (register Register) register(request data.Request, user data.User, password data.RawPassword) error {
-	register.pub.ValidatePassword(request, user)
+	register.pub.RegisterPassword(request, user)
 
 	err := register.repo.registerPassword(user, password)
 	if err != nil {
-		register.pub.ValidatePasswordFailed(request, user, err)
+		register.pub.RegisterPasswordFailed(request, user, err)
 		return err
 	}
 

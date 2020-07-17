@@ -21,7 +21,7 @@ func (log EventLogger) Handler() password.EventHandler {
 	return log
 }
 
-func (log EventLogger) ValidatePassword(request data.Request, user data.User) {
+func (log EventLogger) RegisterPassword(request data.Request, user data.User) {
 	log.logger.Debug(event_log.Entry{
 		Message: "validate password",
 		Request: request,
@@ -29,7 +29,7 @@ func (log EventLogger) ValidatePassword(request data.Request, user data.User) {
 	})
 }
 
-func (log EventLogger) ValidatePasswordFailed(request data.Request, user data.User, err error) {
+func (log EventLogger) RegisterPasswordFailed(request data.Request, user data.User, err error) {
 	log.logger.Info(event_log.Entry{
 		Message: "validate password failed",
 		Request: request,
