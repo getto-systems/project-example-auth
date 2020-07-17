@@ -2,6 +2,7 @@ package password
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/getto-systems/project-example-id/data"
@@ -64,6 +65,68 @@ func TestValidateFailedWhenPasswordNotFound(t *testing.T) {
 	h.checkValidatePasswordEvent("ValidatePassword")
 	h.checkValidatePasswordFailedEvent(errors.New("password not found"))
 	h.checkAuthenticatedByPasswordEvent("")
+}
+
+// 空のパスワードの場合、必ず失敗する
+func TestValidateFailedWhenEmptyPassword(t *testing.T) {
+	hashed := data.HashedPassword("")
+	raw := data.RawPassword("")
+
+	pub := newValidateTestEventPublisher()
+	db := newValidateTestDB(hashed)
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(errors.New("password is empty"))
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(errors.New("password is empty"))
+	h.checkAuthenticatedByPasswordEvent("")
+}
+
+// 長いパスワードの場合、必ず失敗する
+func TestValidateFailedWhenLongPassword(t *testing.T) {
+	length := 73
+	hashed := data.HashedPassword(strings.Repeat("a", length))
+	raw := data.RawPassword(strings.Repeat("a", length))
+
+	pub := newValidateTestEventPublisher()
+	db := newValidateTestDB(hashed)
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(errors.New("password is too long"))
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(errors.New("password is too long"))
+	h.checkAuthenticatedByPasswordEvent("")
+}
+
+// ギリギリの長さのパスワードの場合、成功する
+func TestValidateWhenLongPassword(t *testing.T) {
+	length := 72
+	hashed := data.HashedPassword(strings.Repeat("a", length))
+	raw := data.RawPassword(strings.Repeat("a", length))
+
+	pub := newValidateTestEventPublisher()
+	db := newValidateTestDB(hashed)
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(nil)
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(nil)
+	h.checkAuthenticatedByPasswordEvent("AuthenticatedByPassword")
 }
 
 type (
@@ -143,8 +206,12 @@ func (h validateTestHelper) checkValidateError(err error) {
 			h.t.Errorf("validate fired: %s", h.err)
 		}
 	} else {
-		if h.err.Error() != err.Error() {
-			h.t.Errorf("validate error message is not matched: %s (expected: %s)", h.err, err)
+		if h.err == nil {
+			h.t.Error("validate success")
+		} else {
+			if h.err.Error() != err.Error() {
+				h.t.Errorf("validate error message is not matched: %s (expected: %s)", h.err, err)
+			}
 		}
 	}
 }
@@ -161,9 +228,10 @@ func (h validateTestHelper) checkValidatePasswordFailedEvent(err error) {
 	} else {
 		if h.pub.validatePasswordFailed == nil {
 			h.t.Error("ValidatePasswordFailed event not fired")
-		}
-		if h.pub.validatePasswordFailed.Error() != err.Error() {
-			h.t.Errorf("ValidatePasswordFailed error message is not matched: %s (expected: %s)", h.pub.validatePasswordFailed, err)
+		} else {
+			if h.pub.validatePasswordFailed.Error() != err.Error() {
+				h.t.Errorf("ValidatePasswordFailed error message is not matched: %s (expected: %s)", h.pub.validatePasswordFailed, err)
+			}
 		}
 	}
 }
