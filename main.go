@@ -205,7 +205,7 @@ func NewPasswordUsecase(appLogger logger.Logger) passwordUsecase {
 	log := event_log.NewPasswordEventLogger(appLogger)
 	pub := password_pubsub.NewPasswordPubSub()
 	pub.Subscribe(log)
-	db := password_db.NewPasswordStore()
+	db := password_db.NewMemoryStore()
 	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
 
 	initAdminPassword(db, encrypter)
@@ -229,7 +229,7 @@ func NewTicketUsecase(appLogger logger.Logger) ticketUsecase {
 	log := event_log.NewTicketEventLogger(appLogger)
 	pub := ticket_pubsub.NewTicketPubSub()
 	pub.Subscribe(log)
-	db := ticket_db.NewTicketStore()
+	db := ticket_db.NewMemoryStore()
 
 	signer := NewTicketSigner()
 	apiTokenSigner := NewApiTokenSigner()
