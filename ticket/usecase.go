@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrVerifyFailed            = errors.New("ticket-verify-failed")
+	ErrValidateFailed          = errors.New("ticket-validate-failed")
 	ErrExtendFailed            = errors.New("ticket-extend-failed")
 	ErrShrinkFailed            = errors.New("ticket-shrink-failed")
 	ErrIssueFailed             = errors.New("ticket-issue-failed")
@@ -37,7 +37,7 @@ type EventPublisher interface {
 	extendEventPublisher
 	issueEventPublisher
 	shrinkEventPublisher
-	verifyEventPublisher
+	validateEventPublisher
 }
 
 type EventHandler interface {
@@ -52,28 +52,28 @@ type DB interface {
 }
 
 type TicketExtender struct {
-	verifier    Verifier
+	validater   Validater
 	extender    Extender
 	tokenIssuer TokenIssuer
 }
 
 func NewTicketExtender(
-	verifier Verifier,
+	validater Validater,
 	extender Extender,
 	api ApiTokenIssuer,
 	content ContentTokenIssuer,
 ) TicketExtender {
 	return TicketExtender{
-		verifier:    verifier,
+		validater:   validater,
 		extender:    extender,
 		tokenIssuer: NewTokenIssuer(api, content),
 	}
 }
 
 func (usecase TicketExtender) Extend(request data.Request, ticket Ticket, nonce Nonce) (Ticket, ApiToken, ContentToken, data.Expires, error) {
-	user, err := usecase.verifier.verify(request, ticket, nonce)
+	user, err := usecase.validater.validate(request, ticket, nonce)
 	if err != nil {
-		return nil, nil, nil, data.Expires{}, ErrVerifyFailed
+		return nil, nil, nil, data.Expires{}, ErrValidateFailed
 	}
 
 	ticket, expires, err := usecase.extender.extend(request, nonce, user)
@@ -89,45 +89,43 @@ func (usecase TicketExtender) Extend(request data.Request, ticket Ticket, nonce 
 	return ticket, apiToken, contentToken, expires, nil
 }
 
-type TicketVerifier struct {
-	verifier Verifier
+type TicketValidater struct {
+	validater Validater
 }
 
-func NewTicketVerifier(
-	verifier Verifier,
-) TicketVerifier {
-	return TicketVerifier{
-		verifier: verifier,
+func NewTicketValidater(validater Validater) TicketValidater {
+	return TicketValidater{
+		validater: validater,
 	}
 }
 
-func (usecase TicketVerifier) Verify(request data.Request, ticket Ticket, nonce Nonce) (data.User, error) {
-	user, err := usecase.verifier.verify(request, ticket, nonce)
+func (usecase TicketValidater) Validate(request data.Request, ticket Ticket, nonce Nonce) (data.User, error) {
+	user, err := usecase.validater.validate(request, ticket, nonce)
 	if err != nil {
-		return data.User{}, ErrVerifyFailed
+		return data.User{}, ErrValidateFailed
 	}
 	return user, nil
 }
 
 type TicketShrinker struct {
-	verifier Verifier
-	shrinker Shrinker
+	validater Validater
+	shrinker  Shrinker
 }
 
 func NewTicketShrinker(
-	verifier Verifier,
+	validater Validater,
 	shrinker Shrinker,
 ) TicketShrinker {
 	return TicketShrinker{
-		verifier: verifier,
-		shrinker: shrinker,
+		validater: validater,
+		shrinker:  shrinker,
 	}
 }
 
 func (usecase TicketShrinker) Shrink(request data.Request, ticket Ticket, nonce Nonce) error {
-	user, err := usecase.verifier.verify(request, ticket, nonce)
+	user, err := usecase.validater.validate(request, ticket, nonce)
 	if err != nil {
-		return ErrVerifyFailed
+		return ErrValidateFailed
 	}
 
 	err = usecase.shrinker.shrink(request, nonce, user)

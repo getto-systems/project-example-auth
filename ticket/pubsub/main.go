@@ -82,15 +82,15 @@ func (pubsub *TicketPubSub) ShrinkTicketFailed(request data.Request, nonce ticke
 	}
 }
 
-func (pubsub *TicketPubSub) VerifyTicket(request data.Request) {
+func (pubsub *TicketPubSub) ValidateTicket(request data.Request) {
 	for _, handler := range pubsub.handlers {
-		handler.VerifyTicket(request)
+		handler.ValidateTicket(request)
 	}
 }
 
-func (pubsub *TicketPubSub) VerifyTicketFailed(request data.Request, err error) {
+func (pubsub *TicketPubSub) ValidateTicketFailed(request data.Request, err error) {
 	for _, handler := range pubsub.handlers {
-		handler.VerifyTicketFailed(request, err)
+		handler.ValidateTicketFailed(request, err)
 	}
 }
 

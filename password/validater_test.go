@@ -1,0 +1,174 @@
+package password
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/getto-systems/project-example-id/data"
+)
+
+// パスワードが一致したら AuthenticatedByPassword イベントが発行される
+func TestValidate(t *testing.T) {
+	hashed := data.HashedPassword("password")
+	raw := data.RawPassword("password")
+
+	pub := newValidateTestEventPublisher()
+	db := newValidateTestDB(hashed)
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(nil)
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(nil)
+	h.checkAuthenticatedByPasswordEvent("AuthenticatedByPassword")
+}
+
+// パスワードが一致しなかったら ValidatePasswordFailed イベントが発行される
+func TestValidateFailed(t *testing.T) {
+	hashed := data.HashedPassword("password")
+	raw := data.RawPassword("different-password")
+
+	pub := newValidateTestEventPublisher()
+	db := newValidateTestDB(hashed)
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(errors.New("password not matched"))
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(errors.New("password not matched"))
+	h.checkAuthenticatedByPasswordEvent("")
+}
+
+// パスワードが見つからない場合、必ず失敗する
+func TestValidateFailedWhenPasswordNotFound(t *testing.T) {
+	raw := data.RawPassword("password")
+
+	pub := newValidateTestEventPublisher()
+	db := emptyValidateTestDB()
+	matcher := newValidateTestMatcher()
+
+	// validate
+	validater := NewValidater(pub, db, matcher)
+	err := validater.validate(data.Request{}, data.User{}, raw)
+
+	h := newValidateTestHelper(t, pub, err)
+	h.checkValidateError(errors.New("password not found"))
+	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordFailedEvent(errors.New("password not found"))
+	h.checkAuthenticatedByPasswordEvent("")
+}
+
+type (
+	validateTestEventPublisher struct {
+		validatePassword        string
+		validatePasswordFailed  error
+		authenticatedByPassword string
+	}
+
+	validateTestDB struct {
+		password *data.HashedPassword
+	}
+
+	validateTestMatcher struct {
+	}
+
+	validateTestHelper struct {
+		t   *testing.T
+		pub *validateTestEventPublisher
+		err error
+	}
+)
+
+func newValidateTestEventPublisher() *validateTestEventPublisher {
+	return &validateTestEventPublisher{}
+}
+
+func (pub *validateTestEventPublisher) ValidatePassword(request data.Request, user data.User) {
+	pub.validatePassword = "ValidatePassword"
+}
+func (pub *validateTestEventPublisher) ValidatePasswordFailed(request data.Request, user data.User, err error) {
+	pub.validatePasswordFailed = err
+}
+func (pub *validateTestEventPublisher) AuthenticatedByPassword(request data.Request, user data.User) {
+	pub.authenticatedByPassword = "AuthenticatedByPassword"
+}
+
+func newValidateTestDB(password data.HashedPassword) validateTestDB {
+	return validateTestDB{
+		password: &password,
+	}
+}
+
+func emptyValidateTestDB() validateTestDB {
+	return validateTestDB{}
+}
+
+func (db validateTestDB) FindUserPassword(user data.User) (data.HashedPassword, error) {
+	if db.password == nil {
+		return nil, errors.New("password not found")
+	}
+	return *db.password, nil
+}
+
+func newValidateTestMatcher() validateTestMatcher {
+	return validateTestMatcher{}
+}
+
+func (validateTestMatcher) MatchPassword(hashed data.HashedPassword, raw data.RawPassword) error {
+	if string(raw) != string(hashed) {
+		return errors.New("password not matched")
+	}
+	return nil
+}
+
+func newValidateTestHelper(t *testing.T, pub *validateTestEventPublisher, err error) validateTestHelper {
+	return validateTestHelper{
+		t:   t,
+		pub: pub,
+		err: err,
+	}
+}
+
+func (h validateTestHelper) checkValidateError(err error) {
+	if err == nil {
+		if h.err != nil {
+			h.t.Errorf("validate fired: %s", h.err)
+		}
+	} else {
+		if h.err.Error() != err.Error() {
+			h.t.Errorf("validate error message is not matched: %s (expected: %s)", h.err, err)
+		}
+	}
+}
+func (h validateTestHelper) checkValidatePasswordEvent(event string) {
+	if h.pub.validatePassword != event {
+		h.t.Errorf("ValidatePassword event not match: %s (expected: %s)", h.pub.validatePassword, event)
+	}
+}
+func (h validateTestHelper) checkValidatePasswordFailedEvent(err error) {
+	if err == nil {
+		if h.pub.validatePasswordFailed != nil {
+			h.t.Errorf("ValidatePasswordFailed event fired: %s", h.pub.validatePasswordFailed)
+		}
+	} else {
+		if h.pub.validatePasswordFailed == nil {
+			h.t.Error("ValidatePasswordFailed event not fired")
+		}
+		if h.pub.validatePasswordFailed.Error() != err.Error() {
+			h.t.Errorf("ValidatePasswordFailed error message is not matched: %s (expected: %s)", h.pub.validatePasswordFailed, err)
+		}
+	}
+}
+func (h validateTestHelper) checkAuthenticatedByPasswordEvent(event string) {
+	if h.pub.authenticatedByPassword != event {
+		h.t.Errorf("AuthenticatedByPassword event not match: %s (expected: %s)", h.pub.authenticatedByPassword, event)
+	}
+}

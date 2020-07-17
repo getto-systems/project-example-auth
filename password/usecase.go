@@ -9,13 +9,13 @@ import (
 )
 
 var (
-	ErrVerifyFailed   = errors.New("password-verify-failed")
+	ErrValidateFailed = errors.New("password-validate-failed")
 	ErrRegisterFailed = errors.New("password-register-failed")
 )
 
 type EventPublisher interface {
 	registerEventPublisher
-	verifyEventPublisher
+	validateEventPublisher
 }
 
 type EventHandler interface {
@@ -24,32 +24,32 @@ type EventHandler interface {
 
 type DB interface {
 	registerDB
-	verifyDB
+	validateDB
 }
 
-type PasswordVerifier struct {
-	verifier    Verifier
+type PasswordValidater struct {
+	validater   Validater
 	issuer      ticket.TicketIssuer
 	tokenIssuer ticket.TokenIssuer
 }
 
-func NewPasswordVerifier(
-	verifier Verifier,
+func NewPasswordValidater(
+	validater Validater,
 	issuer ticket.TicketIssuer,
 	api ticket.ApiTokenIssuer,
 	content ticket.ContentTokenIssuer,
-) PasswordVerifier {
-	return PasswordVerifier{
-		verifier:    verifier,
+) PasswordValidater {
+	return PasswordValidater{
+		validater:   validater,
 		issuer:      issuer,
 		tokenIssuer: ticket.NewTokenIssuer(api, content),
 	}
 }
 
-func (usecase PasswordVerifier) Verify(request data.Request, user data.User, password data.RawPassword) (ticket.Ticket, ticket.Nonce, ticket.ApiToken, ticket.ContentToken, data.Expires, error) {
-	err := usecase.verifier.verify(request, user, password)
+func (usecase PasswordValidater) Validate(request data.Request, user data.User, password data.RawPassword) (ticket.Ticket, ticket.Nonce, ticket.ApiToken, ticket.ContentToken, data.Expires, error) {
+	err := usecase.validater.validate(request, user, password)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, ErrVerifyFailed
+		return nil, "", nil, nil, data.Expires{}, ErrValidateFailed
 	}
 
 	newTicket, nonce, expires, err := usecase.issuer.Issue(request, user)
@@ -66,20 +66,20 @@ func (usecase PasswordVerifier) Verify(request data.Request, user data.User, pas
 }
 
 type PasswordRegister struct {
-	ticketVerifier   ticket.TicketVerifier
-	passwordVerifier Verifier
-	register         Register
+	ticketValidater   ticket.TicketValidater
+	passwordValidater Validater
+	register          Register
 }
 
 func NewPasswordRegister(
-	ticketVerifier ticket.TicketVerifier,
-	passwordVerifier Verifier,
+	ticketValidater ticket.TicketValidater,
+	passwordValidater Validater,
 	register Register,
 ) PasswordRegister {
 	return PasswordRegister{
-		ticketVerifier:   ticketVerifier,
-		passwordVerifier: passwordVerifier,
-		register:         register,
+		ticketValidater:   ticketValidater,
+		passwordValidater: passwordValidater,
+		register:          register,
 	}
 }
 
@@ -89,12 +89,12 @@ type PasswordRegisterParam struct {
 }
 
 func (usecase PasswordRegister) Register(request data.Request, ticket ticket.Ticket, nonce ticket.Nonce, password PasswordRegisterParam) error {
-	user, err := usecase.ticketVerifier.Verify(request, ticket, nonce)
+	user, err := usecase.ticketValidater.Validate(request, ticket, nonce)
 	if err != nil {
 		return ErrRegisterFailed
 	}
 
-	err = usecase.passwordVerifier.verify(request, user, password.OldPassword)
+	err = usecase.passwordValidater.validate(request, user, password.OldPassword)
 	if err != nil {
 		return ErrRegisterFailed
 	}

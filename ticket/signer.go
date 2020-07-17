@@ -5,6 +5,6 @@ import (
 )
 
 type Signer interface {
-	Verify(Ticket) (Nonce, data.User, data.Expires, error)
+	Parse(Ticket) (Nonce, data.User, data.Expires, error)
 	Sign(Nonce, data.User, data.Expires) (Ticket, error)
 }

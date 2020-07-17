@@ -40,15 +40,15 @@ func (pubsub *PasswordPubSub) PasswordRegistered(request data.Request, user data
 	}
 }
 
-func (pubsub *PasswordPubSub) VerifyPassword(request data.Request, user data.User) {
+func (pubsub *PasswordPubSub) ValidatePassword(request data.Request, user data.User) {
 	for _, handler := range pubsub.handlers {
-		handler.VerifyPassword(request, user)
+		handler.ValidatePassword(request, user)
 	}
 }
 
-func (pubsub *PasswordPubSub) VerifyPasswordFailed(request data.Request, user data.User, err error) {
+func (pubsub *PasswordPubSub) ValidatePasswordFailed(request data.Request, user data.User, err error) {
 	for _, handler := range pubsub.handlers {
-		handler.VerifyPasswordFailed(request, user, err)
+		handler.ValidatePasswordFailed(request, user, err)
 	}
 }
 

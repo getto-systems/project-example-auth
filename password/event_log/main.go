@@ -46,17 +46,17 @@ func (log EventLogger) PasswordRegistered(request data.Request, user data.User) 
 	})
 }
 
-func (log EventLogger) VerifyPassword(request data.Request, user data.User) {
+func (log EventLogger) ValidatePassword(request data.Request, user data.User) {
 	log.logger.Debug(event_log.Entry{
-		Message: "verify password",
+		Message: "validate password",
 		Request: request,
 		User:    &user,
 	})
 }
 
-func (log EventLogger) VerifyPasswordFailed(request data.Request, user data.User, err error) {
+func (log EventLogger) ValidatePasswordFailed(request data.Request, user data.User, err error) {
 	log.logger.Audit(event_log.Entry{
-		Message: "verify password failed",
+		Message: "validate password failed",
 		Request: request,
 		User:    &user,
 		Error:   err,
