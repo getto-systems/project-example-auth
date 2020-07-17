@@ -1,13 +1,7 @@
 package password
 
 import (
-	"errors"
-
 	"github.com/getto-systems/project-example-id/data"
-)
-
-const (
-	PASSWORD_BYTES_LIMIT = 72 // limit of bcrypt
 )
 
 type Validater struct {
@@ -39,7 +33,7 @@ func NewValidater(
 func (validater Validater) validate(request data.Request, user data.User, password data.RawPassword) error {
 	validater.pub.ValidatePassword(request, user)
 
-	err := validater.checkPassword(password)
+	err := checkPassword(password)
 	if err != nil {
 		validater.pub.ValidatePasswordFailed(request, user, err)
 		return err
@@ -53,15 +47,6 @@ func (validater Validater) validate(request data.Request, user data.User, passwo
 
 	validater.pub.AuthenticatedByPassword(request, user)
 
-	return nil
-}
-func (validater Validater) checkPassword(password data.RawPassword) error {
-	if len(password) == 0 {
-		return errors.New("password is empty")
-	}
-	if len([]byte(password)) > PASSWORD_BYTES_LIMIT {
-		return errors.New("password is too long")
-	}
 	return nil
 }
 

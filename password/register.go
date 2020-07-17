@@ -33,7 +33,13 @@ func NewRegister(
 func (register Register) register(request data.Request, user data.User, password data.RawPassword) error {
 	register.pub.RegisterPassword(request, user)
 
-	err := register.repo.registerPassword(user, password)
+	err := checkPassword(password)
+	if err != nil {
+		register.pub.RegisterPasswordFailed(request, user, err)
+		return err
+	}
+
+	err = register.repo.registerPassword(user, password)
 	if err != nil {
 		register.pub.RegisterPasswordFailed(request, user, err)
 		return err
