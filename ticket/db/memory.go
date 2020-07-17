@@ -25,7 +25,7 @@ func (store *MemoryStore) DB() ticket.DB {
 	return store
 }
 
-func NewTicketStore() *MemoryStore {
+func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
 		ticket:    make(map[string]memoryTicketData),
 		userRoles: make(map[data.UserID]data.Roles),

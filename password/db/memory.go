@@ -18,7 +18,7 @@ func (store *MemoryStore) DB() password.DB {
 	return store
 }
 
-func NewPasswordStore() *MemoryStore {
+func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
 		userPassword: make(map[data.UserID]data.HashedPassword),
 	}
