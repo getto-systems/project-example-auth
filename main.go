@@ -58,14 +58,14 @@ type (
 	}
 
 	passwordUsecase struct {
-		verifier password.Verifier
-		register password.Register
+		validater password.Validater
+		register  password.Register
 	}
 
 	ticketUsecase struct {
-		verifier ticket.Verifier
-		extender ticket.Extender
-		shrinker ticket.Shrinker
+		validater ticket.Validater
+		extender  ticket.Extender
+		shrinker  ticket.Shrinker
 
 		issuer             ticket.Issuer
 		apiTokenIssuer     ticket.ApiTokenIssuer
@@ -103,8 +103,8 @@ func (server server) http_handler(w http.ResponseWriter, r *http.Request) {
 	handler := r.Header.Get(HEADER_HANDLER)
 
 	switch handler {
-	case "password/verify":
-		server.password_verify().Handle(w, r)
+	case "password/validate":
+		server.password_validate().Handle(w, r)
 	case "password/register":
 		server.password_register().Handle(w, r)
 
@@ -117,12 +117,12 @@ func (server server) http_handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", "\"OK\"")
 	}
 }
-func (server server) password_verify() password_handler.Verify {
-	return password_handler.NewVerify(
+func (server server) password_validate() password_handler.Validate {
+	return password_handler.NewValidate(
 		server.logger,
 		server.response,
-		password.NewPasswordVerifier(
-			server.password.verifier,
+		password.NewPasswordValidater(
+			server.password.validater,
 			ticket.NewTicketIssuer(server.ticket.issuer),
 			server.ticket.apiTokenIssuer,
 			server.ticket.contentTokenIssuer,
@@ -134,8 +134,8 @@ func (server server) password_register() password_handler.Register {
 		server.logger,
 		server.response,
 		password.NewPasswordRegister(
-			ticket.NewTicketVerifier(server.ticket.verifier),
-			server.password.verifier,
+			ticket.NewTicketValidater(server.ticket.validater),
+			server.password.validater,
 			server.password.register,
 		),
 	)
@@ -146,7 +146,7 @@ func (server server) ticket_extend() ticket_handler.Extend {
 		server.logger,
 		server.response,
 		ticket.NewTicketExtender(
-			server.ticket.verifier,
+			server.ticket.validater,
 			server.ticket.extender,
 			server.ticket.apiTokenIssuer,
 			server.ticket.contentTokenIssuer,
@@ -158,7 +158,7 @@ func (server server) ticket_shrink() ticket_handler.Shrink {
 		server.logger,
 		server.response,
 		ticket.NewTicketShrinker(
-			server.ticket.verifier,
+			server.ticket.validater,
 			server.ticket.shrinker,
 		),
 	)
@@ -212,8 +212,8 @@ func NewPasswordUsecase(appLogger logger.Logger) passwordUsecase {
 	initAdminPassword(db, encrypter)
 
 	return passwordUsecase{
-		verifier: password.NewVerifier(pub, db, encrypter),
-		register: password.NewRegister(pub, db, encrypter),
+		validater: password.NewValidater(pub, db, encrypter),
+		register:  password.NewRegister(pub, db, encrypter),
 	}
 }
 func initAdminPassword(db password.DB, gen password.Generator) {
@@ -241,9 +241,9 @@ func NewTicketUsecase(appLogger logger.Logger) ticketUsecase {
 	gen := nonce_generator.NewNonceGenerator()
 
 	return ticketUsecase{
-		verifier: ticket.NewVerifier(pub, signer),
-		extender: ticket.NewExtender(pub, db, signer, expiration),
-		shrinker: ticket.NewShrinker(pub, db),
+		validater: ticket.NewValidater(pub, signer),
+		extender:  ticket.NewExtender(pub, db, signer, expiration),
+		shrinker:  ticket.NewShrinker(pub, db),
 
 		issuer:             ticket.NewIssuer(pub, db, signer, expiration, gen),
 		apiTokenIssuer:     ticket.NewApiTokenIssuer(pub, db, apiTokenSigner),

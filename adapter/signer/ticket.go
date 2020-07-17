@@ -25,7 +25,7 @@ func (signer TicketSigner) Signer() ticket.Signer {
 	return signer
 }
 
-func (signer TicketSigner) Verify(ticket ticket.Ticket) (ticket.Nonce, data.User, data.Expires, error) {
+func (signer TicketSigner) Parse(ticket ticket.Ticket) (ticket.Nonce, data.User, data.Expires, error) {
 	claims, err := signer.jwt.Parse(string(ticket))
 	if err != nil {
 		return "", data.User{}, data.Expires{}, err

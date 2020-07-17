@@ -10,34 +10,34 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-type VerifyInput struct {
+type ValidateInput struct {
 	UserID   string `json:"user_id"`
 	Password string `json:"password"`
 }
 
-type Verify struct {
-	logger   http_handler.RequestLogger
-	response http_handler.Response
-	verifier password.PasswordVerifier
+type Validate struct {
+	logger    http_handler.RequestLogger
+	response  http_handler.Response
+	validater password.PasswordValidater
 }
 
-func NewVerify(
+func NewValidate(
 	logger http_handler.RequestLogger,
 	response http_handler.Response,
-	verifier password.PasswordVerifier,
-) Verify {
-	return Verify{
-		logger:   logger,
-		response: response,
-		verifier: verifier,
+	validater password.PasswordValidater,
+) Validate {
+	return Validate{
+		logger:    logger,
+		response:  response,
+		validater: validater,
 	}
 }
 
-func (h Verify) Handle(w http.ResponseWriter, r *http.Request) {
+func (h Validate) Handle(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/verify")
+	logger.DebugMessage("handling password/validate")
 
 	user, password, err := h.param(r, logger)
 	if err != nil {
@@ -45,7 +45,7 @@ func (h Verify) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, nonce, apiToken, contentToken, expires, err := h.verifier.Verify(request, user, password)
+	ticket, nonce, apiToken, contentToken, expires, err := h.validater.Validate(request, user, password)
 	if err != nil {
 		h.response.ResetCookie(w)
 		h.response.Error(w, err)
@@ -55,8 +55,8 @@ func (h Verify) Handle(w http.ResponseWriter, r *http.Request) {
 	h.response.Authenticated(w, ticket, nonce, apiToken, contentToken, expires, logger)
 }
 
-func (h Verify) param(r *http.Request, logger http_handler.Logger) (data.User, data.RawPassword, error) {
-	var input VerifyInput
+func (h Validate) param(r *http.Request, logger http_handler.Logger) (data.User, data.RawPassword, error) {
+	var input ValidateInput
 	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
 		return data.User{}, data.RawPassword(""), err

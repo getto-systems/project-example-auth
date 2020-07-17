@@ -120,16 +120,16 @@ func (log EventLogger) ShrinkTicketFailed(request data.Request, nonce ticket.Non
 	})
 }
 
-func (log EventLogger) VerifyTicket(request data.Request) {
+func (log EventLogger) ValidateTicket(request data.Request) {
 	log.logger.Debug(event_log.Entry{
-		Message: "verify ticket",
+		Message: "validate ticket",
 		Request: request,
 	})
 }
 
-func (log EventLogger) VerifyTicketFailed(request data.Request, err error) {
+func (log EventLogger) ValidateTicketFailed(request data.Request, err error) {
 	log.logger.Info(event_log.Entry{
-		Message: "verify ticket failed",
+		Message: "validate ticket failed",
 		Request: request,
 		Error:   err,
 	})

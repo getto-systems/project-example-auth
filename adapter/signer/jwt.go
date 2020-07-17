@@ -25,7 +25,7 @@ func NewJWTSigner(key JWTKey) JWTSigner {
 type JWTKey interface {
 	signingMethod() jwt.SigningMethod
 	signKey() interface{}
-	verifyKey() interface{}
+	validateKey() interface{}
 }
 
 type JWT_ES_512_Key struct {
@@ -70,7 +70,7 @@ func (key JWT_ES_512_Key) signKey() interface{} {
 	return key.privateKey
 }
 
-func (key JWT_ES_512_Key) verifyKey() interface{} {
+func (key JWT_ES_512_Key) validateKey() interface{} {
 	return key.publicKey
 }
 
@@ -90,14 +90,14 @@ func (key JWT_HS_512_Key) signKey() interface{} {
 	return key.key
 }
 
-func (key JWT_HS_512_Key) verifyKey() interface{} {
+func (key JWT_HS_512_Key) validateKey() interface{} {
 	return key.key
 }
 
 func (signer JWTSigner) Parse(token string) (jwt.MapClaims, error) {
 	var claims jwt.MapClaims
 	jwtToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
-		return signer.key.verifyKey(), nil
+		return signer.key.validateKey(), nil
 	})
 	if err != nil {
 		return nil, err

@@ -74,9 +74,9 @@ func status(err error) int {
 
 	case
 		ErrTicketCookieNotFound,
-		ticket.ErrVerifyFailed,
+		ticket.ErrValidateFailed,
 		ticket.ErrExtendFailed,
-		password.ErrVerifyFailed:
+		password.ErrValidateFailed:
 
 		return http.StatusUnauthorized
 
