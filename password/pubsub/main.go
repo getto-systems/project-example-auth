@@ -22,15 +22,15 @@ func (pubsub *PasswordPubSub) Subscribe(handler password.EventHandler) {
 	pubsub.handlers = append(pubsub.handlers, handler)
 }
 
-func (pubsub *PasswordPubSub) ValidatePassword(request data.Request, user data.User) {
+func (pubsub *PasswordPubSub) RegisterPassword(request data.Request, user data.User) {
 	for _, handler := range pubsub.handlers {
-		handler.ValidatePassword(request, user)
+		handler.RegisterPassword(request, user)
 	}
 }
 
-func (pubsub *PasswordPubSub) ValidatePasswordFailed(request data.Request, user data.User, err error) {
+func (pubsub *PasswordPubSub) RegisterPasswordFailed(request data.Request, user data.User, err error) {
 	for _, handler := range pubsub.handlers {
-		handler.ValidatePasswordFailed(request, user, err)
+		handler.RegisterPasswordFailed(request, user, err)
 	}
 }
 
