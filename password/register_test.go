@@ -22,9 +22,9 @@ func TestRegister(t *testing.T) {
 
 	h := newRegisterTestHelper(t, pub, err)
 	h.checkRegisterError(nil)
-	h.checkRegisterPasswordEvent("RegisterPassword")
+	h.checkRegisterPasswordEvent("fired")
 	h.checkRegisterPasswordFailedEvent(nil)
-	h.checkPasswordRegisteredEvent("PasswordRegistered")
+	h.checkPasswordRegisteredEvent("fired")
 }
 
 // 空のパスワードは保存できない
@@ -41,9 +41,9 @@ func TestRegisterFailedWhenEmptyPassword(t *testing.T) {
 
 	h := newRegisterTestHelper(t, pub, err)
 	h.checkRegisterError(errors.New("password is empty"))
-	h.checkRegisterPasswordEvent("RegisterPassword")
+	h.checkRegisterPasswordEvent("fired")
 	h.checkRegisterPasswordFailedEvent(errors.New("password is empty"))
-	h.checkPasswordRegisteredEvent("")
+	h.checkPasswordRegisteredEvent("never")
 }
 
 // 長いパスワードは保存できない
@@ -61,9 +61,9 @@ func TestRegisterFailedWhenLongPassword(t *testing.T) {
 
 	h := newRegisterTestHelper(t, pub, err)
 	h.checkRegisterError(errors.New("password is too long"))
-	h.checkRegisterPasswordEvent("RegisterPassword")
+	h.checkRegisterPasswordEvent("fired")
 	h.checkRegisterPasswordFailedEvent(errors.New("password is too long"))
-	h.checkPasswordRegisteredEvent("")
+	h.checkPasswordRegisteredEvent("never")
 }
 
 // ギリギリの長さのパスワードは保存できる
@@ -81,9 +81,9 @@ func TestRegisterWhenLongPassword(t *testing.T) {
 
 	h := newRegisterTestHelper(t, pub, err)
 	h.checkRegisterError(nil)
-	h.checkRegisterPasswordEvent("RegisterPassword")
+	h.checkRegisterPasswordEvent("fired")
 	h.checkRegisterPasswordFailedEvent(nil)
-	h.checkPasswordRegisteredEvent("PasswordRegistered")
+	h.checkPasswordRegisteredEvent("fired")
 }
 
 type (
@@ -105,17 +105,20 @@ type (
 )
 
 func newRegisterTestEventPublisher() *registerTestEventPublisher {
-	return &registerTestEventPublisher{}
+	return &registerTestEventPublisher{
+		registerPassword:   "never",
+		passwordRegistered: "never",
+	}
 }
 
 func (pub *registerTestEventPublisher) RegisterPassword(request data.Request, user data.User) {
-	pub.registerPassword = "RegisterPassword"
+	pub.registerPassword = "fired"
 }
 func (pub *registerTestEventPublisher) RegisterPasswordFailed(request data.Request, user data.User, err error) {
 	pub.registerPasswordFailed = err
 }
 func (pub *registerTestEventPublisher) PasswordRegistered(request data.Request, user data.User) {
-	pub.passwordRegistered = "PasswordRegistered"
+	pub.passwordRegistered = "fired"
 }
 
 func newRegisterTestDB() registerTestDB {
