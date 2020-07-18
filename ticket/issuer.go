@@ -28,6 +28,10 @@ type issueDB interface {
 	NonceExists(Nonce) bool
 }
 
+type NonceGenerator interface {
+	GenerateNonce() (Nonce, error)
+}
+
 func NewIssuer(
 	pub issueEventPublisher,
 	db issueDB,
@@ -64,10 +68,6 @@ func (issuer Issuer) issue(request data.Request, user data.User) (Ticket, Nonce,
 	return ticket, nonce, expires, nil
 }
 
-type NonceGenerator interface {
-	GenerateNonce() (Nonce, error)
-}
-
 type issueRepository struct {
 	db  issueDB
 	gen NonceGenerator
@@ -81,6 +81,8 @@ func newIssueRepository(db issueDB, gen NonceGenerator) issueRepository {
 }
 
 func (repo issueRepository) register(user data.User, expires data.Expires, limit data.ExtendLimit) (Nonce, error) {
+	errNonceAlreadyExists := errors.New("nonce already exists")
+
 	for count := 0; count < GENERATE_NONCE_LIMIT; count++ {
 		nonce, err := repo.gen.GenerateNonce()
 		if err != nil {
@@ -89,7 +91,7 @@ func (repo issueRepository) register(user data.User, expires data.Expires, limit
 
 		nonce, err = repo.db.RegisterTransaction(nonce, func(nonce Nonce) error {
 			if repo.db.NonceExists(nonce) {
-				return errors.New("nonce already exists")
+				return errNonceAlreadyExists
 			}
 
 			err := repo.db.RegisterTicket(nonce, user, expires, limit)
@@ -102,7 +104,10 @@ func (repo issueRepository) register(user data.User, expires data.Expires, limit
 		if err == nil {
 			return nonce, nil
 		}
+		if err != errNonceAlreadyExists {
+			return "", err
+		}
 	}
 
-	return "", errors.New("generate nonce failed")
+	return "", errors.New("generate nonce try failed")
 }
