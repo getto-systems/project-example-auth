@@ -23,9 +23,9 @@ func TestValidate(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(nil)
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(nil)
-	h.checkAuthenticatedByPasswordEvent("AuthenticatedByPassword")
+	h.checkAuthenticatedByPasswordEvent("fired")
 }
 
 // パスワードが一致しなかったら ValidatePasswordFailed イベントが発行される
@@ -43,9 +43,9 @@ func TestValidateFailed(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(errors.New("password not matched"))
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(errors.New("password not matched"))
-	h.checkAuthenticatedByPasswordEvent("")
+	h.checkAuthenticatedByPasswordEvent("never")
 }
 
 // パスワードが見つからない場合、必ず失敗する
@@ -62,9 +62,9 @@ func TestValidateFailedWhenPasswordNotFound(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(errors.New("password not found"))
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(errors.New("password not found"))
-	h.checkAuthenticatedByPasswordEvent("")
+	h.checkAuthenticatedByPasswordEvent("never")
 }
 
 // 空のパスワードの場合、必ず失敗する
@@ -82,9 +82,9 @@ func TestValidateFailedWhenEmptyPassword(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(errors.New("password is empty"))
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(errors.New("password is empty"))
-	h.checkAuthenticatedByPasswordEvent("")
+	h.checkAuthenticatedByPasswordEvent("never")
 }
 
 // 長いパスワードの場合、必ず失敗する
@@ -103,9 +103,9 @@ func TestValidateFailedWhenLongPassword(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(errors.New("password is too long"))
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(errors.New("password is too long"))
-	h.checkAuthenticatedByPasswordEvent("")
+	h.checkAuthenticatedByPasswordEvent("never")
 }
 
 // ギリギリの長さのパスワードの場合、成功する
@@ -124,9 +124,9 @@ func TestValidateWhenLongPassword(t *testing.T) {
 
 	h := newValidateTestHelper(t, pub, err)
 	h.checkValidateError(nil)
-	h.checkValidatePasswordEvent("ValidatePassword")
+	h.checkValidatePasswordEvent("fired")
 	h.checkValidatePasswordFailedEvent(nil)
-	h.checkAuthenticatedByPasswordEvent("AuthenticatedByPassword")
+	h.checkAuthenticatedByPasswordEvent("fired")
 }
 
 type (
@@ -151,17 +151,20 @@ type (
 )
 
 func newValidateTestEventPublisher() *validateTestEventPublisher {
-	return &validateTestEventPublisher{}
+	return &validateTestEventPublisher{
+		validatePassword:        "never",
+		authenticatedByPassword: "never",
+	}
 }
 
 func (pub *validateTestEventPublisher) ValidatePassword(request data.Request, user data.User) {
-	pub.validatePassword = "ValidatePassword"
+	pub.validatePassword = "fired"
 }
 func (pub *validateTestEventPublisher) ValidatePasswordFailed(request data.Request, user data.User, err error) {
 	pub.validatePasswordFailed = err
 }
 func (pub *validateTestEventPublisher) AuthenticatedByPassword(request data.Request, user data.User) {
-	pub.authenticatedByPassword = "AuthenticatedByPassword"
+	pub.authenticatedByPassword = "fired"
 }
 
 func newValidateTestDB(password data.HashedPassword) validateTestDB {
