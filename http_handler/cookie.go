@@ -4,9 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 const COOKIE_TICKET = "GETTO-EXAMPLE-ID.Ticket"

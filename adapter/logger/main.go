@@ -10,11 +10,9 @@ import (
 
 	"github.com/getto-systems/project-example-id/http_handler"
 
-	"github.com/getto-systems/project-example-id/event_log"
-
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/event_log"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type Logger struct {
@@ -37,11 +35,11 @@ func leveledLogger(level string, logger *log.Logger) applog.Logger {
 	}
 }
 
-func (logger Logger) Logger() event_log.Logger {
+func (logger Logger) eventLogger() event_log.Logger {
 	return logger
 }
 
-func (logger Logger) RequestLogger() http_handler.RequestLogger {
+func (logger Logger) requestLogger() http_handler.RequestLogger {
 	return logger
 }
 

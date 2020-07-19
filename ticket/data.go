@@ -4,6 +4,22 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
+type (
+	Ticket       []byte
+	ApiToken     []byte
+	ContentToken interface {
+		Policy() string
+		Signature() string
+	}
+
+	Nonce string
+
+	Expiration struct {
+		expires     data.Second
+		extendLimit data.Second
+	}
+)
+
 type ExpirationParam struct {
 	Expires     data.Second
 	ExtendLimit data.Second

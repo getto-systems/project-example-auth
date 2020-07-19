@@ -1,9 +1,8 @@
 package db
 
 import (
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 
 	"errors"
 )

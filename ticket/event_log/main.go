@@ -1,10 +1,9 @@
 package event_log
 
 import (
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type EventLogger struct {
@@ -17,7 +16,7 @@ func NewEventLogger(logger event_log.Logger) EventLogger {
 	}
 }
 
-func (log EventLogger) Handler() ticket.EventHandler {
+func (log EventLogger) handler() ticket.EventHandler {
 	return log
 }
 

@@ -6,9 +6,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type TicketSigner struct {
@@ -21,7 +20,7 @@ func NewTicketSigner(jwt JWTSigner) TicketSigner {
 	}
 }
 
-func (signer TicketSigner) Signer() ticket.Signer {
+func (signer TicketSigner) signer() ticket.Signer {
 	return signer
 }
 

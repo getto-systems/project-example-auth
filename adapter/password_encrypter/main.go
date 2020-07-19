@@ -5,8 +5,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/password"
 
-	"github.com/getto-systems/project-example-id/data"
-
 	"errors"
 )
 
@@ -25,15 +23,15 @@ func NewPasswordEncrypter(cost int) PasswordEncrypter {
 	}
 }
 
-func (enc PasswordEncrypter) Matcher() password.Matcher {
+func (enc PasswordEncrypter) matcher() password.Matcher {
 	return enc
 }
 
-func (enc PasswordEncrypter) Generator() password.Generator {
+func (enc PasswordEncrypter) gen() password.Generator {
 	return enc
 }
 
-func (enc PasswordEncrypter) GeneratePassword(password data.RawPassword) (data.HashedPassword, error) {
+func (enc PasswordEncrypter) GeneratePassword(password password.RawPassword) (password.HashedPassword, error) {
 	p, err := NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -42,7 +40,7 @@ func (enc PasswordEncrypter) GeneratePassword(password data.RawPassword) (data.H
 	return p.generate(enc.cost)
 }
 
-func (enc PasswordEncrypter) MatchPassword(hashed data.HashedPassword, password data.RawPassword) error {
+func (enc PasswordEncrypter) MatchPassword(hashed password.HashedPassword, password password.RawPassword) error {
 	p, err := NewPassword(password)
 	if err != nil {
 		return err
@@ -58,7 +56,7 @@ func (enc PasswordEncrypter) MatchPassword(hashed data.HashedPassword, password 
 
 type Password []byte
 
-func NewPassword(password data.RawPassword) (Password, error) {
+func NewPassword(password password.RawPassword) (Password, error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {

@@ -8,41 +8,23 @@ import (
 	"github.com/getto-systems/project-example-id/ticket"
 )
 
-type ExtendInput struct {
+type extendInput struct {
 	Nonce string `json:"nonce"`
 }
 
-type Extend struct {
-	logger   http_handler.RequestLogger
-	response http_handler.Response
-	extender ticket.TicketExtender
-}
-
-func NewExtend(
-	logger http_handler.RequestLogger,
-	response http_handler.Response,
-	extender ticket.TicketExtender,
-) Extend {
-	return Extend{
-		logger:   logger,
-		response: response,
-		extender: extender,
-	}
-}
-
-func (h Extend) Handle(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Extend(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
 	logger.DebugMessage("handling ticket/extend")
 
-	ticket, nonce, err := h.param(r, logger)
+	ticket, nonce, err := extendParam(r, logger)
 	if err != nil {
 		h.response.Error(w, err)
 		return
 	}
 
-	ticket, apiToken, contentToken, expires, err := h.extender.Extend(request, ticket, nonce)
+	ticket, apiToken, contentToken, expires, err := h.ticket.Extend(request, ticket, nonce)
 	if err != nil {
 		h.response.Error(w, err)
 		return
@@ -51,8 +33,8 @@ func (h Extend) Handle(w http.ResponseWriter, r *http.Request) {
 	h.response.Authenticated(w, ticket, nonce, apiToken, contentToken, expires, logger)
 }
 
-func (h Extend) param(r *http.Request, logger http_handler.Logger) (ticket.Ticket, ticket.Nonce, error) {
-	var input ExtendInput
+func extendParam(r *http.Request, logger http_handler.Logger) (ticket.Ticket, ticket.Nonce, error) {
+	var input extendInput
 	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
 		return nil, "", err
