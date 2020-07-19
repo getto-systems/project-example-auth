@@ -6,9 +6,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type ApiTokenSigner struct {
@@ -21,7 +20,7 @@ func NewApiTokenSigner(jwt JWTSigner) ApiTokenSigner {
 	}
 }
 
-func (signer ApiTokenSigner) ApiTokenSigner() ticket.ApiTokenSigner {
+func (signer ApiTokenSigner) signer() ticket.ApiTokenSigner {
 	return signer
 }
 

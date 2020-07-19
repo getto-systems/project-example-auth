@@ -1,16 +1,16 @@
-package password
+package core
 
 import (
-	"errors"
+	"github.com/getto-systems/project-example-id/password"
 
-	"github.com/getto-systems/project-example-id/data"
+	"errors"
 )
 
 const (
 	PASSWORD_BYTES_LIMIT = 72 // limit of bcrypt
 )
 
-func checkPassword(password data.RawPassword) error {
+func checkPassword(password password.RawPassword) error {
 	if len(password) == 0 {
 		return errors.New("password is empty")
 	}

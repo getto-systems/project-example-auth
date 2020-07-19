@@ -1,45 +1,31 @@
-package ticket
+package core
 
 import (
-	"errors"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
+
+	"errors"
 )
 
 const (
 	GENERATE_NONCE_LIMIT = 10
 )
 
-type Issuer struct {
-	pub        issueEventPublisher
-	signer     Signer
-	expiration Expiration
+type issuer struct {
+	pub        ticket.IssueEventPublisher
+	signer     ticket.Signer
+	expiration ticket.Expiration
 	repo       issueRepository
 }
 
-type issueEventPublisher interface {
-	IssueTicket(data.Request, data.User, data.Expires, data.ExtendLimit)
-	IssueTicketFailed(data.Request, data.User, data.Expires, data.ExtendLimit, error)
-}
-
-type issueDB interface {
-	RegisterTransaction(Nonce, func(Nonce) error) (Nonce, error)
-	RegisterTicket(Nonce, data.User, data.Expires, data.ExtendLimit) error
-	NonceExists(Nonce) bool
-}
-
-type NonceGenerator interface {
-	GenerateNonce() (Nonce, error)
-}
-
-func NewIssuer(
-	pub issueEventPublisher,
-	db issueDB,
-	signer Signer,
-	expiration Expiration,
-	gen NonceGenerator,
-) Issuer {
-	return Issuer{
+func newIssuer(
+	pub ticket.IssueEventPublisher,
+	db ticket.IssueDB,
+	signer ticket.Signer,
+	expiration ticket.Expiration,
+	gen ticket.NonceGenerator,
+) issuer {
+	return issuer{
 		pub:        pub,
 		signer:     signer,
 		expiration: expiration,
@@ -47,7 +33,7 @@ func NewIssuer(
 	}
 }
 
-func (issuer Issuer) issue(request data.Request, user data.User) (Ticket, Nonce, data.Expires, error) {
+func (issuer issuer) issue(request data.Request, user data.User) (ticket.Ticket, ticket.Nonce, data.Expires, error) {
 	expires := issuer.expiration.Expires(request)
 	limit := issuer.expiration.ExtendLimit(request)
 
@@ -69,18 +55,18 @@ func (issuer Issuer) issue(request data.Request, user data.User) (Ticket, Nonce,
 }
 
 type issueRepository struct {
-	db  issueDB
-	gen NonceGenerator
+	db  ticket.IssueDB
+	gen ticket.NonceGenerator
 }
 
-func newIssueRepository(db issueDB, gen NonceGenerator) issueRepository {
+func newIssueRepository(db ticket.IssueDB, gen ticket.NonceGenerator) issueRepository {
 	return issueRepository{
 		db:  db,
 		gen: gen,
 	}
 }
 
-func (repo issueRepository) register(user data.User, expires data.Expires, limit data.ExtendLimit) (Nonce, error) {
+func (repo issueRepository) register(user data.User, expires data.Expires, limit data.ExtendLimit) (ticket.Nonce, error) {
 	errNonceAlreadyExists := errors.New("nonce already exists")
 
 	for count := 0; count < GENERATE_NONCE_LIMIT; count++ {
@@ -89,7 +75,7 @@ func (repo issueRepository) register(user data.User, expires data.Expires, limit
 			return "", err
 		}
 
-		nonce, err = repo.db.RegisterTransaction(nonce, func(nonce Nonce) error {
+		nonce, err = repo.db.RegisterTransaction(nonce, func(nonce ticket.Nonce) error {
 			if repo.db.NonceExists(nonce) {
 				return errNonceAlreadyExists
 			}

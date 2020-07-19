@@ -1,9 +1,8 @@
 package event_log
 
 import (
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type Logger interface {

@@ -5,9 +5,8 @@ import (
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
-	"github.com/getto-systems/project-example-id/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type ContentTokenSigner struct {
@@ -22,7 +21,7 @@ func NewContentTokenSigner(pem []byte, resource string) ContentTokenSigner {
 	}
 }
 
-func (signer ContentTokenSigner) ContentTokenSigner() ticket.ContentTokenSigner {
+func (signer ContentTokenSigner) signer() ticket.ContentTokenSigner {
 	return signer
 }
 

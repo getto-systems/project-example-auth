@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/ticket"
-
-	"github.com/getto-systems/project-example-id/data"
 )
 
 type Response struct {

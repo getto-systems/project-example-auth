@@ -8,41 +8,23 @@ import (
 	"github.com/getto-systems/project-example-id/ticket"
 )
 
-type ShrinkInput struct {
+type shrinkInput struct {
 	Nonce string `json:"nonce"`
 }
 
-type Shrink struct {
-	logger   http_handler.RequestLogger
-	response http_handler.Response
-	shrinker ticket.TicketShrinker
-}
-
-func NewShrink(
-	logger http_handler.RequestLogger,
-	response http_handler.Response,
-	shrinker ticket.TicketShrinker,
-) Shrink {
-	return Shrink{
-		logger:   logger,
-		response: response,
-		shrinker: shrinker,
-	}
-}
-
-func (h Shrink) Handle(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Shrink(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
 	logger.DebugMessage("handling ticket/shrink")
 
-	ticket, nonce, err := h.param(r, logger)
+	ticket, nonce, err := shrinkParam(r, logger)
 	if err != nil {
 		h.response.Error(w, err)
 		return
 	}
 
-	err = h.shrinker.Shrink(request, ticket, nonce)
+	err = h.ticket.Shrink(request, ticket, nonce)
 	if err != nil {
 		h.response.Error(w, err)
 		return
@@ -52,8 +34,8 @@ func (h Shrink) Handle(w http.ResponseWriter, r *http.Request) {
 	h.response.OK(w)
 }
 
-func (h Shrink) param(r *http.Request, logger http_handler.Logger) (ticket.Ticket, ticket.Nonce, error) {
-	var input ShrinkInput
+func shrinkParam(r *http.Request, logger http_handler.Logger) (ticket.Ticket, ticket.Nonce, error) {
+	var input shrinkInput
 	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
 		return nil, "", err

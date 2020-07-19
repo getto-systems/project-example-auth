@@ -1,32 +1,24 @@
-package ticket
+package core
 
 import (
 	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
-type Extender struct {
-	pub        extendEventPublisher
-	signer     Signer
-	expiration Expiration
+type extender struct {
+	pub        ticket.ExtendEventPublisher
+	signer     ticket.Signer
+	expiration ticket.Expiration
 	repo       extendRepository
 }
 
-type extendEventPublisher interface {
-	ExtendTicket(data.Request, Nonce, data.User, data.Expires)
-	ExtendTicketFailed(data.Request, Nonce, data.User, data.Expires, error)
-}
-
-type extendDB interface {
-	FindTicketExtendLimit(Nonce, data.User) (data.ExtendLimit, error)
-}
-
-func NewExtender(
-	pub extendEventPublisher,
-	db extendDB,
-	signer Signer,
-	expiration Expiration,
-) Extender {
-	return Extender{
+func newExtender(
+	pub ticket.ExtendEventPublisher,
+	db ticket.ExtendDB,
+	signer ticket.Signer,
+	expiration ticket.Expiration,
+) extender {
+	return extender{
 		pub:        pub,
 		signer:     signer,
 		expiration: expiration,
@@ -34,7 +26,7 @@ func NewExtender(
 	}
 }
 
-func (extender Extender) extend(request data.Request, nonce Nonce, user data.User) (Ticket, data.Expires, error) {
+func (extender extender) extend(request data.Request, nonce ticket.Nonce, user data.User) (ticket.Ticket, data.Expires, error) {
 	expires := extender.expiration.Expires(request)
 	expires, err := extender.repo.expires(nonce, user, expires)
 
@@ -55,16 +47,16 @@ func (extender Extender) extend(request data.Request, nonce Nonce, user data.Use
 }
 
 type extendRepository struct {
-	db extendDB
+	db ticket.ExtendDB
 }
 
-func newExtendRepository(db extendDB) extendRepository {
+func newExtendRepository(db ticket.ExtendDB) extendRepository {
 	return extendRepository{
 		db: db,
 	}
 }
 
-func (repo extendRepository) expires(nonce Nonce, user data.User, expires data.Expires) (data.Expires, error) {
+func (repo extendRepository) expires(nonce ticket.Nonce, user data.User, expires data.Expires) (data.Expires, error) {
 	limit, err := repo.db.FindTicketExtendLimit(nonce, user)
 	if err != nil {
 		return data.Expires{}, err

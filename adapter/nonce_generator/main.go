@@ -13,7 +13,7 @@ func NewNonceGenerator() NonceGenerator {
 	return NonceGenerator{}
 }
 
-func (gen NonceGenerator) NonceGenerator() ticket.NonceGenerator {
+func (gen NonceGenerator) gen() ticket.NonceGenerator {
 	return gen
 }
 
