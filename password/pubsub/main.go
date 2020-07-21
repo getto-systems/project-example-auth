@@ -21,6 +21,18 @@ func (pubsub *PubSub) Subscribe(handler password.EventHandler) {
 	pubsub.handlers = append(pubsub.handlers, handler)
 }
 
+func (pubsub *PubSub) GetLogin(request data.Request, user data.User) {
+	for _, handler := range pubsub.handlers {
+		handler.GetLogin(request, user)
+	}
+}
+
+func (pubsub *PubSub) LoginNotFound(request data.Request, user data.User, err error) {
+	for _, handler := range pubsub.handlers {
+		handler.LoginNotFound(request, user, err)
+	}
+}
+
 func (pubsub *PubSub) RegisterPassword(request data.Request, user data.User) {
 	for _, handler := range pubsub.handlers {
 		handler.RegisterPassword(request, user)
@@ -39,20 +51,20 @@ func (pubsub *PubSub) PasswordRegistered(request data.Request, user data.User) {
 	}
 }
 
-func (pubsub *PubSub) ValidatePassword(request data.Request, user data.User) {
+func (pubsub *PubSub) ValidatePassword(request data.Request, login password.Login) {
 	for _, handler := range pubsub.handlers {
-		handler.ValidatePassword(request, user)
+		handler.ValidatePassword(request, login)
 	}
 }
 
-func (pubsub *PubSub) ValidatePasswordFailed(request data.Request, user data.User, err error) {
+func (pubsub *PubSub) ValidatePasswordFailed(request data.Request, login password.Login, err error) {
 	for _, handler := range pubsub.handlers {
-		handler.ValidatePasswordFailed(request, user, err)
+		handler.ValidatePasswordFailed(request, login, err)
 	}
 }
 
-func (pubsub *PubSub) AuthenticatedByPassword(request data.Request, user data.User) {
+func (pubsub *PubSub) AuthenticatedByPassword(request data.Request, login password.Login, user data.User) {
 	for _, handler := range pubsub.handlers {
-		handler.AuthenticatedByPassword(request, user)
+		handler.AuthenticatedByPassword(request, login, user)
 	}
 }

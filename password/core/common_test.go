@@ -1,10 +1,14 @@
 package core
 
 import (
-	"github.com/getto-systems/project-example-id/event_log"
+	"fmt"
 
-	"testing"
+	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/event_log"
+	"github.com/getto-systems/project-example-id/password"
 )
+
+type testReportError func(string)
 
 type testLogger struct {
 	audit event_log.Entry
@@ -30,18 +34,30 @@ func (logger *testLogger) Debug(entry event_log.Entry) {
 	logger.debug = entry
 }
 
-func assertError(t *testing.T, label string, got error, expected error) {
-	if expected == nil {
-		if got != nil {
-			t.Errorf("%s error: %s", label, got)
-		}
+func formatError(err error) string {
+	if err == nil {
+		return "nil"
 	} else {
-		if got == nil {
-			t.Errorf("%s success", label)
-		} else {
-			if got.Error() != expected.Error() {
-				t.Errorf("%s error message is not matched: %s (expected: %s)", label, got, expected)
-			}
-		}
+		return fmt.Sprintf("\"%s\"", err)
+	}
+}
+
+func formatRequest(request data.Request) string {
+	return fmt.Sprintf("{%s}", request.Route().RemoteAddr())
+}
+
+func formatLogin(login *password.Login) string {
+	if login == nil {
+		return "nil"
+	} else {
+		return fmt.Sprintf("{%s}", login.ID())
+	}
+}
+
+func formatUser(user *data.User) string {
+	if user == nil {
+		return "nil"
+	} else {
+		return fmt.Sprintf("{%s}", user.UserID())
 	}
 }

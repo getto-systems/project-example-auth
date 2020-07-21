@@ -185,13 +185,19 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 		ticket,
 	)
 }
-func initAdminPassword(db password.DB, gen password.Generator) {
-	admin_user_id := os.Getenv("ADMIN_ID")
+func initAdminPassword(db *password_db.MemoryStore, gen password.Generator) {
+	admin_user_id := os.Getenv("ADMIN_USER_ID")
+	admin_login_id := os.Getenv("ADMIN_LOGIN_ID")
 	admin_password := os.Getenv("ADMIN_PASSWORD")
+
+	user := data.NewUser(data.UserID(admin_user_id))
+	login := password.NewLogin(password.LoginID(admin_login_id))
+
+	db.RegisterUserLogin(user, login)
 
 	p, err := gen.GeneratePassword(password.RawPassword(admin_password))
 	if err == nil {
-		db.RegisterUserPassword(data.NewUser(data.UserID(admin_user_id)), p)
+		db.RegisterPasswordOfUser(data.NewUser(data.UserID(admin_user_id)), p)
 	}
 }
 

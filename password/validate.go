@@ -5,13 +5,13 @@ import (
 )
 
 type ValidateEventPublisher interface {
-	ValidatePassword(data.Request, data.User)
-	ValidatePasswordFailed(data.Request, data.User, error)
-	AuthenticatedByPassword(data.Request, data.User)
+	ValidatePassword(data.Request, Login)
+	ValidatePasswordFailed(data.Request, Login, error)
+	AuthenticatedByPassword(data.Request, Login, data.User)
 }
 
 type ValidateDB interface {
-	FindUserPassword(data.User) (HashedPassword, error)
+	FindPasswordByLogin(Login) (data.User, HashedPassword, error)
 }
 
 type Matcher interface {

@@ -21,24 +21,24 @@ func newValidator(
 	}
 }
 
-func (validator validator) validate(request data.Request, user data.User, password password.RawPassword) error {
-	validator.pub.ValidatePassword(request, user)
+func (validator validator) validate(request data.Request, login password.Login, password password.RawPassword) (data.User, error) {
+	validator.pub.ValidatePassword(request, login)
 
 	err := checkPassword(password)
 	if err != nil {
-		validator.pub.ValidatePasswordFailed(request, user, err)
-		return err
+		validator.pub.ValidatePasswordFailed(request, login, err)
+		return data.User{}, err
 	}
 
-	err = validator.repo.matchPassword(user, password)
+	user, err := validator.repo.matchPassword(login, password)
 	if err != nil {
-		validator.pub.ValidatePasswordFailed(request, user, err)
-		return err
+		validator.pub.ValidatePasswordFailed(request, login, err)
+		return data.User{}, err
 	}
 
-	validator.pub.AuthenticatedByPassword(request, user)
+	validator.pub.AuthenticatedByPassword(request, login, user)
 
-	return nil
+	return user, nil
 }
 
 type validateRepository struct {
@@ -53,11 +53,16 @@ func newValidateRepository(db password.ValidateDB, matcher password.Matcher) val
 	}
 }
 
-func (repo validateRepository) matchPassword(user data.User, password password.RawPassword) error {
-	hashed, err := repo.db.FindUserPassword(user)
+func (repo validateRepository) matchPassword(login password.Login, password password.RawPassword) (data.User, error) {
+	user, hashed, err := repo.db.FindPasswordByLogin(login)
 	if err != nil {
-		return err
+		return data.User{}, err
 	}
 
-	return repo.matcher.MatchPassword(hashed, password)
+	err = repo.matcher.MatchPassword(hashed, password)
+	if err != nil {
+		return data.User{}, err
+	}
+
+	return user, nil
 }

@@ -5,13 +5,17 @@ import (
 )
 
 type RegisterEventPublisher interface {
+	GetLogin(data.Request, data.User)
+	LoginNotFound(data.Request, data.User, error)
+
 	RegisterPassword(data.Request, data.User)
 	RegisterPasswordFailed(data.Request, data.User, error)
 	PasswordRegistered(data.Request, data.User)
 }
 
 type RegisterDB interface {
-	RegisterUserPassword(data.User, HashedPassword) error
+	FindLoginByUser(data.User) (Login, error)
+	RegisterPasswordOfUser(data.User, HashedPassword) error
 }
 
 type Generator interface {

@@ -9,11 +9,12 @@ import (
 
 var (
 	ErrValidateFailed = errors.New("password-validate-failed")
+	ErrLoginNotFound  = errors.New("password-login-not-found")
 	ErrRegisterFailed = errors.New("password-register-failed")
 )
 
 type Usecase interface {
-	Validate(data.Request, data.User, RawPassword) (
+	Validate(data.Request, Login, RawPassword) (
 		ticket.Ticket,
 		ticket.Nonce,
 		ticket.ApiToken,
@@ -21,7 +22,9 @@ type Usecase interface {
 		data.Expires,
 		error,
 	)
-	Register(data.Request, ticket.Ticket, ticket.Nonce, RegisterParam) error
+
+	GetLogin(data.Request, ticket.Ticket, ticket.Nonce) (Login, error)
+	Register(data.Request, ticket.Ticket, ticket.Nonce, Login, RegisterParam) error
 }
 
 type RegisterParam struct {

@@ -23,6 +23,10 @@ type errorResponseBody struct {
 	Message string `json:"message"`
 }
 
+type getLoginResponseBody struct {
+	LoginID string `json:"login_id"`
+}
+
 func NewResponse(cookie Cookie) Response {
 	return Response{
 		cookie: cookie,
@@ -54,6 +58,12 @@ func (response Response) Authenticated(
 
 func (response Response) OK(w http.ResponseWriter) {
 	jsonResponse(w, http.StatusOK, "OK")
+}
+
+func (response Response) Login(w http.ResponseWriter, login password.Login) {
+	jsonResponse(w, http.StatusOK, getLoginResponseBody{
+		LoginID: string(login.ID()),
+	})
 }
 
 func (response Response) Error(w http.ResponseWriter, err error) {
