@@ -15,6 +15,56 @@ import (
 	"errors"
 )
 
+// パスワードを取得
+func Example_getLogin() {
+	h := newRegisterTestHelper()
+	pub, db, gen, logger := h.setup()
+	h.registerLogin(db) // ログインID を登録
+
+	request, user := h.context()
+
+	registerer := newRegisterer(pub, db, gen)
+	login, err := registerer.getLogin(request, user)
+
+	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("login: %s\n", formatLogin(&login))
+	fmt.Printf("debug: %s\n", formatRegisterLog(logger.debug))
+	fmt.Printf("info: %s\n", formatRegisterLog(logger.info))
+	fmt.Printf("audit: %s\n", formatRegisterLog(logger.audit))
+
+	// Output:
+	// err: nil
+	// login: {register-login}
+	// debug: ["get login", req: {register-remote}, user: {register-user}, err: nil]
+	// info: []
+	// audit: []
+}
+
+// パスワードを取得
+func Example_getLogin_fail_LoginNotFound() {
+	h := newRegisterTestHelper()
+	pub, db, gen, logger := h.setup()
+	//h.registerLogin(db) // ログインID を登録しない
+
+	request, user := h.context()
+
+	registerer := newRegisterer(pub, db, gen)
+	login, err := registerer.getLogin(request, user)
+
+	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("login: %s\n", formatLogin(&login))
+	fmt.Printf("debug: %s\n", formatRegisterLog(logger.debug))
+	fmt.Printf("info: %s\n", formatRegisterLog(logger.info))
+	fmt.Printf("audit: %s\n", formatRegisterLog(logger.audit))
+
+	// Output:
+	// err: "login id not found"
+	// login: {}
+	// debug: ["get login", req: {register-remote}, user: {register-user}, err: nil]
+	// info: ["login not found", req: {register-remote}, user: {register-user}, err: "login id not found"]
+	// audit: []
+}
+
 // パスワードを保存したら audit: password registered
 func Example_register() {
 	h := newRegisterTestHelper()
@@ -34,9 +84,9 @@ func Example_register() {
 
 	// Output:
 	// err: nil
-	// debug: ["register password", req: {register-remote}, user: {register-test}, err: nil]
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
 	// info: []
-	// audit: ["password registered", req: {register-remote}, user: {register-test}, err: nil]
+	// audit: ["password registered", req: {register-remote}, user: {register-user}, err: nil]
 	// db: "password"
 }
 
@@ -59,8 +109,8 @@ func Example_register_fail_EmptyPassword() {
 
 	// Output:
 	// err: "password is empty"
-	// debug: ["register password", req: {register-remote}, user: {register-test}, err: nil]
-	// info: ["register password failed", req: {register-remote}, user: {register-test}, err: "password is empty"]
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
+	// info: ["register password failed", req: {register-remote}, user: {register-user}, err: "password is empty"]
 	// audit: []
 	// db: nil
 }
@@ -84,8 +134,8 @@ func Example_register_fail_LongPassword() {
 
 	// Output:
 	// err: "password is too long"
-	// debug: ["register password", req: {register-remote}, user: {register-test}, err: nil]
-	// info: ["register password failed", req: {register-remote}, user: {register-test}, err: "password is too long"]
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
+	// info: ["register password failed", req: {register-remote}, user: {register-user}, err: "password is too long"]
 	// audit: []
 	// db: nil
 }
@@ -109,9 +159,9 @@ func Example_register_LongPassword() {
 
 	// Output:
 	// err: nil
-	// debug: ["register password", req: {register-remote}, user: {register-test}, err: nil]
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
 	// info: []
-	// audit: ["password registered", req: {register-remote}, user: {register-test}, err: nil]
+	// audit: ["password registered", req: {register-remote}, user: {register-user}, err: nil]
 	// db: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 }
 
@@ -134,8 +184,8 @@ func Example_register_fail_FailureDB() {
 
 	// Output:
 	// err: "db error"
-	// debug: ["register password", req: {register-remote}, user: {register-test}, err: nil]
-	// info: ["register password failed", req: {register-remote}, user: {register-test}, err: "db error"]
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
+	// info: ["register password failed", req: {register-remote}, user: {register-user}, err: "db error"]
 	// audit: []
 }
 
@@ -149,6 +199,7 @@ type (
 
 		request data.Request
 		user    data.User
+		login   password.Login
 	}
 
 	registerTestLogEntry struct {
@@ -181,13 +232,15 @@ func newRegisterTestHelper() registerTestHelper {
 	gen := newRegisterTestGenerator()
 
 	request := data.NewRequest(data.RequestedAt{}, data.RemoteAddr("register-remote"))
-	user := data.NewUser("register-test")
+	user := data.NewUser("register-user")
+	login := password.NewLogin("register-login")
 
 	return registerTestHelper{
 		gen: gen,
 
 		request: request,
 		user:    user,
+		login:   login,
 	}
 }
 
@@ -201,6 +254,11 @@ func (h registerTestHelper) setup() (password.EventPublisher, *db.MemoryStore, p
 
 	return pub, db, h.gen, logger
 }
+
+func (h registerTestHelper) registerLogin(db *db.MemoryStore) {
+	db.RegisterUserLogin(h.user, h.login)
+}
+
 func (h registerTestHelper) context() (data.Request, data.User) {
 	return h.request, h.user
 }
