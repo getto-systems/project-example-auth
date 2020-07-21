@@ -21,6 +21,18 @@ func newRegisterer(
 	}
 }
 
+func (registerer registerer) getLogin(request data.Request, user data.User) (password.Login, error) {
+	registerer.pub.GetLogin(request, user)
+
+	login, err := registerer.repo.findLogin(user)
+	if err != nil {
+		registerer.pub.LoginNotFound(request, user, err)
+		return password.Login{}, err
+	}
+
+	return login, nil
+}
+
 func (registerer registerer) register(request data.Request, user data.User, password password.RawPassword) error {
 	registerer.pub.RegisterPassword(request, user)
 
@@ -53,11 +65,15 @@ func newRegisterRepository(db password.RegisterDB, gen password.Generator) regis
 	}
 }
 
+func (repo registerRepository) findLogin(user data.User) (password.Login, error) {
+	return repo.db.FindLoginByUser(user)
+}
+
 func (repo registerRepository) registerPassword(user data.User, password password.RawPassword) error {
 	hashed, err := repo.gen.GeneratePassword(password)
 	if err != nil {
 		return err
 	}
 
-	return repo.db.RegisterUserPassword(user, hashed)
+	return repo.db.RegisterPasswordOfUser(user, hashed)
 }

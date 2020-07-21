@@ -5,12 +5,11 @@ import (
 
 	"github.com/getto-systems/project-example-id/http_handler"
 
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/password"
 )
 
 type validateInput struct {
-	UserID   string `json:"user_id"`
+	LoginID  string `json:"login_id"`
 	Password string `json:"password"`
 }
 
@@ -20,13 +19,13 @@ func (h Handler) Validate(w http.ResponseWriter, r *http.Request) {
 
 	logger.DebugMessage("handling password/validate")
 
-	user, password, err := validateParam(r, logger)
+	login, password, err := validateParam(r, logger)
 	if err != nil {
 		h.response.Error(w, err)
 		return
 	}
 
-	ticket, nonce, apiToken, contentToken, expires, err := h.password.Validate(request, user, password)
+	ticket, nonce, apiToken, contentToken, expires, err := h.password.Validate(request, login, password)
 	if err != nil {
 		h.response.ResetCookie(w)
 		h.response.Error(w, err)
@@ -36,14 +35,14 @@ func (h Handler) Validate(w http.ResponseWriter, r *http.Request) {
 	h.response.Authenticated(w, ticket, nonce, apiToken, contentToken, expires, logger)
 }
 
-func validateParam(r *http.Request, logger http_handler.Logger) (data.User, password.RawPassword, error) {
+func validateParam(r *http.Request, logger http_handler.Logger) (password.Login, password.RawPassword, error) {
 	var input validateInput
 	err := http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return data.User{}, password.RawPassword(""), err
+		return password.Login{}, password.RawPassword(""), err
 	}
 
-	user := data.NewUser(data.UserID(input.UserID))
+	login := password.NewLogin(password.LoginID(input.LoginID))
 
-	return user, password.RawPassword(input.Password), nil
+	return login, password.RawPassword(input.Password), nil
 }

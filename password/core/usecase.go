@@ -30,7 +30,7 @@ func NewUsecase(
 	}
 }
 
-func (usecase usecase) Validate(request data.Request, user data.User, rawPassword password.RawPassword) (
+func (usecase usecase) Validate(request data.Request, login password.Login, rawPassword password.RawPassword) (
 	ticket.Ticket,
 	ticket.Nonce,
 	ticket.ApiToken,
@@ -38,7 +38,7 @@ func (usecase usecase) Validate(request data.Request, user data.User, rawPasswor
 	data.Expires,
 	error,
 ) {
-	err := usecase.validator.validate(request, user, rawPassword)
+	user, err := usecase.validator.validate(request, login, rawPassword)
 	if err != nil {
 		return nil, "", nil, nil, data.Expires{}, password.ErrValidateFailed
 	}
@@ -56,18 +56,37 @@ func (usecase usecase) Validate(request data.Request, user data.User, rawPasswor
 	return newTicket, nonce, apiToken, contentToken, expires, nil
 }
 
+func (usecase usecase) GetLogin(
+	request data.Request,
+	ticket ticket.Ticket,
+	nonce ticket.Nonce,
+) (password.Login, error) {
+	user, err := usecase.ticket.Validate(request, ticket, nonce)
+	if err != nil {
+		return password.Login{}, err
+	}
+
+	login, err := usecase.registerer.getLogin(request, user)
+	if err != nil {
+		return password.Login{}, password.ErrLoginNotFound
+	}
+
+	return login, nil
+}
+
 func (usecase usecase) Register(
 	request data.Request,
 	ticket ticket.Ticket,
 	nonce ticket.Nonce,
+	login password.Login,
 	param password.RegisterParam,
 ) error {
 	user, err := usecase.ticket.Validate(request, ticket, nonce)
 	if err != nil {
-		return password.ErrRegisterFailed
+		return err
 	}
 
-	err = usecase.validator.validate(request, user, param.OldPassword)
+	user, err = usecase.validator.validate(request, login, param.OldPassword)
 	if err != nil {
 		return password.ErrRegisterFailed
 	}
