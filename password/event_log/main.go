@@ -107,6 +107,16 @@ func (log EventLogger) IssueResetFailed(request data.Request, login password.Log
 	})
 }
 
+func (log EventLogger) IssuedReset(request data.Request, login password.Login, expires data.Expires, reset password.Reset, _ password.ResetToken) {
+	log.logger.Debug(event_log.Entry{
+		Message: "issue reset",
+		Request: request,
+		Reset:   &reset,
+		Login:   &login,
+		Expires: &expires,
+	})
+}
+
 func (log EventLogger) GetResetStatus(request data.Request, reset password.Reset) {
 	log.logger.Debug(event_log.Entry{
 		Message: "get reset status",
