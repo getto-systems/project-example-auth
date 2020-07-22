@@ -19,16 +19,15 @@ func (h Handler) Validate(w http.ResponseWriter, r *http.Request) {
 
 	logger.DebugMessage("handling password/validate")
 
-	login, password, err := validateParam(r, logger)
+	login, raw, err := validateParam(r, logger)
 	if err != nil {
-		h.response.Error(w, err)
+		h.response.BadRequest(w, err)
 		return
 	}
 
-	ticket, nonce, apiToken, contentToken, expires, err := h.password.Validate(request, login, password)
+	ticket, nonce, apiToken, contentToken, expires, err := h.password.Validate(request, login, raw)
 	if err != nil {
-		h.response.ResetCookie(w)
-		h.response.Error(w, err)
+		h.errorResponse(w, err)
 		return
 	}
 

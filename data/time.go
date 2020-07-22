@@ -9,6 +9,8 @@ type (
 	ExtendLimit time.Time
 	Expires     time.Time
 	Second      int64
+
+	Time time.Time
 )
 
 func Now() RequestedAt {
@@ -34,6 +36,10 @@ func (requestedAt RequestedAt) ExtendLimit(second Second) ExtendLimit {
 func (requestedAt RequestedAt) addSecond(second Second) time.Time {
 	duration := time.Duration(second * 1_000_000_000)
 	return time.Time(requestedAt).Add(duration)
+}
+
+func (requestedAt RequestedAt) Time() Time {
+	return Time(requestedAt)
 }
 
 func (requestedAt RequestedAt) Expired(expires Expires) bool {

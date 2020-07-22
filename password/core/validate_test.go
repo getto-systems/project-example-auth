@@ -67,39 +67,11 @@ func Example_validate_fail_DifferentPassword() {
 	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not matched"]
 }
 
-// ログインID が見つからない場合は認証失敗
-func Example_validate_fail_LoginNotFound() {
-	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
-	//h.registerPassword(db, password.HashedPassword("password")) // パスワードの登録はしない
-	//h.registerLogin(db) // ログインID も登録しない
-
-	request, login := h.context()
-	raw := password.RawPassword("password") // このユーザーのパスワードは登録されていない
-
-	validator := newValidator(pub, db, matcher)
-	user, err := validator.validate(request, login, raw)
-
-	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
-
-	// Output:
-	// err: "user id not found"
-	// user: {}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
-	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "user id not found"]
-}
-
 // パスワードが見つからない場合は認証失敗
 func Example_validate_fail_PasswordNotFound() {
 	h := newValidateTestHelper()
 	pub, db, matcher, logger := h.setup()
 	//h.registerPassword(db, password.HashedPassword("password")) // パスワードの登録はしない
-	h.registerLogin(db) // ログインID は登録する
 
 	request, login := h.context()
 	raw := password.RawPassword("password") // このユーザーのパスワードは登録されていない
@@ -114,11 +86,11 @@ func Example_validate_fail_PasswordNotFound() {
 	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
 
 	// Output:
-	// err: "user password not found"
+	// err: "password not found"
 	// user: {}
 	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "user password not found"]
+	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not found"]
 }
 
 // 空のパスワードの場合、必ず失敗する
@@ -255,11 +227,8 @@ func (h validateTestHelper) setup() (password.EventPublisher, *db.MemoryStore, p
 }
 
 func (h validateTestHelper) registerPassword(db *db.MemoryStore, password password.HashedPassword) {
-	db.RegisterPasswordOfUser(h.user, password)
-	db.RegisterUserLogin(h.user, h.login)
-}
-func (h validateTestHelper) registerLogin(db *db.MemoryStore) {
-	db.RegisterUserLogin(h.user, h.login)
+	db.RegisterPassword(h.user, password)
+	db.RegisterLogin(h.user, h.login)
 }
 
 func (h validateTestHelper) context() (data.Request, password.Login) {
