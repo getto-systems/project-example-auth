@@ -98,8 +98,8 @@ func (usecase usecase) Register(
 	return nil
 }
 
-func (usecase usecase) IssueResetToken(request data.Request, login password.Login) (password.Reset, error) {
-	reset, err := usecase.resetter.issueResetToken(request, login)
+func (usecase usecase) IssueReset(request data.Request, login password.Login) (password.Reset, error) {
+	reset, err := usecase.resetter.issueReset(request, login)
 	if err != nil {
 		return password.Reset{}, err
 	}

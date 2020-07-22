@@ -88,18 +88,18 @@ func (log EventLogger) RegisteredPassword(request data.Request, user data.User) 
 	})
 }
 
-func (log EventLogger) IssueResetToken(request data.Request, login password.Login, expires data.Expires) {
+func (log EventLogger) IssueReset(request data.Request, login password.Login, expires data.Expires) {
 	log.logger.Debug(event_log.Entry{
-		Message: "issue reset token",
+		Message: "issue reset",
 		Request: request,
 		Login:   &login,
 		Expires: &expires,
 	})
 }
 
-func (log EventLogger) IssueResetTokenFailed(request data.Request, login password.Login, expires data.Expires, err error) {
+func (log EventLogger) IssueResetFailed(request data.Request, login password.Login, expires data.Expires, err error) {
 	log.logger.Info(event_log.Entry{
-		Message: "issue reset token failed",
+		Message: "issue reset failed",
 		Request: request,
 		Login:   &login,
 		Expires: &expires,

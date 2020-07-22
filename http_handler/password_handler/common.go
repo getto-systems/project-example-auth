@@ -52,13 +52,3 @@ func (h Handler) errorResponse(w http.ResponseWriter, err error) {
 		h.response.InternalServerError(w, err)
 	}
 }
-
-type loginResponseBody struct {
-	LoginID string `json:"login_id"`
-}
-
-func (h Handler) loginResponse(w http.ResponseWriter, login password.Login) {
-	http_handler.JsonResponse(w, http.StatusOK, loginResponseBody{
-		LoginID: string(login.ID()),
-	})
-}

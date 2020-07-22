@@ -18,7 +18,7 @@ type Usecase interface {
 	GetLogin(data.Request, ticket.Ticket, ticket.Nonce) (Login, error)
 	Register(data.Request, ticket.Ticket, ticket.Nonce, Login, RegisterParam) error
 
-	IssueResetToken(data.Request, Login) (Reset, error)
+	IssueReset(data.Request, Login) (Reset, error)
 	GetResetStatus(data.Request, Reset) (ResetStatus, error)
 	Reset(data.Request, Login, ResetToken, RawPassword) (
 		ticket.Ticket,

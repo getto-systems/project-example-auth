@@ -12,8 +12,8 @@ var (
 )
 
 type ResetEventPublisher interface {
-	IssueResetToken(data.Request, Login, data.Expires)
-	IssueResetTokenFailed(data.Request, Login, data.Expires, error)
+	IssueReset(data.Request, Login, data.Expires)
+	IssueResetFailed(data.Request, Login, data.Expires, error)
 
 	GetResetStatus(data.Request, Reset)
 	GetResetStatusFailed(data.Request, Reset, error)

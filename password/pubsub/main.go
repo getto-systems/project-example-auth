@@ -69,15 +69,15 @@ func (pubsub *PubSub) RegisteredPassword(request data.Request, user data.User) {
 	}
 }
 
-func (pubsub *PubSub) IssueResetToken(request data.Request, login password.Login, expires data.Expires) {
+func (pubsub *PubSub) IssueReset(request data.Request, login password.Login, expires data.Expires) {
 	for _, handler := range pubsub.handlers {
-		handler.IssueResetToken(request, login, expires)
+		handler.IssueReset(request, login, expires)
 	}
 }
 
-func (pubsub *PubSub) IssueResetTokenFailed(request data.Request, login password.Login, expires data.Expires, err error) {
+func (pubsub *PubSub) IssueResetFailed(request data.Request, login password.Login, expires data.Expires, err error) {
 	for _, handler := range pubsub.handlers {
-		handler.IssueResetTokenFailed(request, login, expires, err)
+		handler.IssueResetFailed(request, login, expires, err)
 	}
 }
 

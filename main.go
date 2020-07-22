@@ -94,6 +94,13 @@ func (server server) handle(w http.ResponseWriter, r *http.Request) {
 	case "password/register":
 		server.handler.password.Register(w, r)
 
+	case "password/issue_reset":
+		server.handler.password.IssueReset(w, r)
+	case "password/reset_status":
+		server.handler.password.GetResetStatus(w, r)
+	case "password/reset":
+		server.handler.password.Reset(w, r)
+
 	case "ticket/extend":
 		server.handler.ticket.Extend(w, r)
 	case "ticket/shrink":

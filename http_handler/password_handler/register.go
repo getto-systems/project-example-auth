@@ -38,7 +38,17 @@ func (h Handler) GetLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.loginResponse(w, login)
+	loginResponse(w, login)
+}
+
+type loginResponseBody struct {
+	LoginID string `json:"login_id"`
+}
+
+func loginResponse(w http.ResponseWriter, login password.Login) {
+	http_handler.JsonResponse(w, http.StatusOK, loginResponseBody{
+		LoginID: string(login.ID()),
+	})
 }
 
 func getLoginParam(r *http.Request, logger http_handler.Logger) (

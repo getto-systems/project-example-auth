@@ -22,13 +22,13 @@ func newResetter(
 	}
 }
 
-func (resetter resetter) issueResetToken(request data.Request, login password.Login) (password.Reset, error) {
+func (resetter resetter) issueReset(request data.Request, login password.Login) (password.Reset, error) {
 	expires := resetter.exp.Expires(request)
-	resetter.pub.IssueResetToken(request, login, expires)
+	resetter.pub.IssueReset(request, login, expires)
 
 	reset, err := resetter.repo.register(login, request, expires)
 	if err != nil {
-		resetter.pub.IssueResetTokenFailed(request, login, expires, err)
+		resetter.pub.IssueResetFailed(request, login, expires, err)
 		return password.Reset{}, err
 	}
 
