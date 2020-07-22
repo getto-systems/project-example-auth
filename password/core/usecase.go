@@ -18,56 +18,57 @@ func NewUsecase(
 	logger password.Logger,
 	db password.DB,
 
-	matcher password.Matcher,
-	gen password.Generator,
-	resetGen password.ResetGenerator,
+	exp password.Expiration,
+	encrypter password.Encrypter,
+	gen password.ResetGenerator,
 
 	ticket ticket.Usecase,
 ) password.Usecase {
 	return usecase{
-		validator:  newValidator(logger, db, matcher),
-		registerer: newRegisterer(logger, db, gen),
-		resetter:   newResetter(logger, db, resetGen),
+		validator:  newValidator(logger, db, encrypter),
+		registerer: newRegisterer(logger, db, encrypter),
+		resetter:   newResetter(logger, db, exp, gen),
 
 		ticket: ticket,
 	}
 }
 
-func (usecase usecase) Validate(request data.Request, login password.Login, rawPassword password.RawPassword) (
-	ticket.Ticket,
-	ticket.Nonce,
-	ticket.ApiToken,
-	ticket.ContentToken,
-	data.Expires,
-	error,
+func (usecase usecase) Validate(
+	request data.Request,
+	login password.Login,
+	rawPassword password.RawPassword,
+) (
+	ticket ticket.Ticket,
+	nonce ticket.Nonce,
+	api ticket.ApiToken,
+	content ticket.ContentToken,
+	expires data.Expires,
+	err error,
 ) {
 	user, err := usecase.validator.validate(request, login, rawPassword)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
+		return
 	}
 
-	newTicket, nonce, expires, err := usecase.ticket.Issue(request, user)
-	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
-	}
-
-	apiToken, contentToken, err := usecase.ticket.IssueToken(request, user, expires)
-	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
-	}
-
-	return newTicket, nonce, apiToken, contentToken, expires, nil
+	return usecase.issueTicket(request, user)
 }
 
-func (usecase usecase) GetLogin(request data.Request, ticket ticket.Ticket, nonce ticket.Nonce) (password.Login, error) {
+func (usecase usecase) GetLogin(
+	request data.Request,
+	ticket ticket.Ticket,
+	nonce ticket.Nonce,
+) (
+	login password.Login,
+	err error,
+) {
 	user, err := usecase.ticket.Validate(request, ticket, nonce)
 	if err != nil {
-		return password.Login{}, err
+		return
 	}
 
-	login, err := usecase.registerer.getLogin(request, user)
+	login, err = usecase.registerer.getLogin(request, user)
 	if err != nil {
-		return password.Login{}, password.ErrLoginNotFound
+		return
 	}
 
 	return login, nil
@@ -79,39 +80,31 @@ func (usecase usecase) Register(
 	nonce ticket.Nonce,
 	login password.Login,
 	param password.RegisterParam,
-) error {
+) (err error) {
 	user, err := usecase.ticket.Validate(request, ticket, nonce)
 	if err != nil {
-		return err
+		return
 	}
 
 	user, err = usecase.validator.validate(request, login, param.OldPassword)
 	if err != nil {
-		return err
+		return
 	}
 
 	err = usecase.registerer.register(request, user, param.NewPassword)
 	if err != nil {
-		return err
+		return
 	}
 
 	return nil
 }
 
 func (usecase usecase) IssueReset(request data.Request, login password.Login) (password.Reset, error) {
-	reset, err := usecase.resetter.issueReset(request, login)
-	if err != nil {
-		return password.Reset{}, err
-	}
-	return reset, nil
+	return usecase.resetter.issueReset(request, login)
 }
 
 func (usecase usecase) GetResetStatus(request data.Request, reset password.Reset) (password.ResetStatus, error) {
-	status, err := usecase.resetter.getResetStatus(request, reset)
-	if err != nil {
-		return password.ResetStatus{}, err
-	}
-	return status, nil
+	return usecase.resetter.getResetStatus(request, reset)
 }
 
 func (usecase usecase) Reset(
@@ -120,32 +113,46 @@ func (usecase usecase) Reset(
 	token password.ResetToken,
 	newPassword password.RawPassword,
 ) (
-	ticket.Ticket,
-	ticket.Nonce,
-	ticket.ApiToken,
-	ticket.ContentToken,
-	data.Expires,
-	error,
+	ticket ticket.Ticket,
+	nonce ticket.Nonce,
+	api ticket.ApiToken,
+	content ticket.ContentToken,
+	expires data.Expires,
+	err error,
 ) {
 	user, err := usecase.resetter.validate(request, login, token)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
+		return
 	}
 
 	err = usecase.registerer.register(request, user, newPassword)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
+		return
 	}
 
-	newTicket, nonce, expires, err := usecase.ticket.Issue(request, user)
+	return usecase.issueTicket(request, user)
+}
+
+func (usecase usecase) issueTicket(
+	request data.Request,
+	user data.User,
+) (
+	ticket ticket.Ticket,
+	nonce ticket.Nonce,
+	api ticket.ApiToken,
+	content ticket.ContentToken,
+	expires data.Expires,
+	err error,
+) {
+	ticket, nonce, expires, err = usecase.ticket.Issue(request, user)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
+		return
 	}
 
-	apiToken, contentToken, err := usecase.ticket.IssueToken(request, user, expires)
+	api, content, err = usecase.ticket.IssueToken(request, user, expires)
 	if err != nil {
-		return nil, "", nil, nil, data.Expires{}, err
+		return
 	}
 
-	return newTicket, nonce, apiToken, contentToken, expires, nil
+	return ticket, nonce, api, content, expires, nil
 }

@@ -47,10 +47,6 @@ func NewPassword(user data.User, hashed HashedPassword) Password {
 	}
 }
 
-func (password Password) User() data.User {
-	return password.user
-}
-
 func NewReset(resetID ResetID) Reset {
 	return Reset{
 		id: resetID,

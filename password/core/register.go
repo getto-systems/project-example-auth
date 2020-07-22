@@ -7,6 +7,7 @@ import (
 
 type registerer struct {
 	logger password.RegisterLogger
+	gen    password.Generator
 	repo   registerRepository
 }
 
@@ -17,71 +18,74 @@ func newRegisterer(
 ) registerer {
 	return registerer{
 		logger: logger,
+		gen:    gen,
 		repo:   newRegisterRepository(db, gen),
 	}
 }
 
-func (registerer registerer) getLogin(request data.Request, user data.User) (password.Login, error) {
+func (registerer registerer) getLogin(request data.Request, user data.User) (login password.Login, err error) {
 	registerer.logger.TryToGetLogin(request, user)
+	defer func() {
+		if err != nil {
+			registerer.logger.FailedToGetLogin(request, user, err)
+		}
+	}()
 
-	login, err := registerer.repo.findLogin(user)
+	login, err = registerer.repo.findLogin(user)
 	if err != nil {
-		registerer.logger.FailedToGetLogin(request, user, err)
-		return password.Login{}, err
+		return login, err
 	}
 
 	return login, nil
 }
 
-func (registerer registerer) register(request data.Request, user data.User, password password.RawPassword) error {
+func (registerer registerer) register(request data.Request, user data.User, password password.RawPassword) (err error) {
 	registerer.logger.TryToRegister(request, user)
+	defer func() {
+		if err == nil {
+			registerer.logger.Registered(request, user)
+		} else {
+			registerer.logger.FailedToRegister(request, user, err)
+		}
+	}()
 
-	err := registerer.repo.register(user, password)
+	err = checkPassword(password)
 	if err != nil {
-		registerer.logger.FailedToRegister(request, user, err)
 		return err
 	}
 
-	registerer.logger.Registered(request, user)
+	hashed, err := registerer.gen.GeneratePassword(password)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return registerer.repo.register(user, hashed)
 }
 
 type registerRepository struct {
-	db  password.RegisterDB
-	gen password.Generator
+	db password.RegisterDB
 }
 
 func newRegisterRepository(db password.RegisterDB, gen password.Generator) registerRepository {
 	return registerRepository{
-		db:  db,
-		gen: gen,
+		db: db,
 	}
 }
 
-func (repo registerRepository) findLogin(user data.User) (password.Login, error) {
+func (repo registerRepository) findLogin(user data.User) (login password.Login, err error) {
 	loginSlice, err := repo.db.FilterLogin(user)
 	if err != nil {
-		return password.Login{}, err
+		return
 	}
 
 	if len(loginSlice) == 0 {
-		return password.Login{}, password.ErrLoginNotFound
+		err = password.ErrLoginNotFound
+		return
 	}
 
 	return loginSlice[0], nil
 }
 
-func (repo registerRepository) register(user data.User, password password.RawPassword) error {
-	err := checkPassword(password)
-	if err != nil {
-		return err
-	}
-
-	hashed, err := repo.gen.GeneratePassword(password)
-	if err != nil {
-		return err
-	}
-
+func (repo registerRepository) register(user data.User, hashed password.HashedPassword) error {
 	return repo.db.RegisterPassword(user, hashed)
 }

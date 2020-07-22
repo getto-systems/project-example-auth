@@ -19,8 +19,8 @@ func (log Logger) FailedToIssueReset(request data.Request, login password.Login,
 	log.logger.Info(resetEntry("FailedToIssueReset", request, &login, nil, nil, &expires, err))
 }
 
-func (log Logger) IssuedReset(request data.Request, reset password.Reset, user data.User, expires data.Expires) {
-	log.logger.Audit(resetEntry("IssuedReset", request, nil, &reset, &user, &expires, nil))
+func (log Logger) IssuedReset(request data.Request, login password.Login, expires data.Expires, reset password.Reset, user data.User) {
+	log.logger.Audit(resetEntry("IssuedReset", request, &login, &reset, &user, &expires, nil))
 }
 
 func (log Logger) TryToGetResetStatus(request data.Request, reset password.Reset) {

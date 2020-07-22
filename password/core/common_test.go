@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
@@ -54,10 +55,26 @@ func formatLogin(login *password.Login) string {
 	}
 }
 
+func formatReset(reset *password.Reset) string {
+	if reset == nil {
+		return "nil"
+	} else {
+		return fmt.Sprintf("{%s}", reset.ID())
+	}
+}
+
 func formatUser(user *data.User) string {
 	if user == nil {
 		return "nil"
 	} else {
 		return fmt.Sprintf("{%s}", user.UserID())
+	}
+}
+
+func formatExpires(expires *data.Expires) string {
+	if expires == nil {
+		return "nil"
+	} else {
+		return fmt.Sprintf("\"%s\"", time.Time(*expires).String())
 	}
 }

@@ -14,7 +14,7 @@ var (
 type ResetLogger interface {
 	TryToIssueReset(data.Request, Login, data.Expires)
 	FailedToIssueReset(data.Request, Login, data.Expires, error)
-	IssuedReset(data.Request, Reset, data.User, data.Expires)
+	IssuedReset(data.Request, Login, data.Expires, Reset, data.User)
 
 	TryToGetResetStatus(data.Request, Reset)
 	FailedToGetResetStatus(data.Request, Reset, error)

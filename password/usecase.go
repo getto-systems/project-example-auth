@@ -30,6 +30,11 @@ type Usecase interface {
 	)
 }
 
+type Encrypter interface {
+	Generator
+	Matcher
+}
+
 type RegisterParam struct {
 	OldPassword RawPassword
 	NewPassword RawPassword

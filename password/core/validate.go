@@ -6,8 +6,9 @@ import (
 )
 
 type validator struct {
-	logger password.ValidateLogger
-	repo   validateRepository
+	logger  password.ValidateLogger
+	matcher password.Matcher
+	repo    validateRepository
 }
 
 func newValidator(
@@ -16,64 +17,58 @@ func newValidator(
 	matcher password.Matcher,
 ) validator {
 	return validator{
-		logger: logger,
-		repo:   newValidateRepository(db, matcher),
+		logger:  logger,
+		matcher: matcher,
+		repo:    newValidateRepository(db),
 	}
 }
 
-func (validator validator) validate(request data.Request, login password.Login, password password.RawPassword) (data.User, error) {
+func (validator validator) validate(
+	request data.Request,
+	login password.Login,
+	raw password.RawPassword,
+) (user data.User, err error) {
 	validator.logger.TryToValidate(request, login)
+	defer func() {
+		if err == nil {
+			validator.logger.AuthedByPassword(request, login, user)
+		} else {
+			validator.logger.FailedToValidate(request, login, err)
+		}
+	}()
 
-	user, err := validator.repo.match(login, password)
+	err = checkPassword(raw)
 	if err != nil {
-		validator.logger.FailedToValidate(request, login, err)
-		return data.User{}, err
+		return
 	}
 
-	validator.logger.AuthedByPassword(request, login, user)
+	pass, err := validator.repo.findPassword(login)
+	if err != nil {
+		return
+	}
 
-	return user, nil
+	return pass.Match(validator.matcher, raw)
 }
 
 type validateRepository struct {
-	db      password.ValidateDB
-	matcher password.Matcher
+	db password.ValidateDB
 }
 
-func newValidateRepository(db password.ValidateDB, matcher password.Matcher) validateRepository {
+func newValidateRepository(db password.ValidateDB) validateRepository {
 	return validateRepository{
-		db:      db,
-		matcher: matcher,
+		db: db,
 	}
 }
 
-func (repo validateRepository) match(login password.Login, raw password.RawPassword) (data.User, error) {
-	err := checkPassword(raw)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	password, err := repo.findPassword(login)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	err = password.Match(repo.matcher, raw)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	return password.User(), nil
-}
-
-func (repo validateRepository) findPassword(login password.Login) (password.Password, error) {
+func (repo validateRepository) findPassword(login password.Login) (pass password.Password, err error) {
 	passwordSlice, err := repo.db.FilterPassword(login)
 	if err != nil {
-		return password.Password{}, err
+		return
 	}
 
 	if len(passwordSlice) == 0 {
-		return password.Password{}, password.ErrPasswordNotFound
+		err = password.ErrPasswordNotFound
+		return
 	}
 
 	return passwordSlice[0], nil
