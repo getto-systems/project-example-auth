@@ -12,6 +12,7 @@ import (
 	"github.com/getto-systems/project-example-id/adapter/logger"
 	"github.com/getto-systems/project-example-id/adapter/nonce_generator"
 	"github.com/getto-systems/project-example-id/adapter/password_encrypter"
+	"github.com/getto-systems/project-example-id/adapter/reset_generator"
 	"github.com/getto-systems/project-example-id/adapter/signer"
 
 	"github.com/getto-systems/project-example-id/http_handler"
@@ -93,6 +94,13 @@ func (server server) handle(w http.ResponseWriter, r *http.Request) {
 	case "password/register":
 		server.handler.password.Register(w, r)
 
+	case "password/issue_reset":
+		server.handler.password.IssueReset(w, r)
+	case "password/reset_status":
+		server.handler.password.GetResetStatus(w, r)
+	case "password/reset":
+		server.handler.password.Reset(w, r)
+
 	case "ticket/extend":
 		server.handler.ticket.Extend(w, r)
 	case "ticket/shrink":
@@ -172,6 +180,7 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 	db := password_db.NewMemoryStore()
 
 	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
+	generator := reset_generator.NewResetGenerator()
 
 	initAdminPassword(db, encrypter)
 
@@ -181,6 +190,7 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 
 		encrypter,
 		encrypter,
+		generator,
 
 		ticket,
 	)
@@ -193,11 +203,11 @@ func initAdminPassword(db *password_db.MemoryStore, gen password.Generator) {
 	user := data.NewUser(data.UserID(admin_user_id))
 	login := password.NewLogin(password.LoginID(admin_login_id))
 
-	db.RegisterUserLogin(user, login)
+	db.RegisterLogin(user, login)
 
 	p, err := gen.GeneratePassword(password.RawPassword(admin_password))
 	if err == nil {
-		db.RegisterPasswordOfUser(data.NewUser(data.UserID(admin_user_id)), p)
+		db.RegisterPassword(data.NewUser(data.UserID(admin_user_id)), p)
 	}
 }
 

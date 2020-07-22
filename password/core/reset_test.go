@@ -1,5 +1,6 @@
 package core
 
+/*
 import (
 	"fmt"
 	"strings"
@@ -11,11 +12,13 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
 	"github.com/getto-systems/project-example-id/password"
+
+	"errors"
 )
 
-// ログインID を取得
-func Example_getLogin() {
-	h := newRegisterTestHelper()
+// リセットトークン発行
+func Example_issueResetToken() {
+	h := newResetTestHelper()
 	pub, db, gen, logger := h.setup()
 	h.registerLogin(db) // ログインID を登録
 
@@ -56,10 +59,10 @@ func Example_getLogin_fail_LoginNotFound() {
 	fmt.Printf("audit: %s\n", formatRegisterLog(logger.audit))
 
 	// Output:
-	// err: "login not found"
+	// err: "login id not found"
 	// login: {}
 	// debug: ["get login", req: {register-remote}, user: {register-user}, err: nil]
-	// info: ["get login failed", req: {register-remote}, user: {register-user}, err: "login not found"]
+	// info: ["login not found", req: {register-remote}, user: {register-user}, err: "login id not found"]
 	// audit: []
 }
 
@@ -163,7 +166,33 @@ func Example_register_LongPassword() {
 	// db: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 }
 
+// DB エラーの場合、登録は失敗する
+func Example_register_fail_FailureDB() {
+	h := newRegisterTestHelper()
+	pub, _, gen, logger := h.setup()
+	failure_db := newRegisterTestFailureDB() // 登録で error を返す DB
+
+	request, user := h.context()
+	raw := password.RawPassword("password")
+
+	registerer := newRegisterer(pub, failure_db, gen)
+	err := registerer.register(request, user, raw)
+
+	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("debug: %s\n", formatRegisterLog(logger.debug))
+	fmt.Printf("info: %s\n", formatRegisterLog(logger.info))
+	fmt.Printf("audit: %s\n", formatRegisterLog(logger.audit))
+
+	// Output:
+	// err: "db error"
+	// debug: ["register password", req: {register-remote}, user: {register-user}, err: nil]
+	// info: ["register password failed", req: {register-remote}, user: {register-user}, err: "db error"]
+	// audit: []
+}
+
 type (
+	registerTestFailureDB struct{}
+
 	registerTestGenerator struct{}
 
 	registerTestHelper struct {
@@ -179,6 +208,18 @@ type (
 		err     error
 	}
 )
+
+func newRegisterTestFailureDB() registerTestFailureDB {
+	return registerTestFailureDB{}
+}
+
+func (registerTestFailureDB) FindLoginByUser(data.User) (password.Login, error) {
+	return password.Login{}, errors.New("db error")
+}
+
+func (registerTestFailureDB) RegisterPasswordOfUser(data.User, password.HashedPassword) error {
+	return errors.New("db error")
+}
 
 func newRegisterTestGenerator() registerTestGenerator {
 	return registerTestGenerator{}
@@ -216,7 +257,7 @@ func (h registerTestHelper) setup() (password.EventPublisher, *db.MemoryStore, p
 }
 
 func (h registerTestHelper) registerLogin(db *db.MemoryStore) {
-	db.RegisterLogin(h.user, h.login)
+	db.RegisterUserLogin(h.user, h.login)
 }
 
 func (h registerTestHelper) context() (data.Request, data.User) {
@@ -245,3 +286,4 @@ func (h registerTestHelper) formatDB(db *db.MemoryStore) string {
 		return fmt.Sprintf("\"%s\"", password)
 	}
 }
+*/

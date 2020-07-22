@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/ticket"
 )
 
@@ -21,10 +20,6 @@ type authenticatedResponseBody struct {
 
 type errorResponseBody struct {
 	Message string `json:"message"`
-}
-
-type getLoginResponseBody struct {
-	LoginID string `json:"login_id"`
 }
 
 func NewResponse(cookie Cookie) Response {
@@ -50,24 +45,37 @@ func (response Response) Authenticated(
 	response.cookie.setTicket(w, ticket, expires)
 	response.cookie.setContentToken(w, contentToken, expires)
 
-	jsonResponse(w, http.StatusOK, authenticatedResponseBody{
+	JsonResponse(w, http.StatusOK, authenticatedResponseBody{
 		Token: apiToken,
 		Nonce: string(nonce),
 	})
 }
 
 func (response Response) OK(w http.ResponseWriter) {
-	jsonResponse(w, http.StatusOK, "OK")
-}
-
-func (response Response) Login(w http.ResponseWriter, login password.Login) {
-	jsonResponse(w, http.StatusOK, getLoginResponseBody{
-		LoginID: string(login.ID()),
-	})
+	JsonResponse(w, http.StatusOK, "OK")
 }
 
 func (response Response) Error(w http.ResponseWriter, err error) {
-	jsonResponse(w, status(err), errorResponseBody{
+	JsonResponse(w, status(err), errorResponseBody{
+		Message: err.Error(),
+	})
+}
+
+func (response Response) BadRequest(w http.ResponseWriter, err error) {
+	JsonResponse(w, http.StatusBadRequest, errorResponseBody{
+		Message: err.Error(),
+	})
+}
+
+func (response Response) Unauthorized(w http.ResponseWriter, err error) {
+	JsonResponse(w, http.StatusUnauthorized, errorResponseBody{
+		Message: err.Error(),
+	})
+}
+
+func (response Response) InternalServerError(w http.ResponseWriter, err error) {
+	// TODO ここで slack とかにログを送信したい
+	JsonResponse(w, http.StatusInternalServerError, errorResponseBody{
 		Message: err.Error(),
 	})
 }
@@ -76,16 +84,14 @@ func status(err error) int {
 	switch err {
 	case
 		ErrEmptyBody,
-		ErrBodyParseFailed,
-		password.ErrRegisterFailed:
+		ErrBodyParseFailed:
 
 		return http.StatusBadRequest
 
 	case
 		ErrTicketCookieNotFound,
 		ticket.ErrValidateFailed,
-		ticket.ErrExtendFailed,
-		password.ErrValidateFailed:
+		ticket.ErrExtendFailed:
 
 		return http.StatusUnauthorized
 
@@ -94,7 +100,7 @@ func status(err error) int {
 	}
 }
 
-func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
+func JsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 
 	jsonData, err := json.Marshal(data)

@@ -17,6 +17,7 @@ type Entry struct {
 	Request data.Request
 	Nonce   *ticket.Nonce
 	Login   *password.Login
+	Reset   *password.Reset
 	User    *data.User
 	Roles   *data.Roles
 	Expires *data.Expires

@@ -53,16 +53,29 @@ func newValidateRepository(db password.ValidateDB, matcher password.Matcher) val
 	}
 }
 
-func (repo validateRepository) matchPassword(login password.Login, password password.RawPassword) (data.User, error) {
-	user, hashed, err := repo.db.FindPasswordByLogin(login)
+func (repo validateRepository) matchPassword(login password.Login, raw password.RawPassword) (data.User, error) {
+	password, err := repo.findPassword(login)
 	if err != nil {
 		return data.User{}, err
 	}
 
-	err = repo.matcher.MatchPassword(hashed, password)
+	err = password.Match(repo.matcher, raw)
 	if err != nil {
 		return data.User{}, err
 	}
 
-	return user, nil
+	return password.User(), nil
+}
+
+func (repo validateRepository) findPassword(login password.Login) (password.Password, error) {
+	passwordSlice, err := repo.db.FilterPassword(login)
+	if err != nil {
+		return password.Password{}, err
+	}
+
+	if len(passwordSlice) == 0 {
+		return password.Password{}, password.ErrPasswordNotFound
+	}
+
+	return passwordSlice[0], nil
 }

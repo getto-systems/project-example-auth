@@ -2,6 +2,13 @@ package password
 
 import (
 	"github.com/getto-systems/project-example-id/data"
+
+	"errors"
+)
+
+var (
+	ErrPasswordNotFound = errors.New("password not found")
+	ErrLoginNotFound    = errors.New("login not found")
 )
 
 type ValidateEventPublisher interface {
@@ -11,9 +18,13 @@ type ValidateEventPublisher interface {
 }
 
 type ValidateDB interface {
-	FindPasswordByLogin(Login) (data.User, HashedPassword, error)
+	FilterPassword(Login) ([]Password, error)
 }
 
 type Matcher interface {
 	MatchPassword(HashedPassword, RawPassword) error
+}
+
+func (password Password) Match(matcher Matcher, raw RawPassword) error {
+	return matcher.MatchPassword(password.hashed, raw)
 }
