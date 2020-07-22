@@ -36,14 +36,10 @@ type RegisterParam struct {
 }
 
 type (
-	EventPublisher interface {
-		ValidateEventPublisher
-		RegisterEventPublisher
-		ResetEventPublisher
-	}
-
-	EventHandler interface {
-		EventPublisher
+	Logger interface {
+		ValidateLogger
+		RegisterLogger
+		ResetLogger
 	}
 
 	DB interface {

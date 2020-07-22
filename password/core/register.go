@@ -6,27 +6,27 @@ import (
 )
 
 type registerer struct {
-	pub  password.RegisterEventPublisher
-	repo registerRepository
+	logger password.RegisterLogger
+	repo   registerRepository
 }
 
 func newRegisterer(
-	pub password.RegisterEventPublisher,
+	logger password.RegisterLogger,
 	db password.RegisterDB,
 	gen password.Generator,
 ) registerer {
 	return registerer{
-		pub:  pub,
-		repo: newRegisterRepository(db, gen),
+		logger: logger,
+		repo:   newRegisterRepository(db, gen),
 	}
 }
 
 func (registerer registerer) getLogin(request data.Request, user data.User) (password.Login, error) {
-	registerer.pub.GetLogin(request, user)
+	registerer.logger.TryToGetLogin(request, user)
 
 	login, err := registerer.repo.findLogin(user)
 	if err != nil {
-		registerer.pub.GetLoginFailed(request, user, err)
+		registerer.logger.FailedToGetLogin(request, user, err)
 		return password.Login{}, err
 	}
 
@@ -34,21 +34,15 @@ func (registerer registerer) getLogin(request data.Request, user data.User) (pas
 }
 
 func (registerer registerer) register(request data.Request, user data.User, password password.RawPassword) error {
-	registerer.pub.RegisterPassword(request, user)
+	registerer.logger.TryToRegister(request, user)
 
-	err := checkPassword(password)
+	err := registerer.repo.register(user, password)
 	if err != nil {
-		registerer.pub.RegisterPasswordFailed(request, user, err)
+		registerer.logger.FailedToRegister(request, user, err)
 		return err
 	}
 
-	err = registerer.repo.registerPassword(user, password)
-	if err != nil {
-		registerer.pub.RegisterPasswordFailed(request, user, err)
-		return err
-	}
-
-	registerer.pub.RegisteredPassword(request, user)
+	registerer.logger.Registered(request, user)
 
 	return nil
 }
@@ -78,7 +72,12 @@ func (repo registerRepository) findLogin(user data.User) (password.Login, error)
 	return loginSlice[0], nil
 }
 
-func (repo registerRepository) registerPassword(user data.User, password password.RawPassword) error {
+func (repo registerRepository) register(user data.User, password password.RawPassword) error {
+	err := checkPassword(password)
+	if err != nil {
+		return err
+	}
+
 	hashed, err := repo.gen.GeneratePassword(password)
 	if err != nil {
 		return err

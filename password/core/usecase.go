@@ -15,7 +15,7 @@ type usecase struct {
 }
 
 func NewUsecase(
-	pub password.EventPublisher,
+	logger password.Logger,
 	db password.DB,
 
 	matcher password.Matcher,
@@ -25,9 +25,9 @@ func NewUsecase(
 	ticket ticket.Usecase,
 ) password.Usecase {
 	return usecase{
-		validator:  newValidator(pub, db, matcher),
-		registerer: newRegisterer(pub, db, gen),
-		resetter:   newResetter(pub, db, resetGen),
+		validator:  newValidator(logger, db, matcher),
+		registerer: newRegisterer(logger, db, gen),
+		resetter:   newResetter(logger, db, resetGen),
 
 		ticket: ticket,
 	}

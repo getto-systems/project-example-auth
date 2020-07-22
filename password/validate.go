@@ -11,10 +11,10 @@ var (
 	ErrLoginNotFound    = errors.New("login not found")
 )
 
-type ValidateEventPublisher interface {
-	ValidatePassword(data.Request, Login)
-	ValidatePasswordFailed(data.Request, Login, error)
-	AuthenticatedByPassword(data.Request, Login, data.User)
+type ValidateLogger interface {
+	TryToValidate(data.Request, Login)
+	FailedToValidate(data.Request, Login, error)
+	AuthedByPassword(data.Request, Login, data.User)
 }
 
 type ValidateDB interface {

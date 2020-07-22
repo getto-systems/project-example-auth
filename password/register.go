@@ -4,13 +4,13 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-type RegisterEventPublisher interface {
-	GetLogin(data.Request, data.User)
-	GetLoginFailed(data.Request, data.User, error)
+type RegisterLogger interface {
+	TryToGetLogin(data.Request, data.User)
+	FailedToGetLogin(data.Request, data.User, error)
 
-	RegisterPassword(data.Request, data.User)
-	RegisterPasswordFailed(data.Request, data.User, error)
-	RegisteredPassword(data.Request, data.User)
+	TryToRegister(data.Request, data.User)
+	FailedToRegister(data.Request, data.User, error)
+	Registered(data.Request, data.User)
 }
 
 type RegisterDB interface {

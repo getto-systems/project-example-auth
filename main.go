@@ -21,8 +21,7 @@ import (
 
 	password_core "github.com/getto-systems/project-example-id/password/core"
 	password_db "github.com/getto-systems/project-example-id/password/db"
-	password_event_log "github.com/getto-systems/project-example-id/password/event_log"
-	password_pubsub "github.com/getto-systems/project-example-id/password/pubsub"
+	password_log "github.com/getto-systems/project-example-id/password/log"
 
 	ticket_core "github.com/getto-systems/project-example-id/ticket/core"
 	ticket_db "github.com/getto-systems/project-example-id/ticket/db"
@@ -174,9 +173,7 @@ func newTicketUsecase(appLogger logger.Logger) ticket.Usecase {
 }
 
 func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password.Usecase {
-	log := password_event_log.NewEventLogger(appLogger)
-	pub := password_pubsub.NewPubSub()
-	pub.Subscribe(log)
+	logger := password_log.NewLogger(appLogger)
 	db := password_db.NewMemoryStore()
 
 	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
@@ -185,7 +182,7 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 	initAdminPassword(db, encrypter)
 
 	return password_core.NewUsecase(
-		pub,
+		logger,
 		db,
 
 		encrypter,

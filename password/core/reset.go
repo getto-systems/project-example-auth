@@ -6,43 +6,44 @@ import (
 )
 
 type resetter struct {
-	pub  password.ResetEventPublisher
-	exp  password.Expiration
-	repo resetRepository
+	logger password.ResetLogger
+	exp    password.Expiration
+	repo   resetRepository
 }
 
 func newResetter(
-	pub password.ResetEventPublisher,
+	logger password.ResetLogger,
 	db password.ResetDB,
 	gen password.ResetGenerator,
 ) resetter {
 	return resetter{
-		pub:  pub,
-		repo: newResetRepository(db, gen),
+		logger: logger,
+		repo:   newResetRepository(db, gen),
 	}
 }
 
 func (resetter resetter) issueReset(request data.Request, login password.Login) (password.Reset, error) {
 	expires := resetter.exp.Expires(request)
-	resetter.pub.IssueReset(request, login, expires)
+	resetter.logger.TryToIssueReset(request, login, expires)
 
-	reset, token, err := resetter.repo.register(login, request, expires)
+	// TODO 第2引数の token は notifier に渡す
+	reset, _, user, err := resetter.repo.register(login, request, expires)
 	if err != nil {
-		resetter.pub.IssueResetFailed(request, login, expires, err)
+		resetter.logger.FailedToIssueReset(request, login, expires, err)
 		return password.Reset{}, err
 	}
 
-	resetter.pub.IssuedReset(request, login, expires, reset, token)
+	resetter.logger.IssuedReset(request, reset, user, expires)
 
 	return reset, nil
 }
 
 func (resetter resetter) getResetStatus(request data.Request, reset password.Reset) (password.ResetStatus, error) {
-	resetter.pub.GetResetStatus(request, reset)
+	resetter.logger.TryToGetResetStatus(request, reset)
 
 	status, err := resetter.repo.findResetStatus(reset)
 	if err != nil {
-		resetter.pub.GetResetStatusFailed(request, reset, err)
+		resetter.logger.FailedToGetResetStatus(request, reset, err)
 		return password.ResetStatus{}, err
 	}
 
@@ -50,15 +51,15 @@ func (resetter resetter) getResetStatus(request data.Request, reset password.Res
 }
 
 func (resetter resetter) validate(request data.Request, login password.Login, token password.ResetToken) (data.User, error) {
-	resetter.pub.ValidateResetToken(request)
+	resetter.logger.TryToValidateResetToken(request)
 
 	user, err := resetter.repo.findUserByResetToken(request, login, token)
 	if err != nil {
-		resetter.pub.ValidateResetTokenFailed(request, err)
+		resetter.logger.FailedToValidateResetToken(request, err)
 		return data.User{}, err
 	}
 
-	resetter.pub.AuthenticatedByResetToken(request, user)
+	resetter.logger.AuthedByResetToken(request, user)
 
 	return user, nil
 }
@@ -75,13 +76,18 @@ func newResetRepository(db password.ResetDB, gen password.ResetGenerator) resetR
 	}
 }
 
-func (repo resetRepository) register(login password.Login, request data.Request, expires data.Expires) (password.Reset, password.ResetToken, error) {
+func (repo resetRepository) register(login password.Login, request data.Request, expires data.Expires) (password.Reset, password.ResetToken, data.User, error) {
 	user, err := repo.findUserByLogin(login)
 	if err != nil {
-		return password.Reset{}, "", err
+		return password.Reset{}, "", data.User{}, err
 	}
 
-	return repo.db.RegisterReset(repo.gen, user, request.RequestedAt(), expires)
+	reset, token, err := repo.db.RegisterReset(repo.gen, user, request.RequestedAt(), expires)
+	if err != nil {
+		return password.Reset{}, "", data.User{}, err
+	}
+
+	return reset, token, user, nil
 }
 
 func (repo resetRepository) findUserByResetToken(request data.Request, login password.Login, token password.ResetToken) (data.User, error) {
