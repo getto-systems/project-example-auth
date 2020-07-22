@@ -77,11 +77,11 @@ func (store *MemoryStore) RegisterReset(
 	user data.User,
 	requestedAt data.RequestedAt,
 	expires data.Expires,
-) (password.Reset, error) {
+) (password.Reset, password.ResetToken, error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		id, token, err := gen.Generate()
 		if err != nil {
-			return password.Reset{}, err
+			return password.Reset{}, "", err
 		}
 
 		_, ok := store.reset[id]
@@ -98,10 +98,10 @@ func (store *MemoryStore) RegisterReset(
 		store.resetToken[token] = id
 		store.resetStatus[id] = password.NewResetStatusRequested(requestedAt.Time())
 
-		return password.NewReset(id), nil
+		return password.NewReset(id), token, nil
 	}
 
-	return password.Reset{}, errors.New("generate reset try failed")
+	return password.Reset{}, "", errors.New("generate reset try failed")
 }
 
 func (store *MemoryStore) FilterResetStatus(reset password.Reset) ([]password.ResetStatus, error) {

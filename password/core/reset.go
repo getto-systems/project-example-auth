@@ -26,11 +26,13 @@ func (resetter resetter) issueReset(request data.Request, login password.Login) 
 	expires := resetter.exp.Expires(request)
 	resetter.pub.IssueReset(request, login, expires)
 
-	reset, err := resetter.repo.register(login, request, expires)
+	reset, token, err := resetter.repo.register(login, request, expires)
 	if err != nil {
 		resetter.pub.IssueResetFailed(request, login, expires, err)
 		return password.Reset{}, err
 	}
+
+	resetter.pub.IssuedReset(request, login, expires, reset, token)
 
 	return reset, nil
 }
@@ -73,10 +75,10 @@ func newResetRepository(db password.ResetDB, gen password.ResetGenerator) resetR
 	}
 }
 
-func (repo resetRepository) register(login password.Login, request data.Request, expires data.Expires) (password.Reset, error) {
+func (repo resetRepository) register(login password.Login, request data.Request, expires data.Expires) (password.Reset, password.ResetToken, error) {
 	user, err := repo.findUserByLogin(login)
 	if err != nil {
-		return password.Reset{}, err
+		return password.Reset{}, "", err
 	}
 
 	return repo.db.RegisterReset(repo.gen, user, request.RequestedAt(), expires)

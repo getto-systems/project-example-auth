@@ -14,6 +14,7 @@ var (
 type ResetEventPublisher interface {
 	IssueReset(data.Request, Login, data.Expires)
 	IssueResetFailed(data.Request, Login, data.Expires, error)
+	IssuedReset(data.Request, Login, data.Expires, Reset, ResetToken)
 
 	GetResetStatus(data.Request, Reset)
 	GetResetStatusFailed(data.Request, Reset, error)
@@ -25,7 +26,7 @@ type ResetEventPublisher interface {
 
 type ResetDB interface {
 	FilterUserByLogin(Login) ([]data.User, error)
-	RegisterReset(ResetGenerator, data.User, data.RequestedAt, data.Expires) (Reset, error)
+	RegisterReset(ResetGenerator, data.User, data.RequestedAt, data.Expires) (Reset, ResetToken, error)
 
 	FilterResetStatus(Reset) ([]ResetStatus, error)
 

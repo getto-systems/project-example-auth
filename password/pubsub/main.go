@@ -81,6 +81,12 @@ func (pubsub *PubSub) IssueResetFailed(request data.Request, login password.Logi
 	}
 }
 
+func (pubsub *PubSub) IssuedReset(request data.Request, login password.Login, expires data.Expires, reset password.Reset, token password.ResetToken) {
+	for _, handler := range pubsub.handlers {
+		handler.IssuedReset(request, login, expires, reset, token)
+	}
+}
+
 func (pubsub *PubSub) GetResetStatus(request data.Request, reset password.Reset) {
 	for _, handler := range pubsub.handlers {
 		handler.GetResetStatus(request, reset)
