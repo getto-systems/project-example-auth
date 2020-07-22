@@ -28,9 +28,9 @@ func Example_validate() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: nil
@@ -54,9 +54,9 @@ func Example_validate_fail_DifferentPassword() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: "password not matched"
@@ -80,9 +80,9 @@ func Example_validate_fail_PasswordNotFound() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: "password not found"
@@ -106,9 +106,9 @@ func Example_validate_fail_EmptyPassword() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: "password is empty"
@@ -132,9 +132,9 @@ func Example_validate_fail_LongPassword() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: "password is too long"
@@ -158,9 +158,9 @@ func Example_validate_LongPassword() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: nil
@@ -187,8 +187,8 @@ type (
 	}
 )
 
-func newValidateTestMatcher() validateTestMatcher {
-	return validateTestMatcher{}
+func newValidateTestMatcher() (matcher validateTestMatcher) {
+	return
 }
 
 func (validateTestMatcher) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) error {
@@ -232,7 +232,7 @@ func (h validateTestHelper) context() (data.Request, password.Login) {
 	return h.request, h.login
 }
 
-func formatValidateLog(entry event_log.Entry) string {
+func (h validateTestHelper) formatLog(entry event_log.Entry) string {
 	if entry.Message == "" {
 		return "[]"
 	}

@@ -25,6 +25,10 @@ type Matcher interface {
 	MatchPassword(HashedPassword, RawPassword) error
 }
 
-func (password Password) Match(matcher Matcher, raw RawPassword) error {
-	return matcher.MatchPassword(password.hashed, raw)
+func (password Password) Match(matcher Matcher, raw RawPassword) (user data.User, err error) {
+	err = matcher.MatchPassword(password.hashed, raw)
+	if err != nil {
+		return user, err
+	}
+	return password.user, nil
 }

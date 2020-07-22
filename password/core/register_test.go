@@ -25,9 +25,9 @@ func Example_getLogin() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("login: %s\n", formatLogin(&login))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: nil
@@ -50,9 +50,9 @@ func Example_getLogin_fail_LoginNotFound() {
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("login: %s\n", formatLogin(&login))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
 	// err: "login not found"
@@ -74,9 +74,9 @@ func Example_register() {
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 	fmt.Printf("db: %s\n", h.formatDB(db))
 
 	// Output:
@@ -99,9 +99,9 @@ func Example_register_fail_EmptyPassword() {
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 	fmt.Printf("db: %s\n", h.formatDB(db))
 
 	// Output:
@@ -124,9 +124,9 @@ func Example_register_fail_LongPassword() {
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 	fmt.Printf("db: %s\n", h.formatDB(db))
 
 	// Output:
@@ -149,9 +149,9 @@ func Example_register_LongPassword() {
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("debug: %s\n", formatRegisterLog(testLogger.debug))
-	fmt.Printf("info: %s\n", formatRegisterLog(testLogger.info))
-	fmt.Printf("audit: %s\n", formatRegisterLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 	fmt.Printf("db: %s\n", h.formatDB(db))
 
 	// Output:
@@ -179,8 +179,8 @@ type (
 	}
 )
 
-func newRegisterTestGenerator() registerTestGenerator {
-	return registerTestGenerator{}
+func newRegisterTestGenerator() (gen registerTestGenerator) {
+	return
 }
 
 func (registerTestGenerator) GeneratePassword(raw password.RawPassword) (password.HashedPassword, error) {
@@ -220,7 +220,7 @@ func (h registerTestHelper) context() (data.Request, data.User) {
 	return h.request, h.user
 }
 
-func formatRegisterLog(entry event_log.Entry) string {
+func (h registerTestHelper) formatLog(entry event_log.Entry) string {
 	if entry.Message == "" {
 		return "[]"
 	}

@@ -28,6 +28,10 @@ func NewMemoryStore() *MemoryStore {
 		userPassword: make(map[data.UserID]password.HashedPassword),
 		userID:       make(map[password.LoginID]data.UserID),
 		loginID:      make(map[data.UserID]password.LoginID),
+
+		reset:       make(map[password.ResetID]password.ResetUser),
+		resetToken:  make(map[password.ResetToken]password.ResetID),
+		resetStatus: make(map[password.ResetID]password.ResetStatus),
 	}
 }
 
@@ -35,24 +39,24 @@ func (store *MemoryStore) db() password.DB {
 	return store
 }
 
-func (store *MemoryStore) FilterPassword(login password.Login) ([]password.Password, error) {
+func (store *MemoryStore) FilterPassword(login password.Login) (slice []password.Password, err error) {
 	userID, ok := store.userID[login.ID()]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	hashed, ok := store.userPassword[userID]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	return []password.Password{password.NewPassword(data.NewUser(userID), hashed)}, nil
 }
 
-func (store *MemoryStore) FilterLogin(user data.User) ([]password.Login, error) {
+func (store *MemoryStore) FilterLogin(user data.User) (slice []password.Login, err error) {
 	loginID, ok := store.loginID[user.UserID()]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	return []password.Login{password.NewLogin(loginID)}, nil
@@ -63,10 +67,10 @@ func (store *MemoryStore) RegisterPassword(user data.User, password password.Has
 	return nil
 }
 
-func (store *MemoryStore) FilterUserByLogin(login password.Login) ([]data.User, error) {
+func (store *MemoryStore) FilterUserByLogin(login password.Login) (slice []data.User, err error) {
 	userID, ok := store.userID[login.ID()]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	return []data.User{data.NewUser(userID)}, nil
@@ -77,11 +81,11 @@ func (store *MemoryStore) RegisterReset(
 	user data.User,
 	requestedAt data.RequestedAt,
 	expires data.Expires,
-) (password.Reset, password.ResetToken, error) {
+) (reset password.Reset, token password.ResetToken, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		id, token, err := gen.Generate()
 		if err != nil {
-			return password.Reset{}, "", err
+			return reset, token, err
 		}
 
 		_, ok := store.reset[id]
@@ -101,27 +105,28 @@ func (store *MemoryStore) RegisterReset(
 		return password.NewReset(id), token, nil
 	}
 
-	return password.Reset{}, "", errors.New("generate reset try failed")
+	err = errors.New("generate reset try failed")
+	return
 }
 
-func (store *MemoryStore) FilterResetStatus(reset password.Reset) ([]password.ResetStatus, error) {
+func (store *MemoryStore) FilterResetStatus(reset password.Reset) (slice []password.ResetStatus, err error) {
 	status, ok := store.resetStatus[reset.ID()]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	return []password.ResetStatus{status}, nil
 }
 
-func (store *MemoryStore) FilterResetUser(token password.ResetToken) ([]password.ResetUser, error) {
+func (store *MemoryStore) FilterResetUser(token password.ResetToken) (slice []password.ResetUser, err error) {
 	id, ok := store.resetToken[token]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	user, ok := store.reset[id]
 	if !ok {
-		return nil, nil
+		return
 	}
 
 	return []password.ResetUser{user}, nil
@@ -131,6 +136,12 @@ func (store *MemoryStore) FilterResetUser(token password.ResetToken) ([]password
 func (store *MemoryStore) GetUserPassword(user data.User) (password.HashedPassword, bool) {
 	password, ok := store.userPassword[user.UserID()]
 	return password, ok
+}
+
+// for test
+func (store *MemoryStore) GetResetUser(resetID password.ResetID) (password.ResetUser, bool) {
+	reset, ok := store.reset[resetID]
+	return reset, ok
 }
 
 // for test

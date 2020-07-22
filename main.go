@@ -151,7 +151,7 @@ func newTicketUsecase(appLogger logger.Logger) ticket.Usecase {
 	pub.Subscribe(log)
 	db := ticket_db.NewMemoryStore()
 
-	exp := newExpiration()
+	exp := newTicketExpiration()
 
 	signer := newTicketSigner()
 	apiTokenSigner := newApiTokenSigner()
@@ -176,6 +176,8 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 	logger := password_log.NewLogger(appLogger)
 	db := password_db.NewMemoryStore()
 
+	exp := newPasswordExpiration()
+
 	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
 	generator := reset_generator.NewResetGenerator()
 
@@ -184,8 +186,8 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 	return password_core.NewUsecase(
 		logger,
 		db,
+		exp,
 
-		encrypter,
 		encrypter,
 		generator,
 
@@ -270,9 +272,13 @@ func newContentTokenSigner() signer.ContentTokenSigner {
 	)
 }
 
-func newExpiration() ticket.Expiration {
+func newTicketExpiration() ticket.Expiration {
 	return ticket.NewExpiration(ticket.ExpirationParam{
 		Expires:     data.Minute(5),
 		ExtendLimit: data.Day(14),
 	})
+}
+
+func newPasswordExpiration() password.Expiration {
+	return password.NewExpiration(data.Minute(30))
 }

@@ -14,10 +14,12 @@ type resetter struct {
 func newResetter(
 	logger password.ResetLogger,
 	db password.ResetDB,
+	exp password.Expiration,
 	gen password.ResetGenerator,
 ) resetter {
 	return resetter{
 		logger: logger,
+		exp:    exp,
 		repo:   newResetRepository(db, gen),
 	}
 }
@@ -33,7 +35,7 @@ func (resetter resetter) issueReset(request data.Request, login password.Login) 
 		return password.Reset{}, err
 	}
 
-	resetter.logger.IssuedReset(request, reset, user, expires)
+	resetter.logger.IssuedReset(request, login, expires, reset, user)
 
 	return reset, nil
 }
