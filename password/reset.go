@@ -11,17 +11,17 @@ var (
 	ErrResetTokenNotFound = errors.New("reset token not found")
 )
 
-type ResetEventPublisher interface {
-	IssueReset(data.Request, Login, data.Expires)
-	IssueResetFailed(data.Request, Login, data.Expires, error)
-	IssuedReset(data.Request, Login, data.Expires, Reset, ResetToken)
+type ResetLogger interface {
+	TryToIssueReset(data.Request, Login, data.Expires)
+	FailedToIssueReset(data.Request, Login, data.Expires, error)
+	IssuedReset(data.Request, Reset, data.User, data.Expires)
 
-	GetResetStatus(data.Request, Reset)
-	GetResetStatusFailed(data.Request, Reset, error)
+	TryToGetResetStatus(data.Request, Reset)
+	FailedToGetResetStatus(data.Request, Reset, error)
 
-	ValidateResetToken(data.Request)
-	ValidateResetTokenFailed(data.Request, error)
-	AuthenticatedByResetToken(data.Request, data.User)
+	TryToValidateResetToken(data.Request)
+	FailedToValidateResetToken(data.Request, error)
+	AuthedByResetToken(data.Request, data.User)
 }
 
 type ResetDB interface {

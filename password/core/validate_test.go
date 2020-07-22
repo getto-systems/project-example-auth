@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/getto-systems/project-example-id/password/db"
-	password_event_log "github.com/getto-systems/project-example-id/password/event_log"
-	"github.com/getto-systems/project-example-id/password/pubsub"
+	"github.com/getto-systems/project-example-id/password/log"
 
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
@@ -18,157 +17,157 @@ import (
 // パスワードが一致したら audit: authenticated by password
 func Example_validate() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	h.registerPassword(db, password.HashedPassword("password"))
 
 	request, login := h.context()
 	raw := password.RawPassword("password") // 保存されているものと同じパスワード
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: nil
 	// user: {validate-user}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["authenticated by password", req: {validate-remote}, login: {validate-login}, user: {validate-user}, err: nil]
+	// audit: ["Password/Validate/AuthedByPassword", req: {validate-remote}, login: {validate-login}, user: {validate-user}, err: nil]
 }
 
 // パスワードが一致しなかったら audit: validate password failed
 func Example_validate_fail_DifferentPassword() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	h.registerPassword(db, password.HashedPassword("password"))
 
 	request, login := h.context()
 	raw := password.RawPassword("different-password") // 保存されているものと違うパスワード
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: "password not matched"
 	// user: {}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not matched"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not matched"]
 }
 
 // パスワードが見つからない場合は認証失敗
 func Example_validate_fail_PasswordNotFound() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	//h.registerPassword(db, password.HashedPassword("password")) // パスワードの登録はしない
 
 	request, login := h.context()
 	raw := password.RawPassword("password") // このユーザーのパスワードは登録されていない
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: "password not found"
 	// user: {}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not found"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "password not found"]
 }
 
 // 空のパスワードの場合、必ず失敗する
 func Example_validate_fail_EmptyPassword() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	h.registerPassword(db, password.HashedPassword("password"))
 
 	request, login := h.context()
 	raw := password.RawPassword("") // 空のパスワード
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: "password is empty"
 	// user: {}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password is empty"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "password is empty"]
 }
 
 // 長いパスワードの場合、必ず失敗する
 func Example_validate_fail_LongPassword() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	h.registerPassword(db, password.HashedPassword("password"))
 
 	request, login := h.context()
 	raw := password.RawPassword(strings.Repeat("a", 73)) // 長いパスワード
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: "password is too long"
 	// user: {}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["validate password failed", req: {validate-remote}, login: {validate-login}, user: nil, err: "password is too long"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "password is too long"]
 }
 
 // ギリギリの長さのパスワードの場合、成功する
 func Example_validate_LongPassword() {
 	h := newValidateTestHelper()
-	pub, db, matcher, logger := h.setup()
+	logger, db, matcher, testLogger := h.setup()
 	h.registerPassword(db, password.HashedPassword(strings.Repeat("a", 72)))
 
 	request, login := h.context()
 	raw := password.RawPassword(strings.Repeat("a", 72)) // 72 バイトまで許容
 
-	validator := newValidator(pub, db, matcher)
+	validator := newValidator(logger, db, matcher)
 	user, err := validator.validate(request, login, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", formatValidateLog(logger.debug))
-	fmt.Printf("info: %s\n", formatValidateLog(logger.info))
-	fmt.Printf("audit: %s\n", formatValidateLog(logger.audit))
+	fmt.Printf("debug: %s\n", formatValidateLog(testLogger.debug))
+	fmt.Printf("info: %s\n", formatValidateLog(testLogger.info))
+	fmt.Printf("audit: %s\n", formatValidateLog(testLogger.audit))
 
 	// Output:
 	// err: nil
 	// user: {validate-user}
-	// debug: ["validate password", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
+	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["authenticated by password", req: {validate-remote}, login: {validate-login}, user: {validate-user}, err: nil]
+	// audit: ["Password/Validate/AuthedByPassword", req: {validate-remote}, login: {validate-login}, user: {validate-user}, err: nil]
 }
 
 type (
@@ -215,15 +214,13 @@ func newValidateTestHelper() validateTestHelper {
 	}
 }
 
-func (h validateTestHelper) setup() (password.EventPublisher, *db.MemoryStore, password.Matcher, *testLogger) {
-	pub := pubsub.NewPubSub()
-	logger := newTestLogger()
-	log := password_event_log.NewEventLogger(logger)
-	pub.Subscribe(log)
+func (h validateTestHelper) setup() (password.Logger, *db.MemoryStore, password.Matcher, *testLogger) {
+	testLogger := newTestLogger()
+	logger := log.NewLogger(testLogger)
 
 	db := db.NewMemoryStore()
 
-	return pub, db, h.matcher, logger
+	return logger, db, h.matcher, testLogger
 }
 
 func (h validateTestHelper) registerPassword(db *db.MemoryStore, password password.HashedPassword) {

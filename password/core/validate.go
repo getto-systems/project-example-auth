@@ -6,37 +6,31 @@ import (
 )
 
 type validator struct {
-	pub  password.ValidateEventPublisher
-	repo validateRepository
+	logger password.ValidateLogger
+	repo   validateRepository
 }
 
 func newValidator(
-	pub password.ValidateEventPublisher,
+	logger password.ValidateLogger,
 	db password.ValidateDB,
 	matcher password.Matcher,
 ) validator {
 	return validator{
-		pub:  pub,
-		repo: newValidateRepository(db, matcher),
+		logger: logger,
+		repo:   newValidateRepository(db, matcher),
 	}
 }
 
 func (validator validator) validate(request data.Request, login password.Login, password password.RawPassword) (data.User, error) {
-	validator.pub.ValidatePassword(request, login)
+	validator.logger.TryToValidate(request, login)
 
-	err := checkPassword(password)
+	user, err := validator.repo.match(login, password)
 	if err != nil {
-		validator.pub.ValidatePasswordFailed(request, login, err)
+		validator.logger.FailedToValidate(request, login, err)
 		return data.User{}, err
 	}
 
-	user, err := validator.repo.matchPassword(login, password)
-	if err != nil {
-		validator.pub.ValidatePasswordFailed(request, login, err)
-		return data.User{}, err
-	}
-
-	validator.pub.AuthenticatedByPassword(request, login, user)
+	validator.logger.AuthedByPassword(request, login, user)
 
 	return user, nil
 }
@@ -53,7 +47,12 @@ func newValidateRepository(db password.ValidateDB, matcher password.Matcher) val
 	}
 }
 
-func (repo validateRepository) matchPassword(login password.Login, raw password.RawPassword) (data.User, error) {
+func (repo validateRepository) match(login password.Login, raw password.RawPassword) (data.User, error) {
+	err := checkPassword(raw)
+	if err != nil {
+		return data.User{}, err
+	}
+
 	password, err := repo.findPassword(login)
 	if err != nil {
 		return data.User{}, err
