@@ -36,8 +36,8 @@ type (
 	}
 
 	ResetSessionRepository interface {
-		FindResetStatus(ResetSession) (ResetStatus, error)     // 見つからない場合は ErrResetSessionNotFoundResetStatus
-		FindResetSession(ResetToken) (ResetSessionData, error) // 見つからない場合は ErrResetSessionNotFoundResetSession
+		FindResetStatus(ResetSession) (ResetStatus, bool, error)
+		FindResetSession(ResetToken) (ResetSessionData, bool, error)
 
 		RegisterResetSession(ResetSessionGenerator, ResetSessionData) (ResetSession, ResetToken, error)
 	}

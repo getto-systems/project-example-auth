@@ -25,40 +25,29 @@ func (store *MemoryStore) db() password.PasswordRepository {
 	return store
 }
 
-func (store *MemoryStore) FindUser(login password.Login) (_ data.User, err error) {
-	userID, ok := store.userID[login.ID()]
-	if !ok {
-		err = password.ErrPasswordNotFoundUser
-		return
-	}
-
-	return data.NewUser(userID), nil
+func (store *MemoryStore) FindUser(login password.Login) (_ data.User, _ bool, err error) {
+	userID, found := store.userID[login.ID()]
+	return data.NewUser(userID), found, nil
 }
 
-func (store *MemoryStore) FindLogin(user data.User) (_ password.Login, err error) {
-	loginID, ok := store.loginID[user.UserID()]
-	if !ok {
-		err = password.ErrPasswordNotFoundLogin
-		return
-	}
-
-	return password.NewLogin(loginID), nil
+func (store *MemoryStore) FindLogin(user data.User) (_ password.Login, _ bool, err error) {
+	loginID, found := store.loginID[user.UserID()]
+	return password.NewLogin(loginID), found, nil
 }
 
-func (store *MemoryStore) FindPassword(login password.Login) (_ data.User, _ password.HashedPassword, err error) {
-	userID, ok := store.userID[login.ID()]
-	if !ok {
-		err = password.ErrPasswordNotFoundPassword
+func (store *MemoryStore) FindPassword(login password.Login) (_ data.User, _ password.HashedPassword, found bool, err error) {
+	userID, found := store.userID[login.ID()]
+	if !found {
 		return
 	}
 
-	hashed, ok := store.userPassword[userID]
-	if !ok {
-		err = password.ErrPasswordNotFoundPassword
+	hashed, found := store.userPassword[userID]
+	if !found {
+		found = false
 		return
 	}
 
-	return data.NewUser(userID), hashed, nil
+	return data.NewUser(userID), hashed, true, nil
 }
 
 func (store *MemoryStore) RegisterPassword(user data.User, password password.HashedPassword) error {
@@ -68,8 +57,8 @@ func (store *MemoryStore) RegisterPassword(user data.User, password password.Has
 
 // for test
 func (store *MemoryStore) GetUserPassword(user data.User) (password.HashedPassword, bool) {
-	password, ok := store.userPassword[user.UserID()]
-	return password, ok
+	password, found := store.userPassword[user.UserID()]
+	return password, found
 }
 
 // for test

@@ -189,11 +189,8 @@ func newValidateTestMatcher() (matcher validateTestMatcher) {
 	return
 }
 
-func (validateTestMatcher) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) error {
-	if string(raw) != string(hashed) {
-		return password.ErrPasswordNotMatched
-	}
-	return nil
+func (validateTestMatcher) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) (bool, error) {
+	return string(raw) == string(hashed), nil
 }
 
 func newValidateTestHelper() validateTestHelper {

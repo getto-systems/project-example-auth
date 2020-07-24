@@ -31,8 +31,12 @@ func (registerer registerer) getLogin(request data.Request, user data.User) (_ p
 		}
 	}()
 
-	login, err := registerer.passwords.FindLogin(user)
+	login, found, err := registerer.passwords.FindLogin(user)
 	if err != nil {
+		return
+	}
+	if !found {
+		err = password.ErrPasswordNotFoundLogin
 		return
 	}
 

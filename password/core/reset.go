@@ -40,8 +40,12 @@ func (resetter resetter) createResetSession(request data.Request, login password
 		}
 	}()
 
-	user, err := resetter.passwords.FindUser(login)
+	user, ok, err := resetter.passwords.FindUser(login)
 	if err != nil {
+		return
+	}
+	if !ok {
+		err = password.ErrPasswordNotFoundUser
 		return
 	}
 
@@ -67,7 +71,16 @@ func (resetter resetter) getResetStatus(request data.Request, session password.R
 		}
 	}()
 
-	return resetter.sessions.FindResetStatus(session)
+	status, found, err := resetter.sessions.FindResetStatus(session)
+	if err != nil {
+		return
+	}
+	if !found {
+		err = password.ErrResetSessionNotFoundResetStatus
+		return
+	}
+
+	return status, nil
 }
 
 func (resetter resetter) validate(request data.Request, login password.Login, token password.ResetToken) (_ data.User, err error) {
@@ -78,8 +91,12 @@ func (resetter resetter) validate(request data.Request, login password.Login, to
 		}
 	}()
 
-	data, err := resetter.sessions.FindResetSession(token)
+	data, found, err := resetter.sessions.FindResetSession(token)
 	if err != nil {
+		return
+	}
+	if !found {
+		err = password.ErrResetSessionNotFoundResetSession
 		return
 	}
 

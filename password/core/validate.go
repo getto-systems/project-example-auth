@@ -40,13 +40,21 @@ func (validator validator) validate(
 		return
 	}
 
-	user, hashed, err := validator.passwords.FindPassword(login)
+	user, hashed, found, err := validator.passwords.FindPassword(login)
 	if err != nil {
 		return
 	}
+	if !found {
+		err = password.ErrPasswordNotFoundPassword
+		return
+	}
 
-	err = validator.matcher.MatchPassword(hashed, raw)
+	matched, err := validator.matcher.MatchPassword(hashed, raw)
 	if err != nil {
+		return
+	}
+	if !matched {
+		err = password.ErrPasswordNotMatched
 		return
 	}
 

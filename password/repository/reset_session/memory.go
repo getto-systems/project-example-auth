@@ -30,30 +30,23 @@ func (store *MemoryStore) db() password.ResetSessionRepository {
 	return store
 }
 
-func (store *MemoryStore) FindResetStatus(session password.ResetSession) (_ password.ResetStatus, err error) {
-	status, ok := store.status[session.ID()]
-	if !ok {
-		err = password.ErrResetSessionNotFoundResetStatus
-		return
-	}
-
-	return status, nil
+func (store *MemoryStore) FindResetStatus(session password.ResetSession) (_ password.ResetStatus, _ bool, err error) {
+	status, found := store.status[session.ID()]
+	return status, found, nil
 }
 
-func (store *MemoryStore) FindResetSession(token password.ResetToken) (_ password.ResetSessionData, err error) {
-	id, ok := store.token[token]
-	if !ok {
-		err = password.ErrResetSessionNotFoundResetSession
+func (store *MemoryStore) FindResetSession(token password.ResetToken) (_ password.ResetSessionData, found bool, err error) {
+	id, found := store.token[token]
+	if !found {
 		return
 	}
 
-	data, ok := store.session[id]
-	if !ok {
-		err = password.ErrResetSessionNotFoundResetSession
+	data, found := store.session[id]
+	if !found {
 		return
 	}
 
-	return data, nil
+	return data, true, nil
 }
 
 func (store *MemoryStore) RegisterResetSession(gen password.ResetSessionGenerator, data password.ResetSessionData) (_ password.ResetSession, _ password.ResetToken, err error) {
@@ -64,13 +57,13 @@ func (store *MemoryStore) RegisterResetSession(gen password.ResetSessionGenerato
 			return
 		}
 
-		_, ok := store.session[id]
-		if ok {
+		_, found := store.session[id]
+		if found {
 			continue
 		}
 
-		_, ok = store.token[token]
-		if ok {
+		_, found = store.token[token]
+		if found {
 			continue
 		}
 
@@ -87,6 +80,6 @@ func (store *MemoryStore) RegisterResetSession(gen password.ResetSessionGenerato
 
 // for test
 func (store *MemoryStore) GetResetSessionData(id password.ResetSessionID) (password.ResetSessionData, bool) {
-	session, ok := store.session[id]
-	return session, ok
+	session, found := store.session[id]
+	return session, found
 }

@@ -32,7 +32,7 @@ type (
 	}
 
 	PasswordMatcher interface {
-		MatchPassword(HashedPassword, RawPassword) error // マッチしない場合は ErrPasswordNotMatched
+		MatchPassword(HashedPassword, RawPassword) (bool, error)
 	}
 
 	PasswordEncrypter interface {
@@ -41,9 +41,9 @@ type (
 	}
 
 	PasswordRepository interface {
-		FindUser(Login) (data.User, error)                     // 見つからない場合は ErrPasswordNotFoundUser
-		FindLogin(data.User) (Login, error)                    // 見つからない場合は ErrPasswordNotFoundLogin
-		FindPassword(Login) (data.User, HashedPassword, error) // 見つからない場合は ErrPasswordNotFoundPassword
+		FindUser(Login) (data.User, bool, error)
+		FindLogin(data.User) (Login, bool, error)
+		FindPassword(Login) (data.User, HashedPassword, bool, error)
 
 		RegisterPassword(data.User, HashedPassword) error
 	}
