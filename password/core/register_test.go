@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/getto-systems/project-example-id/password/db"
 	"github.com/getto-systems/project-example-id/password/log"
+	repository_password "github.com/getto-systems/project-example-id/password/repository/password"
 
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
@@ -15,12 +15,12 @@ import (
 // ログインID を取得
 func Example_getLogin() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
-	h.registerLogin(db) // ログインID を登録
+	logger, passwords, gen, testLogger := h.setup()
+	h.registerLogin(passwords) // ログインID を登録
 
 	request, user := h.context()
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	login, err := registerer.getLogin(request, user)
 
 	fmt.Printf("err: %s\n", formatError(err))
@@ -40,12 +40,12 @@ func Example_getLogin() {
 // パスワードを取得
 func Example_getLogin_fail_LoginNotFound() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
-	//h.registerLogin(db) // ログインID を登録しない
+	logger, passwords, gen, testLogger := h.setup()
+	//h.registerLogin(passwords) // ログインID を登録しない
 
 	request, user := h.context()
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	login, err := registerer.getLogin(request, user)
 
 	fmt.Printf("err: %s\n", formatError(err))
@@ -55,29 +55,29 @@ func Example_getLogin_fail_LoginNotFound() {
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
 
 	// Output:
-	// err: "login not found"
+	// err: "Password/Password/NotFound/Login"
 	// login: {}
 	// debug: ["Password/Register/TryToGetLogin", req: {register-remote}, user: {register-user}, err: nil]
-	// info: ["Password/Register/FailedToGetLogin", req: {register-remote}, user: {register-user}, err: "login not found"]
+	// info: ["Password/Register/FailedToGetLogin", req: {register-remote}, user: {register-user}, err: "Password/Password/NotFound/Login"]
 	// audit: []
 }
 
 // パスワードを保存したら audit: password registered
 func Example_register() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
+	logger, passwords, gen, testLogger := h.setup()
 
 	request, user := h.context()
 	raw := password.RawPassword("password")
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
-	fmt.Printf("db: %s\n", h.formatDB(db))
+	fmt.Printf("db: %s\n", h.formatDB(passwords))
 
 	// Output:
 	// err: nil
@@ -90,24 +90,24 @@ func Example_register() {
 // 空のパスワードは保存できない
 func Example_register_fail_EmptyPassword() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
+	logger, passwords, gen, testLogger := h.setup()
 
 	request, user := h.context()
 	raw := password.RawPassword("") // 空のパスワード
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
-	fmt.Printf("db: %s\n", h.formatDB(db))
+	fmt.Printf("db: %s\n", h.formatDB(passwords))
 
 	// Output:
-	// err: "password is empty"
+	// err: "Password/Password/Empty"
 	// debug: ["Password/Register/TryToRegister", req: {register-remote}, user: {register-user}, err: nil]
-	// info: ["Password/Register/FailedToRegister", req: {register-remote}, user: {register-user}, err: "password is empty"]
+	// info: ["Password/Register/FailedToRegister", req: {register-remote}, user: {register-user}, err: "Password/Password/Empty"]
 	// audit: []
 	// db: nil
 }
@@ -115,24 +115,24 @@ func Example_register_fail_EmptyPassword() {
 // 長いパスワードは保存できない
 func Example_register_fail_LongPassword() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
+	logger, passwords, gen, testLogger := h.setup()
 
 	request, user := h.context()
 	raw := password.RawPassword(strings.Repeat("a", 73)) // 長いパスワード
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
-	fmt.Printf("db: %s\n", h.formatDB(db))
+	fmt.Printf("db: %s\n", h.formatDB(passwords))
 
 	// Output:
-	// err: "password is too long"
+	// err: "Password/Password/TooLong"
 	// debug: ["Password/Register/TryToRegister", req: {register-remote}, user: {register-user}, err: nil]
-	// info: ["Password/Register/FailedToRegister", req: {register-remote}, user: {register-user}, err: "password is too long"]
+	// info: ["Password/Register/FailedToRegister", req: {register-remote}, user: {register-user}, err: "Password/Password/TooLong"]
 	// audit: []
 	// db: nil
 }
@@ -140,19 +140,19 @@ func Example_register_fail_LongPassword() {
 // ギリギリの長さのパスワードは保存できる
 func Example_register_LongPassword() {
 	h := newRegisterTestHelper()
-	logger, db, gen, testLogger := h.setup()
+	logger, passwords, gen, testLogger := h.setup()
 
 	request, user := h.context()
 	raw := password.RawPassword(strings.Repeat("a", 72)) // 72 バイトまで許容
 
-	registerer := newRegisterer(logger, db, gen)
+	registerer := newRegisterer(logger, passwords, gen)
 	err := registerer.register(request, user, raw)
 
 	fmt.Printf("err: %s\n", formatError(err))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
-	fmt.Printf("db: %s\n", h.formatDB(db))
+	fmt.Printf("db: %s\n", h.formatDB(passwords))
 
 	// Output:
 	// err: nil
@@ -203,17 +203,17 @@ func newRegisterTestHelper() registerTestHelper {
 	}
 }
 
-func (h registerTestHelper) setup() (password.Logger, *db.MemoryStore, password.Generator, *testLogger) {
+func (h registerTestHelper) setup() (password.Logger, *repository_password.MemoryStore, password.PasswordGenerator, *testLogger) {
 	testLogger := newTestLogger()
 	logger := log.NewLogger(testLogger)
 
-	db := db.NewMemoryStore()
+	passwords := repository_password.NewMemoryStore()
 
-	return logger, db, h.gen, testLogger
+	return logger, passwords, h.gen, testLogger
 }
 
-func (h registerTestHelper) registerLogin(db *db.MemoryStore) {
-	db.RegisterLogin(h.user, h.login)
+func (h registerTestHelper) registerLogin(passwords *repository_password.MemoryStore) {
+	passwords.RegisterLogin(h.user, h.login)
 }
 
 func (h registerTestHelper) context() (data.Request, data.User) {
@@ -234,8 +234,8 @@ func (h registerTestHelper) formatLog(entry event_log.Entry) string {
 	)
 }
 
-func (h registerTestHelper) formatDB(db *db.MemoryStore) string {
-	password, ok := db.GetUserPassword(h.user)
+func (h registerTestHelper) formatDB(passwords *repository_password.MemoryStore) string {
+	password, ok := passwords.GetUserPassword(h.user)
 	if !ok {
 		return "nil"
 	} else {

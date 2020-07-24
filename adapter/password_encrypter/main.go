@@ -40,14 +40,15 @@ func (enc Encrypter) GeneratePassword(password password.RawPassword) (_ password
 	return p.generate(enc.cost)
 }
 
-func (enc Encrypter) MatchPassword(hashed password.HashedPassword, password password.RawPassword) (err error) {
-	p, err := NewPassword(password)
+func (enc Encrypter) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) (err error) {
+	p, err := NewPassword(raw)
 	if err != nil {
 		return
 	}
 
 	err = p.compare(hashed)
 	if err != nil {
+		err = password.ErrPasswordNotMatched
 		return
 	}
 

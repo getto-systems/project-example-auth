@@ -9,8 +9,9 @@ const (
 )
 
 var (
-	ErrPasswordEmpty   = newError("Password/Empty")
-	ErrPasswordTooLong = newError("Password/TooLong")
+	ErrPasswordEmpty      = newError("Password/Empty")
+	ErrPasswordTooLong    = newError("Password/TooLong")
+	ErrPasswordNotMatched = newError("Password/NotMatched")
 
 	ErrPasswordNotFoundUser     = newError("Password/NotFound/User")
 	ErrPasswordNotFoundLogin    = newError("Password/NotFound/Login")
@@ -31,7 +32,7 @@ type (
 	}
 
 	PasswordMatcher interface {
-		MatchPassword(HashedPassword, RawPassword) error
+		MatchPassword(HashedPassword, RawPassword) error // マッチしない場合は ErrPasswordNotMatched
 	}
 
 	PasswordEncrypter interface {

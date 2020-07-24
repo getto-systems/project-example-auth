@@ -55,7 +55,7 @@ func formatLogin(login *password.Login) string {
 	}
 }
 
-func formatReset(reset *password.Reset) string {
+func formatResetSession(reset *password.ResetSession) string {
 	if reset == nil {
 		return "nil"
 	} else {

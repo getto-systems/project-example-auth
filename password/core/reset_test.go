@@ -5,8 +5,9 @@ import (
 	//"strings"
 	"time"
 
-	"github.com/getto-systems/project-example-id/password/db"
 	"github.com/getto-systems/project-example-id/password/log"
+	repository_password "github.com/getto-systems/project-example-id/password/repository/password"
+	repository_session "github.com/getto-systems/project-example-id/password/repository/reset_session"
 
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/event_log"
@@ -16,16 +17,16 @@ import (
 // 再設定トークン発行
 func Example_issueResetToken() {
 	h := newResetTestHelper()
-	logger, db, exp, gen, testLogger := h.setup()
-	h.registerLogin(db) // ログインID を登録
+	logger, passwords, sessions, exp, gen, testLogger := h.setup()
+	h.registerLogin(passwords) // ログインID を登録
 
 	request, login, _ := h.context()
 
-	resetter := newResetter(logger, db, exp, gen)
-	reset, err := resetter.issueReset(request, login)
+	resetter := newResetter(logger, passwords, sessions, exp, gen)
+	reset, err := resetter.createResetSession(request, login)
 
 	fmt.Printf("err: %s\n", formatError(err))
-	fmt.Printf("reset: %s\n", formatReset(&reset))
+	fmt.Printf("reset: %s\n", formatResetSession(&reset))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
@@ -33,9 +34,9 @@ func Example_issueResetToken() {
 	// Output:
 	// err: nil
 	// reset: {reset-id}
-	// debug: ["Password/Reset/TryToIssueReset", req: {reset-remote}, login: {reset-login}, reset: nil, user: nil, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
+	// debug: ["Password/Reset/TryToCreateResetSession", req: {reset-remote}, login: {reset-login}, reset: nil, user: nil, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
 	// info: []
-	// audit: ["Password/Reset/IssuedReset", req: {reset-remote}, login: {reset-login}, reset: {reset-id}, user: {reset-user}, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
+	// audit: ["Password/Reset/CreatedResetSession", req: {reset-remote}, login: {reset-login}, reset: {reset-id}, user: {reset-user}, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
 }
 
 // ログインID が登録されていない場合は発行できない
@@ -67,7 +68,7 @@ func newResetTestGenerator() resetTestGenerator {
 	return resetTestGenerator{}
 }
 
-func (resetTestGenerator) Generate() (password.ResetID, password.ResetToken, error) {
+func (resetTestGenerator) GenerateSession() (password.ResetSessionID, password.ResetToken, error) {
 	return "reset-id", "reset-token", nil
 }
 
@@ -88,19 +89,20 @@ func newResetTestHelper() resetTestHelper {
 	}
 }
 
-func (h resetTestHelper) setup() (password.Logger, *db.MemoryStore, password.Expiration, password.ResetGenerator, *testLogger) {
+func (h resetTestHelper) setup() (password.Logger, *repository_password.MemoryStore, *repository_session.MemoryStore, password.ResetSessionExpiration, password.ResetSessionGenerator, *testLogger) {
 	testLogger := newTestLogger()
 	logger := log.NewLogger(testLogger)
 
-	db := db.NewMemoryStore()
+	passwords := repository_password.NewMemoryStore()
+	sessions := repository_session.NewMemoryStore()
 
-	exp := password.NewExpiration(data.Hour(1))
+	exp := password.NewResetSessionExpiration(data.Hour(1))
 
-	return logger, db, exp, h.gen, testLogger
+	return logger, passwords, sessions, exp, h.gen, testLogger
 }
 
-func (h resetTestHelper) registerLogin(db *db.MemoryStore) {
-	db.RegisterLogin(h.user, h.login)
+func (h resetTestHelper) registerLogin(passwords *repository_password.MemoryStore) {
+	passwords.RegisterLogin(h.user, h.login)
 }
 
 func (h resetTestHelper) context() (data.Request, password.Login, data.User) {
@@ -117,19 +119,19 @@ func (h resetTestHelper) formatLog(entry event_log.Entry) string {
 		entry.Message,
 		formatRequest(entry.Request),
 		formatLogin(entry.Login),
-		formatReset(entry.Reset),
+		formatResetSession(entry.ResetSession),
 		formatUser(entry.User),
 		formatExpires(entry.Expires),
 		formatError(entry.Error),
 	)
 }
 
-func (h resetTestHelper) formatDB(db *db.MemoryStore) string {
-	resetID, _, _ := h.gen.Generate()
-	reset, ok := db.GetResetUser(resetID)
+func (h resetTestHelper) formatDB(sessions *repository_session.MemoryStore) string {
+	id, _, _ := h.gen.GenerateSession()
+	session, ok := sessions.GetResetSessionData(id)
 	if !ok {
 		return "nil"
 	} else {
-		return fmt.Sprintf("\"%s\"", reset.User().UserID())
+		return fmt.Sprintf("\"%s\"", session.User().UserID())
 	}
 }
