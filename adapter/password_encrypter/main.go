@@ -23,11 +23,7 @@ func NewEncrypter(cost int) Encrypter {
 	}
 }
 
-func (enc Encrypter) matcher() password.PasswordMatcher {
-	return enc
-}
-
-func (enc Encrypter) gen() password.PasswordGenerator {
+func (enc Encrypter) enc() password.PasswordEncrypter {
 	return enc
 }
 
