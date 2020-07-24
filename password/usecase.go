@@ -29,6 +29,14 @@ type (
 			data.Expires,
 			error,
 		)
+
+		Error() UsecaseError
+	}
+
+	UsecaseError interface {
+		InputError(error) bool
+		AuthError(error) bool
+		ResetError(error) bool
 	}
 
 	RegisterParam struct {

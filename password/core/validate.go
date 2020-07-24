@@ -35,7 +35,7 @@ func (validator validator) validate(
 		}
 	}()
 
-	err = raw.Check()
+	err = check(raw)
 	if err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func (validator validator) validate(
 		return
 	}
 	if !found {
-		err = password.ErrPasswordNotFoundPassword
+		err = errPasswordNotFoundPassword
 		return
 	}
 
@@ -54,7 +54,7 @@ func (validator validator) validate(
 		return
 	}
 	if !matched {
-		err = password.ErrPasswordNotMatched
+		err = errPasswordNotMatched
 		return
 	}
 

@@ -17,7 +17,7 @@ func (h Handler) Validate(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/validate")
+	logger.DebugMessage("handling Password/Validate")
 
 	login, raw, err := validateParam(r, logger)
 	if err != nil {

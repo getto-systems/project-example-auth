@@ -4,20 +4,6 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-const (
-	PASSWORD_BYTES_LIMIT = 72 // limit of bcrypt
-)
-
-var (
-	ErrPasswordEmpty      = newError("Password/Empty")
-	ErrPasswordTooLong    = newError("Password/TooLong")
-	ErrPasswordNotMatched = newError("Password/NotMatched")
-
-	ErrPasswordNotFoundUser     = newError("Password/NotFound/User")
-	ErrPasswordNotFoundLogin    = newError("Password/NotFound/Login")
-	ErrPasswordNotFoundPassword = newError("Password/NotFound/Password")
-)
-
 type (
 	LoginID string
 	Login   struct {
@@ -57,14 +43,4 @@ func NewLogin(loginID LoginID) Login {
 
 func (login Login) ID() LoginID {
 	return login.id
-}
-
-func (raw RawPassword) Check() error {
-	if len(raw) == 0 {
-		return ErrPasswordEmpty
-	}
-	if len([]byte(raw)) > PASSWORD_BYTES_LIMIT {
-		return ErrPasswordTooLong
-	}
-	return nil
 }
