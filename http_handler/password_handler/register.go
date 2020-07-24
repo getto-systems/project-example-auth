@@ -51,22 +51,18 @@ func loginResponse(w http.ResponseWriter, login password.Login) {
 	})
 }
 
-func getLoginParam(r *http.Request, logger http_handler.Logger) (
-	ticket.Ticket,
-	ticket.Nonce,
-	error,
-) {
+func getLoginParam(r *http.Request, logger http_handler.Logger) (_ ticket.Ticket, _ ticket.Nonce, err error) {
 	var input getLoginInput
-	err := http_handler.ParseBody(r, &input, logger)
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return nil, "", err
+		return
 	}
 
 	nonce := ticket.Nonce(input.Nonce)
 
 	ticket, err := http_handler.TicketCookie(r)
 	if err != nil {
-		return nil, "", err
+		return
 	}
 
 	return ticket, nonce, nil
@@ -93,17 +89,11 @@ func (h Handler) Register(w http.ResponseWriter, r *http.Request) {
 	h.response.OK(w)
 }
 
-func registerParam(r *http.Request, logger http_handler.Logger) (
-	ticket.Ticket,
-	ticket.Nonce,
-	password.Login,
-	password.RegisterParam,
-	error,
-) {
+func registerParam(r *http.Request, logger http_handler.Logger) (_ ticket.Ticket, _ ticket.Nonce, _ password.Login, _ password.RegisterParam, err error) {
 	var input registerInput
-	err := http_handler.ParseBody(r, &input, logger)
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return nil, "", password.Login{}, password.RegisterParam{}, err
+		return
 	}
 
 	nonce := ticket.Nonce(input.Nonce)
@@ -111,11 +101,14 @@ func registerParam(r *http.Request, logger http_handler.Logger) (
 
 	ticket, err := http_handler.TicketCookie(r)
 	if err != nil {
-		return nil, "", password.Login{}, password.RegisterParam{}, err
+		return
 	}
 
-	return ticket, nonce, password.NewLogin(loginID), password.RegisterParam{
+	login := password.NewLogin(loginID)
+	param := password.RegisterParam{
 		OldPassword: password.RawPassword(input.OldPassword),
 		NewPassword: password.RawPassword(input.NewPassword),
-	}, nil
+	}
+
+	return ticket, nonce, login, param, nil
 }

@@ -12,22 +12,22 @@ func (log Logger) reset() password.ResetLogger {
 	return log
 }
 
-func (log Logger) TryToIssueReset(request data.Request, login password.Login, expires data.Expires) {
-	log.logger.Debug(resetEntry("TryToIssueReset", request, &login, nil, nil, &expires, nil))
+func (log Logger) TryToCreateResetSession(request data.Request, login password.Login, expires data.Expires) {
+	log.logger.Debug(resetEntry("TryToCreateResetSession", request, &login, nil, nil, &expires, nil))
 }
-func (log Logger) FailedToIssueReset(request data.Request, login password.Login, expires data.Expires, err error) {
-	log.logger.Info(resetEntry("FailedToIssueReset", request, &login, nil, nil, &expires, err))
-}
-
-func (log Logger) IssuedReset(request data.Request, login password.Login, expires data.Expires, reset password.Reset, user data.User) {
-	log.logger.Audit(resetEntry("IssuedReset", request, &login, &reset, &user, &expires, nil))
+func (log Logger) FailedToCreateResetSession(request data.Request, login password.Login, expires data.Expires, err error) {
+	log.logger.Info(resetEntry("FailedToCreateResetSession", request, &login, nil, nil, &expires, err))
 }
 
-func (log Logger) TryToGetResetStatus(request data.Request, reset password.Reset) {
-	log.logger.Debug(resetEntry("TryToGetResetStatus", request, nil, &reset, nil, nil, nil))
+func (log Logger) CreatedResetSession(request data.Request, login password.Login, expires data.Expires, user data.User, session password.ResetSession) {
+	log.logger.Audit(resetEntry("CreatedResetSession", request, &login, &session, &user, &expires, nil))
 }
-func (log Logger) FailedToGetResetStatus(request data.Request, reset password.Reset, err error) {
-	log.logger.Info(resetEntry("FailedToGetResetStatus", request, nil, &reset, nil, nil, err))
+
+func (log Logger) TryToGetResetStatus(request data.Request, session password.ResetSession) {
+	log.logger.Debug(resetEntry("TryToGetResetStatus", request, nil, &session, nil, nil, nil))
+}
+func (log Logger) FailedToGetResetStatus(request data.Request, session password.ResetSession, err error) {
+	log.logger.Info(resetEntry("FailedToGetResetStatus", request, nil, &session, nil, nil, err))
 }
 
 func (log Logger) TryToValidateResetToken(request data.Request) {
@@ -45,18 +45,18 @@ func resetEntry(
 	event string,
 	request data.Request,
 	login *password.Login,
-	reset *password.Reset,
+	session *password.ResetSession,
 	user *data.User,
 	expires *data.Expires,
 	err error,
 ) event_log.Entry {
 	return event_log.Entry{
-		Message: fmt.Sprintf("Password/Reset/%s", event),
-		Request: request,
-		Login:   login,
-		Reset:   reset,
-		User:    user,
-		Expires: expires,
-		Error:   err,
+		Message:      fmt.Sprintf("Password/Reset/%s", event),
+		Request:      request,
+		Login:        login,
+		ResetSession: session,
+		User:         user,
+		Expires:      expires,
+		Error:        err,
 	}
 }

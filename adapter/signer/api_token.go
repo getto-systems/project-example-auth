@@ -1,7 +1,6 @@
 package signer
 
 import (
-	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -24,15 +23,14 @@ func (signer ApiTokenSigner) signer() ticket.ApiTokenSigner {
 	return signer
 }
 
-func (signer ApiTokenSigner) Sign(user data.User, roles data.Roles, expires data.Expires) (ticket.ApiToken, error) {
+func (signer ApiTokenSigner) Sign(user data.User, roles data.Roles, expires data.Expires) (_ ticket.ApiToken, err error) {
 	token, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.UserID(),
 		"aud": roles,
 		"exp": time.Time(expires).Unix(),
 	})
 	if err != nil {
-		log.Println("app token sign error")
-		return nil, err
+		return
 	}
 
 	return ticket.ApiToken(token), nil

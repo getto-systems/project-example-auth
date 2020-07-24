@@ -12,7 +12,7 @@ import (
 	"github.com/getto-systems/project-example-id/adapter/logger"
 	"github.com/getto-systems/project-example-id/adapter/nonce_generator"
 	"github.com/getto-systems/project-example-id/adapter/password_encrypter"
-	"github.com/getto-systems/project-example-id/adapter/reset_generator"
+	"github.com/getto-systems/project-example-id/adapter/reset_session_generator"
 	"github.com/getto-systems/project-example-id/adapter/signer"
 
 	"github.com/getto-systems/project-example-id/http_handler"
@@ -20,8 +20,9 @@ import (
 	"github.com/getto-systems/project-example-id/http_handler/ticket_handler"
 
 	password_core "github.com/getto-systems/project-example-id/password/core"
-	password_db "github.com/getto-systems/project-example-id/password/db"
 	password_log "github.com/getto-systems/project-example-id/password/log"
+	password_repository_password "github.com/getto-systems/project-example-id/password/repository/password"
+	password_repository_session "github.com/getto-systems/project-example-id/password/repository/reset_session"
 
 	ticket_core "github.com/getto-systems/project-example-id/ticket/core"
 	ticket_db "github.com/getto-systems/project-example-id/ticket/db"
@@ -88,21 +89,21 @@ func (server server) handle(w http.ResponseWriter, r *http.Request) {
 	handler := r.Header.Get(HEADER_HANDLER)
 
 	switch handler {
-	case "password/validate":
+	case "Password/Validate":
 		server.handler.password.Validate(w, r)
-	case "password/register":
+	case "Password/Register":
 		server.handler.password.Register(w, r)
 
-	case "password/issue_reset":
-		server.handler.password.IssueReset(w, r)
-	case "password/reset_status":
+	case "Password/CreateResetSession":
+		server.handler.password.CreateResetSession(w, r)
+	case "Password/GetResetStatus":
 		server.handler.password.GetResetStatus(w, r)
-	case "password/reset":
+	case "Password/Reset":
 		server.handler.password.Reset(w, r)
 
-	case "ticket/extend":
+	case "Ticket/Extend":
 		server.handler.ticket.Extend(w, r)
-	case "ticket/shrink":
+	case "Ticket/Shrink":
 		server.handler.ticket.Shrink(w, r)
 
 	default:
@@ -174,18 +175,23 @@ func newTicketUsecase(appLogger logger.Logger) ticket.Usecase {
 
 func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password.Usecase {
 	logger := password_log.NewLogger(appLogger)
-	db := password_db.NewMemoryStore()
+
+	passwords := password_repository_password.NewMemoryStore()
+	sessions := password_repository_session.NewMemoryStore()
 
 	exp := newPasswordExpiration()
 
-	encrypter := password_encrypter.NewPasswordEncrypter(10) // bcrypt.DefaultCost
-	generator := reset_generator.NewResetGenerator()
+	encrypter := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
+	generator := reset_session_generator.NewGenerator()
 
-	initAdminPassword(db, encrypter)
+	initAdminPassword(passwords, encrypter)
 
 	return password_core.NewUsecase(
 		logger,
-		db,
+
+		passwords,
+		sessions,
+
 		exp,
 
 		encrypter,
@@ -194,7 +200,7 @@ func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password
 		ticket,
 	)
 }
-func initAdminPassword(db *password_db.MemoryStore, gen password.Generator) {
+func initAdminPassword(db *password_repository_password.MemoryStore, gen password.PasswordGenerator) {
 	admin_user_id := os.Getenv("ADMIN_USER_ID")
 	admin_login_id := os.Getenv("ADMIN_LOGIN_ID")
 	admin_password := os.Getenv("ADMIN_PASSWORD")
@@ -279,6 +285,6 @@ func newTicketExpiration() ticket.Expiration {
 	})
 }
 
-func newPasswordExpiration() password.Expiration {
-	return password.NewExpiration(data.Minute(30))
+func newPasswordExpiration() password.ResetSessionExpiration {
+	return password.NewResetSessionExpiration(data.Minute(30))
 }

@@ -25,10 +25,10 @@ func (signer ContentTokenSigner) signer() ticket.ContentTokenSigner {
 	return signer
 }
 
-func (signer ContentTokenSigner) Sign(expires data.Expires) (ticket.ContentToken, error) {
+func (signer ContentTokenSigner) Sign(expires data.Expires) (_ ticket.ContentToken, err error) {
 	signedToken, err := signer.privateKey.Sign(signer.resource, time.Time(expires))
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return ContentToken{signedToken: signedToken}, nil

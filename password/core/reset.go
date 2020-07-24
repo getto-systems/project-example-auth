@@ -6,147 +6,93 @@ import (
 )
 
 type resetter struct {
-	logger password.ResetLogger
-	exp    password.Expiration
-	repo   resetRepository
+	logger    password.ResetLogger
+	passwords password.PasswordRepository
+	sessions  password.ResetSessionRepository
+	exp       password.ResetSessionExpiration
+	gen       password.ResetSessionGenerator
 }
 
 func newResetter(
 	logger password.ResetLogger,
-	db password.ResetDB,
-	exp password.Expiration,
-	gen password.ResetGenerator,
+	passwords password.PasswordRepository,
+	sessions password.ResetSessionRepository,
+	exp password.ResetSessionExpiration,
+	gen password.ResetSessionGenerator,
 ) resetter {
 	return resetter{
-		logger: logger,
-		exp:    exp,
-		repo:   newResetRepository(db, gen),
+		logger:    logger,
+		passwords: passwords,
+		sessions:  sessions,
+		exp:       exp,
+		gen:       gen,
 	}
 }
 
-func (resetter resetter) issueReset(request data.Request, login password.Login) (password.Reset, error) {
-	expires := resetter.exp.Expires(request)
-	resetter.logger.TryToIssueReset(request, login, expires)
+func (resetter resetter) createResetSession(request data.Request, login password.Login) (_ password.ResetSession, err error) {
+	requestedAt := request.RequestedAt()
+	expires := resetter.exp.Expires(requestedAt)
 
-	// TODO 第2引数の token は notifier に渡す
-	reset, _, user, err := resetter.repo.register(login, request, expires)
+	resetter.logger.TryToCreateResetSession(request, login, expires)
+	defer func() {
+		if err != nil {
+			resetter.logger.FailedToCreateResetSession(request, login, expires, err)
+		}
+	}()
+
+	user, err := resetter.passwords.FindUser(login)
 	if err != nil {
-		resetter.logger.FailedToIssueReset(request, login, expires, err)
-		return password.Reset{}, err
+		return
 	}
 
-	resetter.logger.IssuedReset(request, login, expires, reset, user)
+	data := password.NewResetSessionData(user, login, requestedAt, expires)
 
-	return reset, nil
-}
-
-func (resetter resetter) getResetStatus(request data.Request, reset password.Reset) (password.ResetStatus, error) {
-	resetter.logger.TryToGetResetStatus(request, reset)
-
-	status, err := resetter.repo.findResetStatus(reset)
+	// TODO token を notifier に渡す
+	session, _, err := resetter.sessions.RegisterResetSession(resetter.gen, data)
 	if err != nil {
-		resetter.logger.FailedToGetResetStatus(request, reset, err)
-		return password.ResetStatus{}, err
+		return
 	}
 
-	return status, nil
+	//resetter.notifier.SendResetToken(data, token)
+
+	resetter.logger.CreatedResetSession(request, login, expires, user, session)
+	return session, nil
 }
 
-func (resetter resetter) validate(request data.Request, login password.Login, token password.ResetToken) (data.User, error) {
+func (resetter resetter) getResetStatus(request data.Request, session password.ResetSession) (_ password.ResetStatus, err error) {
+	resetter.logger.TryToGetResetStatus(request, session)
+	defer func() {
+		if err != nil {
+			resetter.logger.FailedToGetResetStatus(request, session, err)
+		}
+	}()
+
+	return resetter.sessions.FindResetStatus(session)
+}
+
+func (resetter resetter) validate(request data.Request, login password.Login, token password.ResetToken) (_ data.User, err error) {
 	resetter.logger.TryToValidateResetToken(request)
+	defer func() {
+		if err != nil {
+			resetter.logger.FailedToValidateResetToken(request, err)
+		}
+	}()
 
-	user, err := resetter.repo.findUserByResetToken(request, login, token)
+	data, err := resetter.sessions.FindResetSession(token)
 	if err != nil {
-		resetter.logger.FailedToValidateResetToken(request, err)
-		return data.User{}, err
+		return
 	}
 
-	resetter.logger.AuthedByResetToken(request, user)
-
-	return user, nil
-}
-
-type resetRepository struct {
-	db  password.ResetDB
-	gen password.ResetGenerator
-}
-
-func newResetRepository(db password.ResetDB, gen password.ResetGenerator) resetRepository {
-	return resetRepository{
-		db:  db,
-		gen: gen,
-	}
-}
-
-func (repo resetRepository) register(login password.Login, request data.Request, expires data.Expires) (password.Reset, password.ResetToken, data.User, error) {
-	user, err := repo.findUserByLogin(login)
-	if err != nil {
-		return password.Reset{}, "", data.User{}, err
+	if data.Login().ID() != login.ID() {
+		err = password.ErrResetSessionLoginNotMatched
+		return
 	}
 
-	reset, token, err := repo.db.RegisterReset(repo.gen, user, request.RequestedAt(), expires)
-	if err != nil {
-		return password.Reset{}, "", data.User{}, err
+	if request.RequestedAt().Expired(data.Expires()) {
+		err = password.ErrResetSessionAlreadyExpired
+		return
 	}
 
-	return reset, token, user, nil
-}
-
-func (repo resetRepository) findUserByResetToken(request data.Request, login password.Login, token password.ResetToken) (data.User, error) {
-	loginUser, err := repo.findUserByLogin(login)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	user, err := repo.findResetUser(token)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	err = user.Validate(request, loginUser)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	return user.User(), nil
-}
-
-func (repo resetRepository) findUserByLogin(login password.Login) (data.User, error) {
-	userSlice, err := repo.db.FilterUserByLogin(login)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	if len(userSlice) == 0 {
-		return data.User{}, password.ErrResetUserNotFound
-	}
-
-	return userSlice[0], nil
-}
-
-func (repo resetRepository) findResetStatus(reset password.Reset) (password.ResetStatus, error) {
-	statusSlice, err := repo.db.FilterResetStatus(reset)
-	if err != nil {
-		return password.ResetStatus{}, err
-	}
-
-	if len(statusSlice) == 0 {
-		// ステータスが見つからない場合は「リクエストなし」を返してエラーにはしない
-		return password.NewResetStatusNotRequested(), nil
-	}
-
-	return statusSlice[0], nil
-}
-
-func (repo resetRepository) findResetUser(token password.ResetToken) (password.ResetUser, error) {
-	userSlice, err := repo.db.FilterResetUser(token)
-	if err != nil {
-		return password.ResetUser{}, err
-	}
-
-	if len(userSlice) == 0 {
-		return password.ResetUser{}, password.ErrResetTokenNotFound
-	}
-
-	return userSlice[0], nil
+	resetter.logger.AuthedByResetToken(request, data.User())
+	return data.User(), nil
 }

@@ -34,14 +34,15 @@ func (h Handler) Validate(w http.ResponseWriter, r *http.Request) {
 	h.response.Authenticated(w, ticket, nonce, apiToken, contentToken, expires, logger)
 }
 
-func validateParam(r *http.Request, logger http_handler.Logger) (password.Login, password.RawPassword, error) {
+func validateParam(r *http.Request, logger http_handler.Logger) (_ password.Login, _ password.RawPassword, err error) {
 	var input validateInput
-	err := http_handler.ParseBody(r, &input, logger)
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return password.Login{}, password.RawPassword(""), err
+		return
 	}
 
 	login := password.NewLogin(password.LoginID(input.LoginID))
+	raw := password.RawPassword(input.Password)
 
-	return login, password.RawPassword(input.Password), nil
+	return login, raw, nil
 }
