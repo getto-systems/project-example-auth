@@ -39,7 +39,7 @@ func (h Handler) CreateResetSession(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/validate")
+	logger.DebugMessage("handling Password/CreateResetSession")
 
 	login, err := createResetSessionParam(r, logger)
 	if err != nil {
@@ -78,7 +78,7 @@ func (h Handler) GetResetStatus(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/validate")
+	logger.DebugMessage("handling Password/GetResetStatus")
 
 	session, err := getResetStatusParam(r, logger)
 	if err != nil {
@@ -114,7 +114,7 @@ func (h Handler) Reset(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/validate")
+	logger.DebugMessage("handling Password/Reset")
 
 	login, token, raw, err := resetParam(r, logger)
 	if err != nil {

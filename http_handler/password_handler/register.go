@@ -24,7 +24,7 @@ func (h Handler) GetLogin(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/get_login")
+	logger.DebugMessage("handling Password/GetLogin")
 
 	ticket, nonce, err := getLoginParam(r, logger)
 	if err != nil {
@@ -72,7 +72,7 @@ func (h Handler) Register(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
-	logger.DebugMessage("handling password/register")
+	logger.DebugMessage("handling Password/Register")
 
 	ticket, nonce, login, password, err := registerParam(r, logger)
 	if err != nil {

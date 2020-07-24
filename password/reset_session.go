@@ -4,14 +4,6 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 )
 
-var (
-	ErrResetSessionNotFoundResetStatus  = newError("ResetSession/NotFound/ResetStatus")
-	ErrResetSessionNotFoundResetSession = newError("ResetSession/NotFound/ResetSession")
-
-	ErrResetSessionLoginNotMatched = newError("ResetSession/LoginNotMatched")
-	ErrResetSessionAlreadyExpired  = newError("ResetSession/AlreadyExpired")
-)
-
 type (
 	ResetToken     string
 	ResetSessionID string

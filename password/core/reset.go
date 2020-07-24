@@ -40,12 +40,12 @@ func (resetter resetter) createResetSession(request data.Request, login password
 		}
 	}()
 
-	user, ok, err := resetter.passwords.FindUser(login)
+	user, found, err := resetter.passwords.FindUser(login)
 	if err != nil {
 		return
 	}
-	if !ok {
-		err = password.ErrPasswordNotFoundUser
+	if !found {
+		err = errResetSessionNotFoundUser
 		return
 	}
 
@@ -76,7 +76,7 @@ func (resetter resetter) getResetStatus(request data.Request, session password.R
 		return
 	}
 	if !found {
-		err = password.ErrResetSessionNotFoundResetStatus
+		err = errResetSessionNotFoundResetStatus
 		return
 	}
 
@@ -96,17 +96,17 @@ func (resetter resetter) validate(request data.Request, login password.Login, to
 		return
 	}
 	if !found {
-		err = password.ErrResetSessionNotFoundResetSession
+		err = errResetSessionNotFoundResetSession
 		return
 	}
 
 	if data.Login().ID() != login.ID() {
-		err = password.ErrResetSessionLoginNotMatched
+		err = errResetSessionLoginNotMatched
 		return
 	}
 
 	if request.RequestedAt().Expired(data.Expires()) {
-		err = password.ErrResetSessionAlreadyExpired
+		err = errResetSessionAlreadyExpired
 		return
 	}
 

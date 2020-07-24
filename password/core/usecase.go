@@ -12,6 +12,8 @@ type usecase struct {
 	resetter   resetter
 
 	ticket ticket.Usecase
+
+	err password.UsecaseError
 }
 
 func NewUsecase(
@@ -32,7 +34,13 @@ func NewUsecase(
 		resetter:   newResetter(logger, passwords, sessions, exp, gen),
 
 		ticket: ticket,
+
+		err: newUsecaseError(),
 	}
+}
+
+func (usecase usecase) Error() password.UsecaseError {
+	return usecase.err
 }
 
 func (usecase usecase) Validate(request data.Request, login password.Login, rawPassword password.RawPassword) (_ ticket.Ticket, _ ticket.Nonce, _ ticket.ApiToken, _ ticket.ContentToken, _ data.Expires, err error) {
