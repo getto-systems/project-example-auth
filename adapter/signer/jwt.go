@@ -38,22 +38,24 @@ type JWT_Pem struct {
 	PublicKey  []byte
 }
 
-func NewJWT_ES_512_Key(pem JWT_Pem) (JWT_ES_512_Key, error) {
+func NewJWT_ES_512_Key(pem JWT_Pem) (_ JWT_ES_512_Key, err error) {
 	var key JWT_ES_512_Key
 
 	if pem.PrivateKey != nil {
-		privateKey, err := jwt.ParseECPrivateKeyFromPEM(pem.PrivateKey)
-		if err != nil {
-			return JWT_ES_512_Key{}, err
+		privateKey, parseErr := jwt.ParseECPrivateKeyFromPEM(pem.PrivateKey)
+		if parseErr != nil {
+			err = parseErr
+			return
 		}
 
 		key.privateKey = privateKey
 	}
 
 	if pem.PublicKey != nil {
-		publicKey, err := jwt.ParseECPublicKeyFromPEM(pem.PublicKey)
-		if err != nil {
-			return JWT_ES_512_Key{}, err
+		publicKey, parseErr := jwt.ParseECPublicKeyFromPEM(pem.PublicKey)
+		if parseErr != nil {
+			err = parseErr
+			return
 		}
 
 		key.publicKey = publicKey
@@ -94,17 +96,18 @@ func (key JWT_HS_512_Key) validateKey() interface{} {
 	return key.key
 }
 
-func (signer JWTSigner) Parse(token string) (jwt.MapClaims, error) {
+func (signer JWTSigner) Parse(token string) (_ jwt.MapClaims, err error) {
 	var claims jwt.MapClaims
 	jwtToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 		return signer.key.validateKey(), nil
 	})
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if !jwtToken.Valid {
-		return nil, ErrInvalidJWT
+		err = ErrInvalidJWT
+		return
 	}
 
 	return claims, nil

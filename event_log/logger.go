@@ -13,13 +13,13 @@ type Logger interface {
 }
 
 type Entry struct {
-	Message string
-	Request data.Request
-	Nonce   *ticket.Nonce
-	Login   *password.Login
-	Reset   *password.Reset
-	User    *data.User
-	Roles   *data.Roles
-	Expires *data.Expires
-	Error   error
+	Message      string
+	Request      data.Request
+	Nonce        *ticket.Nonce
+	Login        *password.Login
+	ResetSession *password.ResetSession
+	User         *data.User
+	Roles        *data.Roles
+	Expires      *data.Expires
+	Error        error
 }

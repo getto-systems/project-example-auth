@@ -6,20 +6,20 @@ import (
 )
 
 type validator struct {
-	logger  password.ValidateLogger
-	matcher password.Matcher
-	repo    validateRepository
+	logger    password.ValidateLogger
+	passwords password.PasswordRepository
+	matcher   password.PasswordMatcher
 }
 
 func newValidator(
 	logger password.ValidateLogger,
-	db password.ValidateDB,
-	matcher password.Matcher,
+	passwords password.PasswordRepository,
+	matcher password.PasswordMatcher,
 ) validator {
 	return validator{
-		logger:  logger,
-		matcher: matcher,
-		repo:    newValidateRepository(db),
+		logger:    logger,
+		passwords: passwords,
+		matcher:   matcher,
 	}
 }
 
@@ -27,49 +27,37 @@ func (validator validator) validate(
 	request data.Request,
 	login password.Login,
 	raw password.RawPassword,
-) (user data.User, err error) {
+) (_ data.User, err error) {
 	validator.logger.TryToValidate(request, login)
 	defer func() {
-		if err == nil {
-			validator.logger.AuthedByPassword(request, login, user)
-		} else {
+		if err != nil {
 			validator.logger.FailedToValidate(request, login, err)
 		}
 	}()
 
-	err = checkPassword(raw)
+	err = raw.Check()
 	if err != nil {
 		return
 	}
 
-	pass, err := validator.repo.findPassword(login)
+	user, hashed, found, err := validator.passwords.FindPassword(login)
 	if err != nil {
 		return
 	}
-
-	return pass.Match(validator.matcher, raw)
-}
-
-type validateRepository struct {
-	db password.ValidateDB
-}
-
-func newValidateRepository(db password.ValidateDB) validateRepository {
-	return validateRepository{
-		db: db,
+	if !found {
+		err = password.ErrPasswordNotFoundPassword
+		return
 	}
-}
 
-func (repo validateRepository) findPassword(login password.Login) (pass password.Password, err error) {
-	passwordSlice, err := repo.db.FilterPassword(login)
+	matched, err := validator.matcher.MatchPassword(hashed, raw)
 	if err != nil {
 		return
 	}
-
-	if len(passwordSlice) == 0 {
-		err = password.ErrPasswordNotFound
+	if !matched {
+		err = password.ErrPasswordNotMatched
 		return
 	}
 
-	return passwordSlice[0], nil
+	validator.logger.AuthedByPassword(request, login, user)
+	return user, nil
 }

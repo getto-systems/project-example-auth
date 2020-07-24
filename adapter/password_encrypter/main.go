@@ -13,58 +13,60 @@ var (
 	ErrPasswordTooLong = errors.New("password too long")
 )
 
-type PasswordEncrypter struct {
+type Encrypter struct {
 	cost int
 }
 
-func NewPasswordEncrypter(cost int) PasswordEncrypter {
-	return PasswordEncrypter{
+func NewEncrypter(cost int) Encrypter {
+	return Encrypter{
 		cost: cost,
 	}
 }
 
-func (enc PasswordEncrypter) matcher() password.Matcher {
+func (enc Encrypter) matcher() password.PasswordMatcher {
 	return enc
 }
 
-func (enc PasswordEncrypter) gen() password.Generator {
+func (enc Encrypter) gen() password.PasswordGenerator {
 	return enc
 }
 
-func (enc PasswordEncrypter) GeneratePassword(password password.RawPassword) (password.HashedPassword, error) {
+func (enc Encrypter) GeneratePassword(password password.RawPassword) (_ password.HashedPassword, err error) {
 	p, err := NewPassword(password)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return p.generate(enc.cost)
 }
 
-func (enc PasswordEncrypter) MatchPassword(hashed password.HashedPassword, password password.RawPassword) error {
-	p, err := NewPassword(password)
+func (enc Encrypter) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) (_ bool, err error) {
+	p, err := NewPassword(raw)
 	if err != nil {
-		return err
+		return
 	}
 
 	err = p.compare(hashed)
 	if err != nil {
-		return err
+		return false, nil
 	}
 
-	return nil
+	return true, nil
 }
 
 type Password []byte
 
-func NewPassword(password password.RawPassword) (Password, error) {
+func NewPassword(password password.RawPassword) (_ Password, err error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {
-		return nil, ErrPasswordEmpty
+		err = ErrPasswordEmpty
+		return
 	}
 
 	if len(bytes) > 72 {
-		return nil, ErrPasswordTooLong
+		err = ErrPasswordTooLong
+		return
 	}
 
 	return bytes, nil

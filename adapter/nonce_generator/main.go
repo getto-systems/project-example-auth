@@ -17,10 +17,10 @@ func (gen NonceGenerator) gen() ticket.NonceGenerator {
 	return gen
 }
 
-func (NonceGenerator) GenerateNonce() (ticket.Nonce, error) {
+func (NonceGenerator) GenerateNonce() (_ ticket.Nonce, err error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
-		return "", err
+		return
 	}
 
 	return ticket.Nonce(id.String()), nil

@@ -12,12 +12,3 @@ type RegisterLogger interface {
 	FailedToRegister(data.Request, data.User, error)
 	Registered(data.Request, data.User)
 }
-
-type RegisterDB interface {
-	FilterLogin(data.User) ([]Login, error)
-	RegisterPassword(data.User, HashedPassword) error
-}
-
-type Generator interface {
-	GeneratePassword(RawPassword) (HashedPassword, error)
-}

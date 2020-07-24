@@ -30,21 +30,21 @@ func NewHandler(
 
 func (h Handler) errorResponse(w http.ResponseWriter, err error) {
 	switch err {
-	case password.ErrPasswordIsEmpty,
-		password.ErrPasswordIsTooLong:
+	case password.ErrPasswordEmpty,
+		password.ErrPasswordTooLong:
 
 		h.response.BadRequest(w, err)
 
-	case password.ErrPasswordNotFound,
-		password.ErrLoginNotFound:
+	case password.ErrPasswordNotFoundLogin,
+		password.ErrPasswordNotFoundPassword:
 
 		h.response.ResetCookie(w)
 		h.response.Unauthorized(w, err)
 
-	case password.ErrResetTokenNotFound,
-		password.ErrResetTokenNotFound,
-		password.ErrResetTokenUserNotMatched,
-		password.ErrResetTokenAlreadyExpired:
+	case password.ErrResetSessionNotFoundResetStatus,
+		password.ErrResetSessionNotFoundResetSession,
+		password.ErrResetSessionLoginNotMatched,
+		password.ErrResetSessionAlreadyExpired:
 
 		h.response.Unauthorized(w, err)
 

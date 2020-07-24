@@ -8,12 +8,12 @@ import (
 	"github.com/getto-systems/project-example-id/password"
 )
 
-type issueResetInput struct {
+type createResetSessionInput struct {
 	LoginID string `json:"login_id"`
 }
 
 type getResetStatusInput struct {
-	ResetID string `json:"reset_id"`
+	ResetSessionID string `json:"reset_id"`
 }
 
 type resetInput struct {
@@ -23,7 +23,7 @@ type resetInput struct {
 }
 
 type resetResponseBody struct {
-	ResetID string `json:"reset_id"`
+	ResetSessionID string `json:"reset_id"`
 }
 
 type resetStatusResponseBody struct {
@@ -35,19 +35,19 @@ type resetStatusResponseBody struct {
 	DeliverError   string `json:"deliver_error"`
 }
 
-func (h Handler) IssueReset(w http.ResponseWriter, r *http.Request) {
+func (h Handler) CreateResetSession(w http.ResponseWriter, r *http.Request) {
 	request := http_handler.Request(r)
 	logger := http_handler.NewLogger(h.logger, request)
 
 	logger.DebugMessage("handling password/validate")
 
-	login, err := issueResetParam(r, logger)
+	login, err := createResetSessionParam(r, logger)
 	if err != nil {
 		h.response.BadRequest(w, err)
 		return
 	}
 
-	reset, err := h.password.IssueReset(request, login)
+	reset, err := h.password.CreateResetSession(request, login)
 	if err != nil {
 		h.errorResponse(w, err)
 		return
@@ -56,11 +56,11 @@ func (h Handler) IssueReset(w http.ResponseWriter, r *http.Request) {
 	resetResponse(w, reset)
 }
 
-func issueResetParam(r *http.Request, logger http_handler.Logger) (password.Login, error) {
-	var input issueResetInput
-	err := http_handler.ParseBody(r, &input, logger)
+func createResetSessionParam(r *http.Request, logger http_handler.Logger) (_ password.Login, err error) {
+	var input createResetSessionInput
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return password.Login{}, err
+		return
 	}
 
 	login := password.NewLogin(password.LoginID(input.LoginID))
@@ -68,9 +68,9 @@ func issueResetParam(r *http.Request, logger http_handler.Logger) (password.Logi
 	return login, nil
 }
 
-func resetResponse(w http.ResponseWriter, reset password.Reset) {
+func resetResponse(w http.ResponseWriter, session password.ResetSession) {
 	http_handler.JsonResponse(w, http.StatusOK, resetResponseBody{
-		ResetID: string(reset.ID()),
+		ResetSessionID: string(session.ID()),
 	})
 }
 
@@ -80,13 +80,13 @@ func (h Handler) GetResetStatus(w http.ResponseWriter, r *http.Request) {
 
 	logger.DebugMessage("handling password/validate")
 
-	reset, err := getResetStatusParam(r, logger)
+	session, err := getResetStatusParam(r, logger)
 	if err != nil {
 		h.response.BadRequest(w, err)
 		return
 	}
 
-	status, err := h.password.GetResetStatus(request, reset)
+	status, err := h.password.GetResetStatus(request, session)
 	if err != nil {
 		h.errorResponse(w, err)
 		return
@@ -95,16 +95,14 @@ func (h Handler) GetResetStatus(w http.ResponseWriter, r *http.Request) {
 	resetStatusResponse(w, status)
 }
 
-func getResetStatusParam(r *http.Request, logger http_handler.Logger) (password.Reset, error) {
+func getResetStatusParam(r *http.Request, logger http_handler.Logger) (_ password.ResetSession, err error) {
 	var input getResetStatusInput
-	err := http_handler.ParseBody(r, &input, logger)
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return password.Reset{}, err
+		return
 	}
 
-	reset := password.NewReset(password.ResetID(input.ResetID))
-
-	return reset, nil
+	return password.NewResetSession(password.ResetSessionID(input.ResetSessionID)), nil
 }
 
 func resetStatusResponse(w http.ResponseWriter, reset password.ResetStatus) {
@@ -133,11 +131,11 @@ func (h Handler) Reset(w http.ResponseWriter, r *http.Request) {
 	h.response.Authenticated(w, ticket, nonce, apiToken, contentToken, expires, logger)
 }
 
-func resetParam(r *http.Request, logger http_handler.Logger) (password.Login, password.ResetToken, password.RawPassword, error) {
+func resetParam(r *http.Request, logger http_handler.Logger) (_ password.Login, _ password.ResetToken, _ password.RawPassword, err error) {
 	var input resetInput
-	err := http_handler.ParseBody(r, &input, logger)
+	err = http_handler.ParseBody(r, &input, logger)
 	if err != nil {
-		return password.Login{}, "", "", err
+		return
 	}
 
 	login := password.NewLogin(password.LoginID(input.LoginID))
