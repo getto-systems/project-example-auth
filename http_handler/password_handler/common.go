@@ -11,7 +11,6 @@ import (
 type Handler struct {
 	logger   http_handler.RequestLogger
 	response http_handler.Response
-
 	password password.Usecase
 }
 
@@ -23,7 +22,6 @@ func NewHandler(
 	return Handler{
 		logger:   logger,
 		response: response,
-
 		password: password,
 	}
 }
