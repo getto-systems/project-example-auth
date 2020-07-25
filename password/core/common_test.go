@@ -35,12 +35,16 @@ func (logger *testLogger) Debug(entry event_log.Entry) {
 	logger.debug = entry
 }
 
-func formatError(err error) string {
+func formatError(err error, expected error) string {
 	if err == nil {
 		return "nil"
-	} else {
+	}
+
+	if err != expected {
 		return fmt.Sprintf("\"%s\"", err)
 	}
+
+	return "err"
 }
 
 func formatRequest(request data.Request) string {

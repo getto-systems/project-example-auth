@@ -24,11 +24,11 @@ func Example_validate() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, nil))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, nil))
 
 	// Output:
 	// err: nil
@@ -50,18 +50,18 @@ func Example_validate_fail_DifferentPassword() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, errPasswordNotMatched))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, errPasswordNotMatched))
 
 	// Output:
-	// err: "Password/Password/NotMatched"
+	// err: err
 	// user: {}
 	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "Password/Password/NotMatched"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: err]
 }
 
 // パスワードが見つからない場合は認証失敗
@@ -76,18 +76,18 @@ func Example_validate_fail_PasswordNotFound() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, errPasswordNotFoundPassword))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, errPasswordNotFoundPassword))
 
 	// Output:
-	// err: "Password/Password/NotFound/Password"
+	// err: err
 	// user: {}
 	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "Password/Password/NotFound/Password"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: err]
 }
 
 // 空のパスワードの場合、必ず失敗する
@@ -102,18 +102,18 @@ func Example_validate_fail_EmptyPassword() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, errPasswordEmpty))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, errPasswordEmpty))
 
 	// Output:
-	// err: "Password/Password/Empty"
+	// err: err
 	// user: {}
 	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "Password/Password/Empty"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: err]
 }
 
 // 長いパスワードの場合、必ず失敗する
@@ -128,18 +128,18 @@ func Example_validate_fail_LongPassword() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, errPasswordTooLong))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, errPasswordTooLong))
 
 	// Output:
-	// err: "Password/Password/TooLong"
+	// err: err
 	// user: {}
 	// debug: ["Password/Validate/TryToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: nil]
 	// info: []
-	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: "Password/Password/TooLong"]
+	// audit: ["Password/Validate/FailedToValidate", req: {validate-remote}, login: {validate-login}, user: nil, err: err]
 }
 
 // ギリギリの長さのパスワードの場合、成功する
@@ -154,11 +154,11 @@ func Example_validate_LongPassword() {
 	validator := newValidator(logger, passwords, matcher)
 	user, err := validator.validate(request, login, raw)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, nil))
 	fmt.Printf("user: %s\n", formatUser(&user))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, nil))
 
 	// Output:
 	// err: nil
@@ -227,7 +227,7 @@ func (h validateTestHelper) context() (data.Request, password.Login) {
 	return h.request, h.login
 }
 
-func (h validateTestHelper) formatLog(entry event_log.Entry) string {
+func (h validateTestHelper) formatLog(entry event_log.Entry, err error) string {
 	if entry.Message == "" {
 		return "[]"
 	}
@@ -238,6 +238,6 @@ func (h validateTestHelper) formatLog(entry event_log.Entry) string {
 		formatRequest(entry.Request),
 		formatLogin(entry.Login),
 		formatUser(entry.User),
-		formatError(entry.Error),
+		formatError(entry.Error, err),
 	)
 }

@@ -25,11 +25,11 @@ func Example_issueResetToken() {
 	resetter := newResetter(logger, passwords, sessions, exp, gen)
 	reset, err := resetter.createResetSession(request, login)
 
-	fmt.Printf("err: %s\n", formatError(err))
+	fmt.Printf("err: %s\n", formatError(err, nil))
 	fmt.Printf("reset: %s\n", formatResetSession(&reset))
-	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug))
-	fmt.Printf("info: %s\n", h.formatLog(testLogger.info))
-	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit))
+	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
+	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
+	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, nil))
 
 	// Output:
 	// err: nil
@@ -109,7 +109,7 @@ func (h resetTestHelper) context() (data.Request, password.Login, data.User) {
 	return h.request, h.login, h.user
 }
 
-func (h resetTestHelper) formatLog(entry event_log.Entry) string {
+func (h resetTestHelper) formatLog(entry event_log.Entry, err error) string {
 	if entry.Message == "" {
 		return "[]"
 	}
@@ -122,7 +122,7 @@ func (h resetTestHelper) formatLog(entry event_log.Entry) string {
 		formatResetSession(entry.ResetSession),
 		formatUser(entry.User),
 		formatExpires(entry.Expires),
-		formatError(entry.Error),
+		formatError(entry.Error, err),
 	)
 }
 
