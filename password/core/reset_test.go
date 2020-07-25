@@ -23,20 +23,20 @@ func Example_issueResetToken() {
 	request, login, _ := h.context()
 
 	resetter := newResetter(logger, passwords, sessions, exp, gen)
-	reset, err := resetter.createResetSession(request, login)
+	session, err := resetter.createResetSession(request, login)
 
-	fmt.Printf("err: %s\n", formatError(err, nil))
-	fmt.Printf("reset: %s\n", formatResetSession(&reset))
+	fmt.Println(formatError(err, nil))
+	fmt.Println(formatResetSession(&session))
 	fmt.Printf("debug: %s\n", h.formatLog(testLogger.debug, nil))
 	fmt.Printf("info: %s\n", h.formatLog(testLogger.info, nil))
 	fmt.Printf("audit: %s\n", h.formatLog(testLogger.audit, nil))
 
 	// Output:
 	// err: nil
-	// reset: {reset-id}
-	// debug: ["Password/Reset/TryToCreateResetSession", req: {reset-remote}, login: {reset-login}, reset: nil, user: nil, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
+	// session: {reset-session-id}
+	// debug: ["Password/Reset/TryToCreateResetSession", req, login, session: nil, user: nil, expires, err: nil]
 	// info: []
-	// audit: ["Password/Reset/CreatedResetSession", req: {reset-remote}, login: {reset-login}, reset: {reset-id}, user: {reset-user}, expires: "2020-01-01 01:00:00 +0000 UTC", err: nil]
+	// audit: ["Password/Reset/CreatedResetSession", req, login, session: {reset-session-id}, user, expires, err: nil]
 }
 
 // ログインID が登録されていない場合は発行できない
@@ -54,6 +54,7 @@ type (
 		gen resetTestGenerator
 
 		request data.Request
+		expires data.Expires
 		user    data.User
 		login   password.Login
 	}
@@ -69,7 +70,7 @@ func newResetTestGenerator() resetTestGenerator {
 }
 
 func (resetTestGenerator) GenerateSession() (password.ResetSessionID, password.ResetToken, error) {
-	return "reset-id", "reset-token", nil
+	return "reset-session-id", "reset-token", nil
 }
 
 func newResetTestHelper() resetTestHelper {
@@ -77,6 +78,9 @@ func newResetTestHelper() resetTestHelper {
 
 	now, _ := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")
 	request := data.NewRequest(data.RequestedAt(now), data.RemoteAddr("reset-remote"))
+
+	expires, _ := time.Parse(time.RFC3339, "2020-01-01T01:00:00Z") // 1 hour after : see setup()
+
 	user := data.NewUser("reset-user")
 	login := password.NewLogin("reset-login")
 
@@ -84,6 +88,7 @@ func newResetTestHelper() resetTestHelper {
 		gen: gen,
 
 		request: request,
+		expires: data.Expires(expires),
 		user:    user,
 		login:   login,
 	}
@@ -115,13 +120,13 @@ func (h resetTestHelper) formatLog(entry event_log.Entry, err error) string {
 	}
 
 	return fmt.Sprintf(
-		"[\"%s\", req: %s, login: %s, reset: %s, user: %s, expires: %s, err: %s]",
+		"[\"%s\", %s, %s, %s, %s, %s, %s]",
 		entry.Message,
-		formatRequest(entry.Request),
-		formatLogin(entry.Login),
+		formatRequest(entry.Request, h.request),
+		formatLogin(entry.Login, &h.login),
 		formatResetSession(entry.ResetSession),
-		formatUser(entry.User),
-		formatExpires(entry.Expires),
+		formatUser(entry.User, &h.user),
+		formatExpires(entry.Expires, &h.expires),
 		formatError(entry.Error, err),
 	)
 }

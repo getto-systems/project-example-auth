@@ -37,48 +37,64 @@ func (logger *testLogger) Debug(entry event_log.Entry) {
 
 func formatError(err error, expected error) string {
 	if err == nil {
-		return "nil"
+		return "err: nil"
 	}
 
 	if err != expected {
-		return fmt.Sprintf("\"%s\"", err)
+		return fmt.Sprintf("err: \"%s\"", err)
 	}
 
 	return "err"
 }
 
-func formatRequest(request data.Request) string {
-	return fmt.Sprintf("{%s}", request.Route().RemoteAddr())
+func formatRequest(request data.Request, expected data.Request) string {
+	if request.Route().RemoteAddr() != expected.Route().RemoteAddr() {
+		return fmt.Sprintf("req: {%s}", request.Route().RemoteAddr())
+	}
+
+	return "req"
 }
 
-func formatLogin(login *password.Login) string {
+func formatLogin(login *password.Login, expected *password.Login) string {
 	if login == nil {
-		return "nil"
-	} else {
-		return fmt.Sprintf("{%s}", login.ID())
+		return "login: nil"
 	}
+
+	if login.ID() != expected.ID() {
+		return fmt.Sprintf("login: {%s}", login.ID())
+	}
+
+	return "login"
 }
 
-func formatResetSession(reset *password.ResetSession) string {
-	if reset == nil {
-		return "nil"
-	} else {
-		return fmt.Sprintf("{%s}", reset.ID())
+func formatResetSession(session *password.ResetSession) string {
+	if session == nil {
+		return "session: nil"
 	}
+
+	return fmt.Sprintf("session: {%s}", session.ID())
 }
 
-func formatUser(user *data.User) string {
+func formatUser(user *data.User, expected *data.User) string {
 	if user == nil {
-		return "nil"
-	} else {
-		return fmt.Sprintf("{%s}", user.UserID())
+		return "user: nil"
 	}
+
+	if user.UserID() != expected.UserID() {
+		return fmt.Sprintf("user: {%s}", user.UserID())
+	}
+
+	return "user"
 }
 
-func formatExpires(expires *data.Expires) string {
+func formatExpires(expires *data.Expires, expected *data.Expires) string {
 	if expires == nil {
-		return "nil"
-	} else {
-		return fmt.Sprintf("\"%s\"", time.Time(*expires).String())
+		return "expires: nil"
 	}
+
+	if expected == nil || *expires != *expected {
+		return fmt.Sprintf("expires: \"%s\"", time.Time(*expires).String())
+	}
+
+	return "expires"
 }
