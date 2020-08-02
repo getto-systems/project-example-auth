@@ -1,11 +1,50 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/user"
 )
 
-type ValidateEventPublisher interface {
-	ValidateTicket(data.Request)
-	ValidateTicketFailed(data.Request, error)
-	AuthenticatedByTicket(data.Request, data.User)
+var (
+	errValidateDifferentNonce = errors.NewError("Ticket.Validate", "DifferentNonce")
+	errValidateAlreadyExpired = errors.NewError("Ticket.Validate", "AlreadyExpired")
+)
+
+type Validate struct {
+	logger ticket.ValidateLogger
+	parser ticket.TicketParser
+}
+
+func NewValidate(logger ticket.ValidateLogger, parser ticket.TicketParser) Validate {
+	return Validate{
+		logger: logger,
+		parser: parser,
+	}
+}
+
+func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (_ user.User, err error) {
+	action.logger.TryToValidateTicket(request, ticket.Nonce())
+
+	user, nonce, expires, err := action.parser.Parse(ticket.Token())
+	if err != nil {
+		action.logger.FailedToValidateTicket(request, ticket.Nonce(), err)
+		return
+	}
+
+	if nonce != ticket.Nonce() {
+		err = errValidateDifferentNonce
+		action.logger.FailedToValidateTicket(request, ticket.Nonce(), err)
+		return
+	}
+
+	if request.RequestedAt().Expired(expires) {
+		err = errValidateAlreadyExpired
+		action.logger.FailedToValidateTicketBecauseExpired(request, ticket.Nonce(), err)
+		return
+	}
+
+	action.logger.AuthByTicket(request, user, ticket.Nonce())
+	return user, nil
 }

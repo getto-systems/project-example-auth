@@ -1,16 +1,16 @@
 package password_encrypter
 
 import (
+	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/getto-systems/project-example-id/password"
-
-	"errors"
+	"github.com/getto-systems/project-example-id/data/password"
 )
 
 var (
-	ErrPasswordEmpty   = errors.New("empty password is not allowed")
-	ErrPasswordTooLong = errors.New("password too long")
+	errPasswordEmpty   = errors.New("empty password is not allowed")
+	errPasswordTooLong = errors.New("password too long")
 )
 
 type Encrypter struct {
@@ -28,7 +28,7 @@ func (enc Encrypter) enc() password.PasswordEncrypter {
 }
 
 func (enc Encrypter) GeneratePassword(password password.RawPassword) (_ password.HashedPassword, err error) {
-	p, err := NewPassword(password)
+	p, err := newRaw(password)
 	if err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (enc Encrypter) GeneratePassword(password password.RawPassword) (_ password
 }
 
 func (enc Encrypter) MatchPassword(hashed password.HashedPassword, raw password.RawPassword) (_ bool, err error) {
-	p, err := NewPassword(raw)
+	p, err := newRaw(raw)
 	if err != nil {
 		return
 	}
@@ -50,28 +50,28 @@ func (enc Encrypter) MatchPassword(hashed password.HashedPassword, raw password.
 	return true, nil
 }
 
-type Password []byte
+type raw []byte
 
-func NewPassword(password password.RawPassword) (_ Password, err error) {
+func newRaw(password password.RawPassword) (_ raw, err error) {
 	bytes := []byte(password)
 
 	if len(bytes) == 0 {
-		err = ErrPasswordEmpty
+		err = errPasswordEmpty
 		return
 	}
 
 	if len(bytes) > 72 {
-		err = ErrPasswordTooLong
+		err = errPasswordTooLong
 		return
 	}
 
 	return bytes, nil
 }
 
-func (password Password) generate(cost int) ([]byte, error) {
+func (password raw) generate(cost int) ([]byte, error) {
 	return bcrypt.GenerateFromPassword(password, cost)
 }
 
-func (password Password) compare(hashed []byte) error {
+func (password raw) compare(hashed []byte) error {
 	return bcrypt.CompareHashAndPassword(hashed, password)
 }

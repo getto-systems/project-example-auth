@@ -9,29 +9,40 @@ import (
 
 	"github.com/rs/cors"
 
+	"github.com/getto-systems/project-example-id/adapter/http_handler"
 	"github.com/getto-systems/project-example-id/adapter/logger"
+	"github.com/getto-systems/project-example-id/adapter/message"
 	"github.com/getto-systems/project-example-id/adapter/nonce_generator"
 	"github.com/getto-systems/project-example-id/adapter/password_encrypter"
 	"github.com/getto-systems/project-example-id/adapter/reset_session_generator"
 	"github.com/getto-systems/project-example-id/adapter/signer"
 
-	"github.com/getto-systems/project-example-id/http_handler"
-	"github.com/getto-systems/project-example-id/http_handler/password_handler"
-	"github.com/getto-systems/project-example-id/http_handler/ticket_handler"
+	"github.com/getto-systems/project-example-id/client"
 
-	password_core "github.com/getto-systems/project-example-id/password/core"
+	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/data/user"
+
+	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
+	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
+
+	api_token_log "github.com/getto-systems/project-example-id/api_token/log"
+	api_token_repository_api_user "github.com/getto-systems/project-example-id/api_token/repository/api_user"
+
+	user_log "github.com/getto-systems/project-example-id/user/log"
+	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
+
 	password_log "github.com/getto-systems/project-example-id/password/log"
 	password_repository_password "github.com/getto-systems/project-example-id/password/repository/password"
-	password_repository_session "github.com/getto-systems/project-example-id/password/repository/reset_session"
 
-	ticket_core "github.com/getto-systems/project-example-id/ticket/core"
-	ticket_db "github.com/getto-systems/project-example-id/ticket/db"
-	ticket_event_log "github.com/getto-systems/project-example-id/ticket/event_log"
-	ticket_pubsub "github.com/getto-systems/project-example-id/ticket/pubsub"
-
-	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/password"
-	"github.com/getto-systems/project-example-id/ticket"
+	password_reset_job_queue_send_token "github.com/getto-systems/project-example-id/password_reset/job_queue/send_token"
+	password_reset_log "github.com/getto-systems/project-example-id/password_reset/log"
+	password_reset_repository_destination "github.com/getto-systems/project-example-id/password_reset/repository/destination"
+	password_reset_repository_session "github.com/getto-systems/project-example-id/password_reset/repository/session"
+	password_reset_sender "github.com/getto-systems/project-example-id/password_reset/sender"
 )
 
 const (
@@ -41,21 +52,16 @@ const (
 type (
 	server struct {
 		port string
-
 		cors cors.Options
 		tls  tls
 
-		handler handler
+		cookieDomain http_handler.CookieDomain
+		backend      client.Backend
 	}
 
 	tls struct {
 		cert string
 		key  string
-	}
-
-	handler struct {
-		ticket   ticket_handler.Handler
-		password password_handler.Handler
 	}
 )
 
@@ -63,48 +69,54 @@ func main() {
 	log.Fatal(newServer().listen())
 }
 func (server server) listen() error {
-	handler := server.http_handler()
+	mux := server.mux()
 
 	if os.Getenv("SERVER_MODE") == "backend" {
 		return http.ListenAndServe(
 			server.port,
-			handler,
+			mux,
 		)
 	} else {
 		return http.ListenAndServeTLS(
 			server.port,
 			server.tls.cert,
 			server.tls.key,
-			cors.New(server.cors).Handler(handler),
+			cors.New(server.cors).Handler(mux),
 		)
 	}
 }
-func (server server) http_handler() *http.ServeMux {
-	router := http.NewServeMux()
-	router.HandleFunc("/", server.handle)
-	return router
+func (server server) mux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", server.handle)
+	return mux
 }
 
 func (server server) handle(w http.ResponseWriter, r *http.Request) {
-	handler := r.Header.Get(HEADER_HANDLER)
+	h := http_handler.NewHandler(w, r)
+	c := client.NewClient(server.backend, http_handler.NewCredentialHandler(server.cookieDomain, w, r))
 
-	switch handler {
-	case "Password/Validate":
-		server.handler.password.Validate(w, r)
-	case "Password/Register":
-		server.handler.password.Register(w, r)
+	switch r.Header.Get(HEADER_HANDLER) {
+	case "Renew":
+		client.NewRenew(c).Renew(http_handler.NewRenew(h))
+	case "Logout":
+		client.NewLogout(c).Logout(http_handler.NewLogout(h))
 
-	case "Password/CreateResetSession":
-		server.handler.password.CreateResetSession(w, r)
-	case "Password/GetResetStatus":
-		server.handler.password.GetResetStatus(w, r)
-	case "Password/Reset":
-		server.handler.password.Reset(w, r)
+	case "PasswordLogin":
+		client.NewPasswordLogin(c).Login(http_handler.NewPasswordLogin(h))
 
-	case "Ticket/Extend":
-		server.handler.ticket.Extend(w, r)
-	case "Ticket/Shrink":
-		server.handler.ticket.Shrink(w, r)
+	case "PasswordChange/GetLogin":
+		client.NewPasswordChange(c).GetLogin(http_handler.NewPasswordChange(h))
+	case "PasswordChange/Change":
+		client.NewPasswordChange(c).Change(http_handler.NewPasswordChange(h))
+
+	case "PasswordReset/CreateSession":
+		client.NewPasswordReset(c).CreateSession(http_handler.NewPasswordReset(h))
+	case "PasswordReset/SendToken":
+		client.NewPasswordReset(c).SendToken(http_handler.NewPasswordReset(h))
+	case "PasswordReset/GetStatus":
+		client.NewPasswordReset(c).GetStatus(http_handler.NewPasswordReset(h))
+	case "PasswordReset/Reset":
+		client.NewPasswordReset(c).Reset(http_handler.NewPasswordReset(h))
 
 	default:
 		w.Header().Set("Content-Type", "application/json")
@@ -123,109 +135,137 @@ func newServer() server {
 			AllowedHeaders:   []string{HEADER_HANDLER},
 			AllowCredentials: true,
 		},
+
 		tls: tls{
 			cert: os.Getenv("TLS_CERT"),
 			key:  os.Getenv("TLS_KEY"),
 		},
 
-		handler: newHandler(),
+		cookieDomain: http_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
+		backend:      newBackend(),
 	}
 }
 
-func newHandler() handler {
+func newBackend() client.Backend {
 	appLogger := newAppLogger()
 
-	response := newResponse()
-
-	ticket := newTicketUsecase(appLogger)
-	password := newPasswordUsecase(appLogger, ticket)
-
-	return handler{
-		ticket:   ticket_handler.NewHandler(appLogger, response, ticket),
-		password: password_handler.NewHandler(appLogger, response, password),
-	}
-}
-
-func newTicketUsecase(appLogger logger.Logger) ticket.Usecase {
-	log := ticket_event_log.NewEventLogger(appLogger)
-	pub := ticket_pubsub.NewPubSub()
-	pub.Subscribe(log)
-	db := ticket_db.NewMemoryStore()
-
-	exp := newTicketExpiration()
-
-	signer := newTicketSigner()
-	apiTokenSigner := newApiTokenSigner()
-	contentTokenSigner := newContentTokenSigner()
-
-	gen := nonce_generator.NewNonceGenerator()
-
-	return ticket_core.NewUsecase(
-		pub,
-		db,
-		exp,
-
-		signer,
-		apiTokenSigner,
-		contentTokenSigner,
-
-		gen,
+	return client.NewBackend(
+		newTicketAction(appLogger),
+		newApiTokenAction(appLogger),
+		newUserAction(appLogger),
+		newPasswordAction(appLogger),
+		newPasswordResetAction(appLogger),
 	)
 }
+func newTicketAction(appLogger logger.Logger) client.TicketAction {
+	return client.NewTicketAction(
+		ticket_log.NewLogger(appLogger),
 
-func newPasswordUsecase(appLogger logger.Logger, ticket ticket.Usecase) password.Usecase {
-	logger := password_log.NewLogger(appLogger)
+		newTicketSigner(),
+		ticket.ExpirationParam{
+			Expires:     time.Minute(5),
+			ExtendLimit: time.Day(14),
+		},
+		nonce_generator.NewNonceGenerator(),
 
+		ticket_repository_ticket.NewMemoryStore(),
+	)
+}
+func newApiTokenAction(appLogger logger.Logger) client.ApiTokenAction {
+	api_users := api_token_repository_api_user.NewMemoryStore()
+
+	initApiUserRepository(api_users)
+
+	return client.NewApiTokenAction(
+		api_token_log.NewLogger(appLogger),
+
+		newApiTokenSigner(),
+		newContentTokenSigner(),
+
+		api_users,
+	)
+}
+func newUserAction(appLogger logger.Logger) client.UserAction {
+	users := user_repository_user.NewMemoryStore()
+
+	initUserRepository(users)
+
+	return client.NewUserAction(
+		user_log.NewLogger(appLogger),
+
+		users,
+	)
+}
+func newPasswordAction(appLogger logger.Logger) client.PasswordAction {
+	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
-	sessions := password_repository_session.NewMemoryStore()
 
-	exp := newPasswordExpiration()
+	initPasswordRepository(passwords, enc)
 
-	encrypter := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
-	generator := reset_session_generator.NewGenerator()
+	return client.NewPasswordAction(
+		password_log.NewLogger(appLogger),
 
-	initAdminPassword(passwords, encrypter)
-
-	return password_core.NewUsecase(
-		logger,
+		enc,
 
 		passwords,
-		sessions,
-
-		exp,
-
-		encrypter,
-		generator,
-
-		ticket,
 	)
 }
-func initAdminPassword(db *password_repository_password.MemoryStore, gen password.PasswordGenerator) {
-	admin_user_id := os.Getenv("ADMIN_USER_ID")
-	admin_login_id := os.Getenv("ADMIN_LOGIN_ID")
-	admin_password := os.Getenv("ADMIN_PASSWORD")
+func newPasswordResetAction(appLogger logger.Logger) client.PasswordResetAction {
+	destinations := password_reset_repository_destination.NewMemoryStore()
 
-	user := data.NewUser(data.UserID(admin_user_id))
-	login := password.NewLogin(password.LoginID(admin_login_id))
+	initPasswordResetDestinationRepository(destinations)
 
-	db.RegisterLogin(user, login)
+	return client.NewPasswordResetAction(
+		password_reset_log.NewLogger(appLogger),
 
-	p, err := gen.GeneratePassword(password.RawPassword(admin_password))
-	if err == nil {
-		db.RegisterPassword(data.NewUser(data.UserID(admin_user_id)), p)
+		time.Minute(30),
+		reset_session_generator.NewGenerator(),
+
+		password_reset_repository_session.NewMemoryStore(),
+		destinations,
+
+		password_reset_job_queue_send_token.NewMemoryQueue(),
+		password_reset_sender.NewTokenSender(message.NewLogMessage()),
+	)
+}
+
+func initUserRepository(users user.UserRepository) {
+	login := user.NewLogin(user.LoginID(os.Getenv("ADMIN_LOGIN_ID")))
+
+	err := users.RegisterUser(adminUser(), login)
+	if err != nil {
+		log.Fatalf("failed to register admin user: %s", err)
 	}
+}
+func initApiUserRepository(api_users api_token.ApiUserRepository) {
+	err := api_users.RegisterApiRoles(adminUser(), api_token.ApiRoles([]string{"admin"}))
+	if err != nil {
+		log.Fatalf("failed to register admin user api roles: %s", err)
+	}
+}
+func initPasswordRepository(passwords password.PasswordRepository, gen password.PasswordGenerator) {
+	raw := password.RawPassword(os.Getenv("ADMIN_PASSWORD"))
+
+	hashed, err := gen.GeneratePassword(raw)
+	if err != nil {
+		log.Fatalf("failed to generate admin user password: %s", err)
+	}
+
+	passwords.ChangePassword(adminUser(), hashed)
+}
+func initPasswordResetDestinationRepository(destinations password_reset.DestinationRepository) {
+	err := destinations.RegisterDestination(adminUser(), password_reset.NewLogDestination())
+	if err != nil {
+		log.Fatalf("failed to register admin user destination: %s", err)
+	}
+}
+
+func adminUser() user.User {
+	return user.NewUser(user.UserID(os.Getenv("ADMIN_USER_ID")))
 }
 
 func newAppLogger() logger.Logger {
-	return logger.NewLogger(os.Getenv("LOG_LEVEL"), log.New(os.Stdout, "", 0))
-}
-
-func newResponse() http_handler.Response {
-	cookie := http_handler.NewCookie(
-		http_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
-		http_handler.ContentTokenID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
-	)
-	return http_handler.NewResponse(cookie)
+	return logger.NewLogger(os.Getenv("LOG_LEVEL"))
 }
 
 func newTicketSigner() signer.TicketSigner {
@@ -273,18 +313,8 @@ func newContentTokenSigner() signer.ContentTokenSigner {
 	}
 
 	return signer.NewContentTokenSigner(
+		api_token.ContentKeyID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 		pem,
 		os.Getenv("AWS_CLOUDFRONT_SECURE_URL"),
 	)
-}
-
-func newTicketExpiration() ticket.Expiration {
-	return ticket.NewExpiration(ticket.ExpirationParam{
-		Expires:     data.Minute(5),
-		ExtendLimit: data.Day(14),
-	})
-}
-
-func newPasswordExpiration() password.ResetSessionExpiration {
-	return password.NewResetSessionExpiration(data.Minute(30))
 }

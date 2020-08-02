@@ -1,12 +1,13 @@
 package signer
 
 import (
-	"time"
+	gotime "time"
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type ApiTokenSigner struct {
@@ -19,19 +20,19 @@ func NewApiTokenSigner(jwt JWTSigner) ApiTokenSigner {
 	}
 }
 
-func (signer ApiTokenSigner) signer() ticket.ApiTokenSigner {
+func (signer ApiTokenSigner) signer() api_token.ApiTokenSigner {
 	return signer
 }
 
-func (signer ApiTokenSigner) Sign(user data.User, roles data.Roles, expires data.Expires) (_ ticket.ApiToken, err error) {
+func (signer ApiTokenSigner) Sign(user user.User, roles api_token.ApiRoles, expires time.Expires) (_ api_token.ApiToken, err error) {
 	token, err := signer.jwt.Sign(jwt.MapClaims{
-		"sub": user.UserID(),
+		"sub": user.ID(),
 		"aud": roles,
-		"exp": time.Time(expires).Unix(),
+		"exp": gotime.Time(expires).Unix(),
 	})
 	if err != nil {
 		return
 	}
 
-	return ticket.ApiToken(token), nil
+	return api_token.NewApiToken(roles, api_token.ApiSignature(token)), nil
 }

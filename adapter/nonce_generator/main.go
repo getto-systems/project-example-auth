@@ -3,7 +3,7 @@ package nonce_generator
 import (
 	"github.com/google/uuid"
 
-	"github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-id/data/ticket"
 )
 
 type NonceGenerator struct {
