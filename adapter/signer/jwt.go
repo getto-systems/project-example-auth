@@ -2,10 +2,9 @@ package signer
 
 import (
 	"crypto/ecdsa"
+	"errors"
 
 	"github.com/dgrijalva/jwt-go"
-
-	"errors"
 )
 
 var (

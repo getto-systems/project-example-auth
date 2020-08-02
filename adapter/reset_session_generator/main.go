@@ -3,7 +3,7 @@ package reset_session_generator
 import (
 	"github.com/google/uuid"
 
-	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
 )
 
 type Generator struct {
@@ -13,11 +13,11 @@ func NewGenerator() Generator {
 	return Generator{}
 }
 
-func (gen Generator) gen() password.ResetSessionGenerator {
+func (gen Generator) gen() password_reset.SessionGenerator {
 	return gen
 }
 
-func (Generator) GenerateSession() (_ password.ResetSessionID, _ password.ResetToken, err error) {
+func (Generator) GenerateSession() (_ password_reset.SessionID, _ password_reset.Token, err error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return
@@ -28,5 +28,5 @@ func (Generator) GenerateSession() (_ password.ResetSessionID, _ password.ResetT
 		return
 	}
 
-	return password.ResetSessionID(id.String()), password.ResetToken(token.String()), nil
+	return password_reset.SessionID(id.String()), password_reset.Token(token.String()), nil
 }

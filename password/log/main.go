@@ -1,15 +1,16 @@
 package log
 
 import (
-	"github.com/getto-systems/project-example-id/event_log"
-	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/log"
+
+	"github.com/getto-systems/project-example-id/data/password"
 )
 
 type Logger struct {
-	logger event_log.Logger
+	logger log.Logger
 }
 
-func NewLogger(logger event_log.Logger) Logger {
+func NewLogger(logger log.Logger) Logger {
 	return Logger{
 		logger: logger,
 	}

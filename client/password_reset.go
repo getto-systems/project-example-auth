@@ -1,0 +1,108 @@
+package client
+
+import (
+	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/data/user"
+)
+
+type (
+	PasswordReset struct {
+		Client
+	}
+	PasswordResetHandler interface {
+		CreateSessionRequest() (request.Request, user.Login, error)
+		CreateSessionResponse(password_reset.Session, error)
+
+		SendTokenResponse(error)
+
+		GetStatusRequest() (request.Request, user.Login, password_reset.Session, error)
+		GetStatusResponse(password_reset.Status, error)
+
+		ResetRequest() (request.Request, user.Login, password_reset.Token, password.RawPassword, error)
+		ResetResponse(error)
+	}
+)
+
+func NewPasswordReset(client Client) PasswordReset {
+	return PasswordReset{Client: client}
+}
+
+func (client PasswordReset) CreateSession(handler PasswordResetHandler) {
+	session, err := client.createSession(handler)
+	client.handleCredentialError(err)
+	handler.CreateSessionResponse(session, err)
+}
+func (client PasswordReset) createSession(handler PasswordResetHandler) (_ password_reset.Session, err error) {
+	request, login, err := handler.CreateSessionRequest()
+	if err != nil {
+		return
+	}
+
+	user, err := client.user.getUser.Get(request, login)
+	if err != nil {
+		return
+	}
+
+	session, dest, token, err := client.passwordReset.createSession.Create(request, user, login)
+	if err != nil {
+		return
+	}
+
+	// job の追加は一番最後 : この後にエラーが発生した場合、再試行により job が 2重に登録されてしまう
+	err = client.passwordReset.pushSendTokenJob.Push(request, session, dest, token)
+	if err != nil {
+		return
+	}
+
+	return session, nil
+}
+
+func (client PasswordReset) SendToken(handler PasswordResetHandler) {
+	err := client.sendToken(handler)
+	client.handleCredentialError(err)
+	handler.SendTokenResponse(err)
+}
+func (client PasswordReset) sendToken(handler PasswordResetHandler) error {
+	return client.passwordReset.sendToken.Send()
+}
+
+func (client PasswordReset) GetStatus(handler PasswordResetHandler) {
+	status, err := client.getStatus(handler)
+	client.handleCredentialError(err)
+	handler.GetStatusResponse(status, err)
+}
+func (client PasswordReset) getStatus(handler PasswordResetHandler) (_ password_reset.Status, err error) {
+	request, login, session, err := handler.GetStatusRequest()
+	if err != nil {
+		return
+	}
+
+	return client.passwordReset.getStatus.Get(request, login, session)
+}
+
+func (client PasswordReset) Reset(handler PasswordResetHandler) {
+	credential, err := client.reset(handler)
+	client.handleCredential(credential, err)
+	handler.ResetResponse(err)
+}
+func (client PasswordReset) reset(handler PasswordResetHandler) (_ data.Credential, err error) {
+	request, login, token, newPassword, err := handler.ResetRequest()
+	if err != nil {
+		return
+	}
+
+	user, err := client.passwordReset.validate.Validate(request, login, token)
+	if err != nil {
+		return
+	}
+
+	err = client.password.change.Change(request, user, newPassword)
+	if err != nil {
+		return
+	}
+
+	return client.issueCredential(request, user)
+}

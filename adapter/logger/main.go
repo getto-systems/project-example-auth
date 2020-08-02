@@ -2,29 +2,34 @@ package logger
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
-	"time"
+	golog "log"
+	"os"
+	gotime "time"
 
 	"github.com/getto-systems/applog-go/v2"
 
-	"github.com/getto-systems/project-example-id/http_handler"
+	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/event_log"
-	"github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type Logger struct {
 	logger applog.Logger
 }
 
-func NewLogger(level string, logger *log.Logger) Logger {
+func NewLogger(level string) Logger {
 	return Logger{
-		logger: leveledLogger(level, logger),
+		logger: leveledLogger(level),
 	}
 }
-func leveledLogger(level string, logger *log.Logger) applog.Logger {
+func leveledLogger(level string) applog.Logger {
+	logger := golog.New(os.Stdout, "", 0)
+
 	switch level {
 	case "QUIET":
 		return applog.NewQuietLogger(logger)
@@ -35,47 +40,46 @@ func leveledLogger(level string, logger *log.Logger) applog.Logger {
 	}
 }
 
-func (logger Logger) eventLogger() event_log.Logger {
+func (logger Logger) log() log.Logger {
 	return logger
 }
 
-func (logger Logger) requestLogger() http_handler.RequestLogger {
-	return logger
-}
-
-func (logger Logger) Audit(entry event_log.Entry) {
+func (logger Logger) Audit(entry log.Entry) {
 	logger.logger.Always(jsonMessage("AUDIT", format(entry)))
 }
 
-func (logger Logger) Info(entry event_log.Entry) {
+func (logger Logger) Error(entry log.Entry) {
+	logger.logger.Always(jsonMessage("ERROR", format(entry)))
+}
+
+func (logger Logger) Info(entry log.Entry) {
 	logger.logger.Info(jsonMessage("INFO", format(entry)))
 }
 
-func (logger Logger) Debug(entry event_log.Entry) {
+func (logger Logger) Debug(entry log.Entry) {
 	logger.logger.Debug(jsonMessage("DEBUG", format(entry)))
 }
 
-func (logger Logger) DebugMessage(request data.Request, message string) {
-	logger.logger.Debug(jsonMessage("DEBUG", Entry{
-		Message: message,
-		Request: requestLog(request),
-	}))
-}
-
-func (logger Logger) DebugError(request data.Request, format string, err error) {
-	logger.DebugMessage(request, fmt.Sprintf(format, err))
-}
-
 type Entry struct {
-	Time    string      `json:"time"`
-	Level   string      `json:"level"`
-	Message string      `json:"message"`
-	Request RequestLog  `json:"request"`
-	Nonce   *NonceLog   `json:"nonce,omitempty"`
-	User    *UserLog    `json:"user,omitempty"`
-	Roles   *RolesLog   `json:"roles,omitempty"`
-	Expires *ExpiresLog `json:"expires,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Time    string     `json:"time"`
+	Level   string     `json:"level"`
+	Message string     `json:"message"`
+	Request RequestLog `json:"request"`
+
+	User  *UserLog  `json:"user,omitempty"`
+	Login *LoginLog `json:"login,omitempty"`
+
+	Nonce    *NonceLog    `json:"ticket,omitempty"`
+	ApiRoles *ApiRolesLog `json:"api_roles,omitempty"`
+
+	Expires     *ExpiresLog     `json:"expires,omitempty"`
+	ExtendLimit *ExtendLimitLog `json:"extend_limit,omitempty"`
+
+	ResetSession     *ResetSessionLog     `json:"reset_session,omitempty"`
+	ResetStatus      *ResetStatusLog      `json:"reset_status,omitempty"`
+	ResetDestination *ResetDestinationLog `json:"reset_destination,omitempty"`
+
+	Error string `json:"error,omitempty"`
 }
 
 type RequestLog struct {
@@ -85,41 +89,77 @@ type RequestLog struct {
 type RouteLog struct {
 	RemoteAddr string `json:"remote_addr"`
 }
-type NonceLog struct {
-	Nonce string `json:"nonce"`
-}
+
 type UserLog struct {
 	UserID string `json:"user_id"`
 }
-type RolesLog struct {
-	Roles []string `json:"roles"`
+type LoginLog struct {
+	LoginID string `json:"login_id"`
 }
+
+type NonceLog struct {
+	Nonce string `json:"nonce"`
+}
+type ApiRolesLog struct {
+	ApiRoles []string `json:"api_roles"`
+}
+
 type ExpiresLog struct {
 	Expires string `json:"expires"`
 }
+type ExtendLimitLog struct {
+	ExtendLimit string `json:"extend_limit"`
+}
 
-func format(log event_log.Entry) Entry {
+type ResetSessionLog struct {
+	SessionID string `json:"session_id"`
+}
+
+// TODO あとでちゃんとする
+type ResetStatusLog struct {
+}
+
+// TODO あとでちゃんとする
+type ResetDestinationLog struct {
+}
+
+func format(log log.Entry) Entry {
 	entry := Entry{
-		Time:    time.Now().UTC().String(),
+		Time:    gotime.Now().UTC().String(),
 		Message: log.Message,
 	}
 
 	entry.Request = requestLog(log.Request)
 
-	if log.Nonce != nil {
-		entry.Nonce = nonceLog(log.Nonce)
-	}
-
 	if log.User != nil {
 		entry.User = userLog(log.User)
 	}
+	if log.Login != nil {
+		entry.Login = loginLog(log.Login)
+	}
 
-	if log.Roles != nil {
-		entry.Roles = rolesLog(log.Roles)
+	if log.Nonce != nil {
+		entry.Nonce = ticketLog(log.Nonce)
+	}
+	if log.ApiRoles != nil {
+		entry.ApiRoles = apiRolesLog(log.ApiRoles)
 	}
 
 	if log.Expires != nil {
 		entry.Expires = expiresLog(log.Expires)
+	}
+	if log.ExtendLimit != nil {
+		entry.ExtendLimit = extendLimitLog(log.ExtendLimit)
+	}
+
+	if log.ResetSession != nil {
+		entry.ResetSession = resetSessionLog(log.ResetSession)
+	}
+	if log.ResetStatus != nil {
+		entry.ResetStatus = resetStatusLog(log.ResetStatus)
+	}
+	if log.ResetDestination != nil {
+		entry.ResetDestination = resetDestinationLog(log.ResetDestination)
 	}
 
 	if log.Error != nil {
@@ -138,38 +178,61 @@ func jsonMessage(level string, log Entry) string {
 	return string(data)
 }
 
-func requestLog(request data.Request) RequestLog {
+func requestLog(request request.Request) RequestLog {
 	return RequestLog{
-		RequestedAt: time.Time(request.RequestedAt()).String(),
+		RequestedAt: gotime.Time(request.RequestedAt()).String(),
 		Route: RouteLog{
 			RemoteAddr: string(request.Route().RemoteAddr()),
 		},
 	}
 }
 
-func nonceLog(nonce *ticket.Nonce) *NonceLog {
+func userLog(user *user.User) *UserLog {
+	return &UserLog{
+		UserID: string(user.ID()),
+	}
+}
+func loginLog(login *user.Login) *LoginLog {
+	return &LoginLog{
+		LoginID: string(login.ID()),
+	}
+}
+
+func ticketLog(nonce *ticket.Nonce) *NonceLog {
 	return &NonceLog{
 		Nonce: string(*nonce),
 	}
 }
-
-func userLog(user *data.User) *UserLog {
-	return &UserLog{
-		UserID: string(user.UserID()),
-	}
-}
-
-func rolesLog(roles *data.Roles) *RolesLog {
-	log := RolesLog{}
+func apiRolesLog(roles *api_token.ApiRoles) *ApiRolesLog {
+	log := ApiRolesLog{}
 	for _, role := range *roles {
-		log.Roles = append(log.Roles, string(role))
+		log.ApiRoles = append(log.ApiRoles, string(role))
 	}
 
 	return &log
 }
 
-func expiresLog(expires *data.Expires) *ExpiresLog {
+func expiresLog(expires *time.Expires) *ExpiresLog {
 	return &ExpiresLog{
-		Expires: time.Time(*expires).String(),
+		Expires: gotime.Time(*expires).String(),
 	}
+}
+func extendLimitLog(limit *time.ExtendLimit) *ExtendLimitLog {
+	return &ExtendLimitLog{
+		ExtendLimit: gotime.Time(*limit).String(),
+	}
+}
+
+func resetSessionLog(session *password_reset.Session) *ResetSessionLog {
+	return &ResetSessionLog{
+		SessionID: string(session.ID()),
+	}
+}
+func resetStatusLog(status *password_reset.Status) *ResetStatusLog {
+	// TODO あとでちゃんとする
+	return &ResetStatusLog{}
+}
+func resetDestinationLog(dest *password_reset.Destination) *ResetDestinationLog {
+	// TODO あとでちゃんとする
+	return &ResetDestinationLog{}
 }
