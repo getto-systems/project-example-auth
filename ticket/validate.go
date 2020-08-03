@@ -25,23 +25,23 @@ func NewValidate(logger ticket.ValidateLogger, parser ticket.TicketParser) Valid
 }
 
 func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (_ user.User, err error) {
-	action.logger.TryToValidateTicket(request, ticket.Nonce())
+	action.logger.TryToValidate(request, ticket.Nonce())
 
 	user, nonce, expires, err := action.parser.Parse(ticket.Token())
 	if err != nil {
-		action.logger.FailedToValidateTicket(request, ticket.Nonce(), err)
+		action.logger.FailedToValidate(request, ticket.Nonce(), err)
 		return
 	}
 
 	if nonce != ticket.Nonce() {
 		err = errValidateDifferentNonce
-		action.logger.FailedToValidateTicket(request, ticket.Nonce(), err)
+		action.logger.FailedToValidate(request, ticket.Nonce(), err)
 		return
 	}
 
 	if request.RequestedAt().Expired(expires) {
 		err = errValidateAlreadyExpired
-		action.logger.FailedToValidateTicketBecauseExpired(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseExpired(request, ticket.Nonce(), err)
 		return
 	}
 

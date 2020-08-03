@@ -14,14 +14,14 @@ func (log Logger) validate() ticket.ValidateLogger {
 	return log
 }
 
-func (log Logger) TryToValidateTicket(request request.Request, nonce ticket.Nonce) {
-	log.logger.Debug(validateEntry("TryToValidateTicket", request, nil, nonce, nil))
+func (log Logger) TryToValidate(request request.Request, nonce ticket.Nonce) {
+	log.logger.Debug(validateEntry("TryToValidate", request, nil, nonce, nil))
 }
-func (log Logger) FailedToValidateTicket(request request.Request, nonce ticket.Nonce, err error) {
-	log.logger.Error(validateEntry("FailedToValidateTicket", request, nil, nonce, err))
+func (log Logger) FailedToValidate(request request.Request, nonce ticket.Nonce, err error) {
+	log.logger.Error(validateEntry("FailedToValidate", request, nil, nonce, err))
 }
-func (log Logger) FailedToValidateTicketBecauseExpired(request request.Request, nonce ticket.Nonce, err error) {
-	log.logger.Info(validateEntry("FailedToValidateTicketBecauseExpired", request, nil, nonce, err))
+func (log Logger) FailedToValidateBecauseExpired(request request.Request, nonce ticket.Nonce, err error) {
+	log.logger.Info(validateEntry("FailedToValidateBecauseExpired", request, nil, nonce, err))
 }
 func (log Logger) AuthByTicket(request request.Request, user user.User, nonce ticket.Nonce) {
 	log.logger.Info(validateEntry("AuthByTicket", request, &user, nonce, nil))

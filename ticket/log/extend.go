@@ -15,14 +15,14 @@ func (log Logger) extend() ticket.ExtendLogger {
 	return log
 }
 
-func (log Logger) TryToExtendTicket(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
-	log.logger.Debug(extendEntry("TryToExtendTicket", request, user, nonce, expires, nil))
+func (log Logger) TryToExtend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
+	log.logger.Debug(extendEntry("TryToExtend", request, user, nonce, expires, nil))
 }
-func (log Logger) FailedToExtendTicket(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
-	log.logger.Error(extendEntry("FailedToExtendTicket", request, user, nonce, expires, err))
+func (log Logger) FailedToExtend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
+	log.logger.Error(extendEntry("FailedToExtend", request, user, nonce, expires, err))
 }
-func (log Logger) ExtendTicket(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
-	log.logger.Error(extendEntry("ExtendTicket", request, user, nonce, expires, nil))
+func (log Logger) Extend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
+	log.logger.Info(extendEntry("Extend", request, user, nonce, expires, nil))
 }
 
 func extendEntry(event string, request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) log.Entry {
