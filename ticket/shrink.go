@@ -25,30 +25,30 @@ func NewShrink(logger ticket.ShrinkLogger, tickets ticket.TicketRepository) Shri
 }
 
 func (action Shrink) Shrink(request request.Request, user user.User, ticket ticket.Ticket) (err error) {
-	action.logger.TryToShrinkTicket(request, user, ticket.Nonce())
+	action.logger.TryToShrink(request, user, ticket.Nonce())
 
 	ticketUser, found, err := action.tickets.FindUser(ticket.Nonce())
 	if err != nil {
-		action.logger.FailedToShrinkTicket(request, user, ticket.Nonce(), err)
+		action.logger.FailedToShrink(request, user, ticket.Nonce(), err)
 		return
 	}
 	if !found {
 		err = errShrinkNotFoundNonce
-		action.logger.FailedToShrinkTicket(request, user, ticket.Nonce(), err)
+		action.logger.FailedToShrink(request, user, ticket.Nonce(), err)
 		return
 	}
 	if ticketUser.ID() != user.ID() {
 		err = errShrinkDifferentUser
-		action.logger.FailedToShrinkTicket(request, user, ticket.Nonce(), err)
+		action.logger.FailedToShrink(request, user, ticket.Nonce(), err)
 		return
 	}
 
 	err = action.tickets.ShrinkExtendLimit(ticket.Nonce())
 	if err != nil {
-		action.logger.FailedToShrinkTicket(request, user, ticket.Nonce(), err)
+		action.logger.FailedToShrink(request, user, ticket.Nonce(), err)
 		return
 	}
 
-	action.logger.ShrinkTicket(request, user, ticket.Nonce())
+	action.logger.Shrink(request, user, ticket.Nonce())
 	return nil
 }

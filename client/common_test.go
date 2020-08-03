@@ -231,15 +231,8 @@ func (logger *testLogger) Debug(entry log.Entry) {
 func (logger *testLogger) entry(level string, entry log.Entry) testLogEntry {
 	return testLogEntry{level: level, entry: entry}
 }
-func (logger *testLogger) fetch() (_ testLogEntry, found bool) {
-	if len(logger.log) == 0 {
-		return
-	}
-
-	entry := logger.log[0]
-	logger.log = logger.log[1:]
-
-	return entry, true
+func (logger *testLogger) clear() {
+	logger.log = []testLogEntry{}
 }
 
 func newTestMessage() *testMessage {
@@ -346,6 +339,7 @@ func (backend *testBackend) newRequest(label string, nowSecond time.Second, hand
 		message:    backend.message,
 	})
 	fmt.Println("")
+	backend.logger.clear()
 }
 
 func (backend *testBackend) newHandler() *commonTestHandler {

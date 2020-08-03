@@ -15,9 +15,10 @@ func ExamplePasswordLogin_login_renew_logout() {
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
 	// 登録済みデータと同じログインID・パスワードでログイン
-	passwordLoginHandler := h.passwordLoginHandler("login-id", "password")
-	//renewHandler := h.renewHandler()
-	//logoutHandler := h.logoutHandler()
+	handler := h.newHandler()
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	renewHandler := newRenewHandler(handler)
+	logoutHandler := newLogoutHandler(handler)
 
 	client := NewClient(h.newBackend(), h.credentialHandler())
 
@@ -30,23 +31,23 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printLog()
 	})
 
-	/*
-		h.newRequest("Renew", time.Minute(1), renewHandler, func() {
-			NewRenew(client).Renew(renewHandler)
-		}, func(f testFormatter) {
-			f.printError()
-			f.printCredential(h.expectedCredential(time.Minute(5), []string{"role"}))
-			f.printLog()
-		})
+	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
+		NewRenew(client).Renew(renewHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printCredential()
+		f.printError()
+		f.printLog()
+	})
 
-		h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
-			NewLogout(client).Logout(logoutHandler)
-		}, func(f testFormatter) {
-			f.printError()
-			f.printCredential(nil)
-			f.printLog()
-		})
-	*/
+	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
+		NewLogout(client).Logout(logoutHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printCredential()
+		f.printError()
+		f.printLog()
+	})
 
 	// Output:
 	// PasswordLogin
@@ -63,6 +64,28 @@ func ExamplePasswordLogin_login_renew_logout() {
 	// log: "ApiToken/IssueApiToken/Issue", info
 	// log: "ApiToken/IssueContentToken/TryToIssue", debug
 	// log: "ApiToken/IssueContentToken/Issue", info
+	//
+	// Renew
+	// request: "2020-01-01T00:01:00Z"
+	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
+	// err: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
+	// log: "Ticket/Extend/TryToExtend", debug
+	// log: "Ticket/Extend/Extend", info
+	// log: "ApiToken/IssueApiToken/TryToIssue", debug
+	// log: "ApiToken/IssueApiToken/Issue", info
+	// log: "ApiToken/IssueContentToken/TryToIssue", debug
+	// log: "ApiToken/IssueContentToken/Issue", info
+	//
+	// Logout
+	// request: "2020-01-01T00:02:00Z"
+	// credential: nil
+	// err: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
+	// log: "Ticket/Shrink/TryToShrink", debug
+	// log: "Ticket/Shrink/Shrink", info
 	//
 }
 
@@ -109,9 +132,9 @@ func (h passwordLoginTestHelper) registerUserData(userID string, loginID string,
 	}
 }
 
-func (h passwordLoginTestHelper) passwordLoginHandler(loginID user.LoginID, rawPassword password.RawPassword) passwordLoginTestHandler {
+func newPasswordLoginHandler(handler *commonTestHandler, loginID user.LoginID, rawPassword password.RawPassword) passwordLoginTestHandler {
 	return passwordLoginTestHandler{
-		commonTestHandler: h.newHandler(),
+		commonTestHandler: handler,
 
 		login:    user.NewLogin(loginID),
 		password: rawPassword,

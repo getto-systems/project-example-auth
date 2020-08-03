@@ -31,21 +31,21 @@ func NewExtend(logger ticket.ExtendLogger, signer ticket.TicketSigner, exp ticke
 
 func (action Extend) Extend(request request.Request, user user.User, oldTicket ticket.Ticket) (_ ticket.Ticket, _ time.Expires, err error) {
 	expires := action.exp.Expires(request)
-	action.logger.TryToExtendTicket(request, user, oldTicket.Nonce(), expires)
+	action.logger.TryToExtend(request, user, oldTicket.Nonce(), expires)
 
 	ticketUser, limit, found, err := action.tickets.FindUserAndExtendLimit(oldTicket.Nonce())
 	if err != nil {
-		action.logger.FailedToExtendTicket(request, user, oldTicket.Nonce(), expires, err)
+		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 	if !found {
 		err = errExtendNotFoundNonce
-		action.logger.FailedToExtendTicket(request, user, oldTicket.Nonce(), expires, err)
+		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 	if ticketUser.ID() != user.ID() {
 		err = errExtendDifferentUser
-		action.logger.FailedToExtendTicket(request, user, oldTicket.Nonce(), expires, err)
+		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 
@@ -53,12 +53,12 @@ func (action Extend) Extend(request request.Request, user user.User, oldTicket t
 
 	token, err := action.signer.Sign(user, oldTicket.Nonce(), expires)
 	if err != nil {
-		action.logger.FailedToExtendTicket(request, user, oldTicket.Nonce(), expires, err)
+		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 
 	newTicket := ticket.NewTicket(token, oldTicket.Nonce())
 
-	action.logger.ExtendTicket(request, user, newTicket.Nonce(), expires)
+	action.logger.Extend(request, user, newTicket.Nonce(), expires)
 	return newTicket, expires, nil
 }

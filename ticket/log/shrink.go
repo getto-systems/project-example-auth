@@ -14,14 +14,14 @@ func (log Logger) shrink() ticket.ShrinkLogger {
 	return log
 }
 
-func (log Logger) TryToShrinkTicket(request request.Request, user user.User, nonce ticket.Nonce) {
-	log.logger.Debug(shrinkEntry("TryToShrinkTicket", request, user, nonce, nil))
+func (log Logger) TryToShrink(request request.Request, user user.User, nonce ticket.Nonce) {
+	log.logger.Debug(shrinkEntry("TryToShrink", request, user, nonce, nil))
 }
-func (log Logger) FailedToShrinkTicket(request request.Request, user user.User, nonce ticket.Nonce, err error) {
-	log.logger.Error(shrinkEntry("FailedToShrinkTicket", request, user, nonce, err))
+func (log Logger) FailedToShrink(request request.Request, user user.User, nonce ticket.Nonce, err error) {
+	log.logger.Error(shrinkEntry("FailedToShrink", request, user, nonce, err))
 }
-func (log Logger) ShrinkTicket(request request.Request, user user.User, nonce ticket.Nonce) {
-	log.logger.Info(shrinkEntry("ShrinkTicket", request, user, nonce, nil))
+func (log Logger) Shrink(request request.Request, user user.User, nonce ticket.Nonce) {
+	log.logger.Info(shrinkEntry("Shrink", request, user, nonce, nil))
 }
 
 func shrinkEntry(event string, request request.Request, user user.User, nonce ticket.Nonce, err error) log.Entry {

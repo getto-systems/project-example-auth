@@ -15,16 +15,16 @@ type (
 	}
 
 	ValidateLogger interface {
-		TryToValidateTicket(request.Request, Nonce)
-		FailedToValidateTicket(request.Request, Nonce, error)
-		FailedToValidateTicketBecauseExpired(request.Request, Nonce, error)
+		TryToValidate(request.Request, Nonce)
+		FailedToValidate(request.Request, Nonce, error)
+		FailedToValidateBecauseExpired(request.Request, Nonce, error)
 		AuthByTicket(request.Request, user.User, Nonce)
 	}
 
 	ShrinkLogger interface {
-		TryToShrinkTicket(request.Request, user.User, Nonce)
-		FailedToShrinkTicket(request.Request, user.User, Nonce, error)
-		ShrinkTicket(request.Request, user.User, Nonce)
+		TryToShrink(request.Request, user.User, Nonce)
+		FailedToShrink(request.Request, user.User, Nonce, error)
+		Shrink(request.Request, user.User, Nonce)
 	}
 
 	IssueLogger interface {
@@ -34,8 +34,8 @@ type (
 	}
 
 	ExtendLogger interface {
-		TryToExtendTicket(request.Request, user.User, Nonce, time.Expires)
-		FailedToExtendTicket(request.Request, user.User, Nonce, time.Expires, error)
-		ExtendTicket(request.Request, user.User, Nonce, time.Expires)
+		TryToExtend(request.Request, user.User, Nonce, time.Expires)
+		FailedToExtend(request.Request, user.User, Nonce, time.Expires, error)
+		Extend(request.Request, user.User, Nonce, time.Expires)
 	}
 )
