@@ -41,5 +41,6 @@ func (action GetStatus) Get(request request.Request, login user.Login, session p
 		return
 	}
 
+	action.logger.GetStatus(request, session, status)
 	return status, nil
 }
