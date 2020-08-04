@@ -247,10 +247,10 @@ func (log *testMessage) fetch() (_ string, found bool) {
 		return
 	}
 
-	message := log.log[0]
-	log.log = log.log[1:]
-
-	return message, true
+	return log.log[0], true
+}
+func (log *testMessage) clear() {
+	log.log = []string{}
 }
 
 type ticketTestSignToken struct {
@@ -306,7 +306,7 @@ func (passwordTestEncrypter) MatchPassword(hashed password.HashedPassword, raw p
 }
 
 func (passwordResetTestSessionGenerator) GenerateSession() (password_reset.SessionID, password_reset.Token, error) {
-	return "reset-session", "reset-token", nil
+	return "reset-session-id", "reset-token", nil
 }
 
 func (backend *testBackend) credentialHandler() CredentialHandler {
@@ -325,6 +325,30 @@ func (backend *testBackend) SetCredential(credential data.Credential) {
 }
 func (backend *testBackend) ClearCredential() {
 	backend.credential = nil
+}
+
+func (backend *testBackend) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
+	testUser := user.NewUser(userID)
+
+	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
+	if err != nil {
+		golog.Fatalf("register user error: %s", err)
+	}
+
+	hashed, err := backend.password.enc.GeneratePassword(rawPassword)
+	if err != nil {
+		golog.Fatalf("generate password error: %s", err)
+	}
+
+	err = backend.password.passwords.ChangePassword(testUser, hashed)
+	if err != nil {
+		golog.Fatalf("change password error: %s", err)
+	}
+
+	err = backend.apiToken.apiUsers.RegisterApiRoles(testUser, apiRoles)
+	if err != nil {
+		golog.Fatalf("register api roles error: %s", err)
+	}
 }
 
 func (backend *testBackend) newRequest(label string, nowSecond time.Second, handler testHandler, exec func(), format func(f testFormatter)) {
@@ -386,9 +410,26 @@ func (f testFormatter) printCredential() {
 		)
 	}
 }
+func (f testFormatter) printLogin(login user.Login) {
+	fmt.Printf("login: {%s}\n", login.ID())
+}
+func (f testFormatter) printResetSession(session password_reset.Session) {
+	fmt.Printf("session: {%s}\n", session.ID())
+}
+func (f testFormatter) printResetStatus(status password_reset.Status) {
+	fmt.Printf("status: %v\n", status) // TODO ちゃんとする
+}
+func (f testFormatter) printResetToken(token password_reset.Token) {
+	fmt.Printf("token: \"%s\"\n", token)
+}
 
 func (f testFormatter) printLog() {
 	for _, entry := range f.logger.log {
 		fmt.Printf("log: \"%s\", %s\n", entry.entry.Message, entry.level)
+	}
+}
+func (f testFormatter) printMessage() {
+	for _, message := range f.message.log {
+		fmt.Printf("message: %s\n", message)
 	}
 }

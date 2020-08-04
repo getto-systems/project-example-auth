@@ -25,7 +25,7 @@ func (log Logger) GetStatus(request request.Request, session password_reset.Sess
 
 func getStatusEntry(event string, request request.Request, session password_reset.Session, status *password_reset.Status, err error) log.Entry {
 	return log.Entry{
-		Message: fmt.Sprintf("Password/GetStatus/%s", event),
+		Message: fmt.Sprintf("PasswordReset/GetStatus/%s", event),
 		Request: request,
 
 		ResetSession: &session,

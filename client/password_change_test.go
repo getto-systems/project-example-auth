@@ -7,18 +7,17 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func ExamplePasswordLogin_login_renew_logout() {
-	h := newPasswordLoginTestHelper()
+func ExamplePasswordChange_change() {
+	h := newPasswordChangeTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
 	client := NewClient(h.newBackend(), h.credentialHandler())
 
 	handler := h.newHandler()
 
-	// 登録済みデータと同じログインID・パスワードでログイン
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
-	renewHandler := newRenewHandler(handler)
-	logoutHandler := newLogoutHandler(handler)
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
 	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
@@ -26,23 +25,21 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printRequest()
 		f.printCredential()
 		f.printError()
-		f.printLog()
 	})
 
-	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
-		NewRenew(client).Renew(renewHandler)
+	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).GetLogin(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
-		f.printCredential()
 		f.printError()
+		f.printLogin(passwordChangeHandler.login)
 		f.printLog()
 	})
 
-	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
-		NewLogout(client).Logout(logoutHandler)
+	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
-		f.printCredential()
 		f.printError()
 		f.printLog()
 	})
@@ -52,76 +49,75 @@ func ExamplePasswordLogin_login_renew_logout() {
 	// request: "2020-01-01T00:00:00Z"
 	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
 	// err: nil
-	// log: "User/GetUser/TryToGetUser", debug
-	// log: "User/GetUser/GetUser", info
+	//
+	// PasswordChange/GetLogin
+	// request: "2020-01-01T00:01:00Z"
+	// err: nil
+	// login: {login-id}
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
+	// log: "User/GetLogin/TryToGetLogin", debug
+	// log: "User/GetLogin/GetLogin", info
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:02:00Z"
+	// err: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Password/Validate/TryToValidate", debug
 	// log: "Password/Validate/AuthByPassword", audit
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
-	//
-	// Renew
-	// request: "2020-01-01T00:01:00Z"
-	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
-	// err: nil
-	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/AuthByTicket", info
-	// log: "Ticket/Extend/TryToExtend", debug
-	// log: "Ticket/Extend/Extend", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
-	//
-	// Logout
-	// request: "2020-01-01T00:02:00Z"
-	// credential: nil
-	// err: nil
-	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/AuthByTicket", info
-	// log: "Ticket/Shrink/TryToShrink", debug
-	// log: "Ticket/Shrink/Shrink", info
+	// log: "Password/Change/TryToChange", debug
+	// log: "Password/Change/Change", audit
 	//
 }
 
 type (
-	passwordLoginTestHelper struct {
+	passwordChangeTestHelper struct {
 		*testBackend
 	}
 
-	passwordLoginTestHandler struct {
+	passwordChangeTestHandler struct {
 		*commonTestHandler
 
-		login    user.Login
-		password password.RawPassword
+		oldPassword password.RawPassword
+		newPassword password.RawPassword
+
+		login user.Login
 	}
 )
 
-func newPasswordLoginTestHelper() passwordLoginTestHelper {
-	return passwordLoginTestHelper{
+func newPasswordChangeTestHelper() passwordChangeTestHelper {
+	return passwordChangeTestHelper{
 		testBackend: newTestBackend(),
 	}
 }
 
-func newPasswordLoginHandler(handler *commonTestHandler, loginID user.LoginID, rawPassword password.RawPassword) passwordLoginTestHandler {
-	return passwordLoginTestHandler{
+func newPasswordChangeHandler(handler *commonTestHandler, oldPassword password.RawPassword, newPassword password.RawPassword) *passwordChangeTestHandler {
+	return &passwordChangeTestHandler{
 		commonTestHandler: handler,
 
-		login:    user.NewLogin(loginID),
-		password: rawPassword,
+		oldPassword: oldPassword,
+		newPassword: newPassword,
 	}
 }
 
-func (handler passwordLoginTestHandler) handler() PasswordLoginHandler {
+func (handler *passwordChangeTestHandler) handler() PasswordChangeHandler {
 	return handler
 }
-func (handler passwordLoginTestHandler) LoginRequest() (request.Request, user.Login, password.RawPassword, error) {
-	return handler.newRequest(), handler.login, handler.password, nil
+func (handler *passwordChangeTestHandler) GetLoginRequest() (request.Request, error) {
+	return handler.newRequest(), nil
 }
-func (handler passwordLoginTestHandler) LoginResponse(err error) {
+func (handler *passwordChangeTestHandler) GetLoginResponse(login user.Login, err error) {
+	handler.setError(err)
+	handler.login = login
+}
+func (handler *passwordChangeTestHandler) ChangeRequest() (request.Request, password.ChangeParam, error) {
+	return handler.newRequest(), password.ChangeParam{
+		OldPassword: handler.oldPassword,
+		NewPassword: handler.newPassword,
+	}, nil
+}
+func (handler *passwordChangeTestHandler) ChangeResponse(err error) {
 	handler.setError(err)
 }
 

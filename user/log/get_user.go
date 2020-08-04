@@ -25,7 +25,7 @@ func (log Logger) GetUser(request request.Request, login user.Login, user user.U
 
 func getUserEntry(event string, request request.Request, login user.Login, user *user.User, err error) log.Entry {
 	return log.Entry{
-		Message: fmt.Sprintf("Password/GetUser/%s", event),
+		Message: fmt.Sprintf("User/GetUser/%s", event),
 		Request: request,
 		User:    user,
 		Login:   &login,

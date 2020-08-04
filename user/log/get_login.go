@@ -20,12 +20,12 @@ func (log Logger) FailedToGetLogin(request request.Request, user user.User, err 
 	log.logger.Info(getLoginEntry("FailedToGetLogin", request, user, nil, err))
 }
 func (log Logger) GetLogin(request request.Request, user user.User, login user.Login) {
-	log.logger.Debug(getLoginEntry("GetLogin", request, user, &login, nil))
+	log.logger.Info(getLoginEntry("GetLogin", request, user, &login, nil))
 }
 
 func getLoginEntry(event string, request request.Request, user user.User, login *user.Login, err error) log.Entry {
 	return log.Entry{
-		Message: fmt.Sprintf("Password/GetLogin/%s", event),
+		Message: fmt.Sprintf("User/GetLogin/%s", event),
 		Request: request,
 		User:    &user,
 		Login:   login,
