@@ -59,6 +59,7 @@ func ExamplePasswordReset_reset() {
 		f.printRequest()
 		f.printResetToken(passwordResetHandler.token)
 		f.printError()
+		f.printCredential()
 		f.printLog()
 	})
 
@@ -92,6 +93,7 @@ func ExamplePasswordReset_reset() {
 	// request: "2020-01-01T00:03:00Z"
 	// token: "reset-token"
 	// err: nil
+	// credential: expires: "2020-01-01T00:08:00Z", roles: [role]
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/AuthByToken", audit
 	// log: "Password/Change/TryToChange", debug

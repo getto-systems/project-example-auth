@@ -24,8 +24,8 @@ func ExamplePasswordLogin_login_renew_logout() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
-		f.printCredential()
 		f.printError()
+		f.printCredential()
 		f.printLog()
 	})
 
@@ -33,8 +33,8 @@ func ExamplePasswordLogin_login_renew_logout() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
-		f.printCredential()
 		f.printError()
+		f.printCredential()
 		f.printLog()
 	})
 
@@ -42,16 +42,16 @@ func ExamplePasswordLogin_login_renew_logout() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
-		f.printCredential()
 		f.printError()
+		f.printCredential()
 		f.printLog()
 	})
 
 	// Output:
 	// PasswordLogin
 	// request: "2020-01-01T00:00:00Z"
-	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
 	// err: nil
+	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -65,8 +65,8 @@ func ExamplePasswordLogin_login_renew_logout() {
 	//
 	// Renew
 	// request: "2020-01-01T00:01:00Z"
-	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
 	// err: nil
+	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Extend/TryToExtend", debug
@@ -78,8 +78,8 @@ func ExamplePasswordLogin_login_renew_logout() {
 	//
 	// Logout
 	// request: "2020-01-01T00:02:00Z"
-	// credential: nil
 	// err: nil
+	// credential: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Shrink/TryToShrink", debug
