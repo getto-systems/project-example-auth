@@ -26,7 +26,6 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printRequest()
 		f.printError()
 		f.printCredential()
-		f.printLog()
 	})
 
 	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
@@ -35,7 +34,6 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printRequest()
 		f.printError()
 		f.printCredential()
-		f.printLog()
 	})
 
 	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
@@ -44,7 +42,6 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printRequest()
 		f.printError()
 		f.printCredential()
-		f.printLog()
 	})
 
 	// Output:
@@ -52,6 +49,40 @@ func ExamplePasswordLogin_login_renew_logout() {
 	// request: "2020-01-01T00:00:00Z"
 	// err: nil
 	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
+	//
+	// Renew
+	// request: "2020-01-01T00:01:00Z"
+	// err: nil
+	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
+	//
+	// Logout
+	// request: "2020-01-01T00:02:00Z"
+	// err: nil
+	// credential: nil
+	//
+}
+
+func ExamplePasswordLogin_loginLog() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -63,10 +94,39 @@ func ExamplePasswordLogin_login_renew_logout() {
 	// log: "ApiToken/IssueContentToken/TryToIssue", debug
 	// log: "ApiToken/IssueContentToken/Issue", info
 	//
-	// Renew
-	// request: "2020-01-01T00:01:00Z"
+}
+
+func ExamplePasswordLogin_renewLog() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	renewHandler := newRenewHandler(handler)
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
+		NewRenew(client).Renew(renewHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
 	// err: nil
-	// credential: expires: "2020-01-01T00:06:00Z", roles: [role]
+	//
+	// Renew
+	// err: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Extend/TryToExtend", debug
@@ -76,10 +136,49 @@ func ExamplePasswordLogin_login_renew_logout() {
 	// log: "ApiToken/IssueContentToken/TryToIssue", debug
 	// log: "ApiToken/IssueContentToken/Issue", info
 	//
-	// Logout
-	// request: "2020-01-01T00:02:00Z"
+}
+
+func ExamplePasswordLogin_logoutLog() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	renewHandler := newRenewHandler(handler)
+	logoutHandler := newLogoutHandler(handler)
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
+		NewRenew(client).Renew(renewHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
+		NewLogout(client).Logout(logoutHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
 	// err: nil
-	// credential: nil
+	//
+	// Renew
+	// err: nil
+	//
+	// Logout
+	// err: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Shrink/TryToShrink", debug

@@ -33,7 +33,6 @@ func ExamplePasswordChange_change() {
 		f.printRequest()
 		f.printError()
 		f.printLogin(passwordChangeHandler.login)
-		f.printLog()
 	})
 
 	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
@@ -41,7 +40,6 @@ func ExamplePasswordChange_change() {
 	}, func(f testFormatter) {
 		f.printRequest()
 		f.printError()
-		f.printLog()
 	})
 
 	// Output:
@@ -54,13 +52,90 @@ func ExamplePasswordChange_change() {
 	// request: "2020-01-01T00:01:00Z"
 	// err: nil
 	// login: {login-id}
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:02:00Z"
+	// err: nil
+	//
+}
+
+func ExamplePasswordChange_getLoginLog() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).GetLogin(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/GetLogin
+	// err: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "User/GetLogin/TryToGetLogin", debug
 	// log: "User/GetLogin/GetLogin", info
 	//
+}
+
+func ExamplePasswordChange_changeLog() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).GetLogin(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/GetLogin
+	// err: nil
+	//
 	// PasswordChange/Change
-	// request: "2020-01-01T00:02:00Z"
 	// err: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
