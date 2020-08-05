@@ -30,10 +30,11 @@ func NewExtend(logger ticket.ExtendLogger, signer ticket.TicketSigner, exp ticke
 }
 
 func (action Extend) Extend(request request.Request, user user.User, oldTicket ticket.Ticket) (_ ticket.Ticket, _ time.Expires, err error) {
+	// ここの user が正しいことは確認済みでなければならない
 	expires := action.exp.Expires(request)
 	action.logger.TryToExtend(request, user, oldTicket.Nonce(), expires)
 
-	ticketUser, limit, found, err := action.tickets.FindUserAndExtendLimit(oldTicket.Nonce())
+	limit, found, err := action.tickets.FindExtendLimit(oldTicket.Nonce())
 	if err != nil {
 		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
@@ -41,11 +42,6 @@ func (action Extend) Extend(request request.Request, user user.User, oldTicket t
 	if !found {
 		err = errExtendNotFoundNonce
 		action.logger.FailedToExtendBecauseTicketNotFound(request, user, oldTicket.Nonce(), expires, err)
-		return
-	}
-	if ticketUser.ID() != user.ID() {
-		err = errExtendMatchFailedUser
-		action.logger.FailedToExtendBecauseUserMatchFailed(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 

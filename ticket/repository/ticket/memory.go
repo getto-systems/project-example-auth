@@ -42,12 +42,12 @@ func (store *MemoryStore) FindUserAndExpires(nonce ticket.Nonce) (_ user.User, _
 	return data.user, data.expires, true, nil
 }
 
-func (store *MemoryStore) FindUserAndExtendLimit(nonce ticket.Nonce) (_ user.User, _ time.ExtendLimit, found bool, err error) {
+func (store *MemoryStore) FindExtendLimit(nonce ticket.Nonce) (_ time.ExtendLimit, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
 	}
-	return data.user, data.limit, true, nil
+	return data.limit, true, nil
 }
 
 func (store *MemoryStore) FindUser(nonce ticket.Nonce) (_ user.User, found bool, err error) {

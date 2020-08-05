@@ -40,7 +40,6 @@ type (
 		TryToExtend(request.Request, user.User, Nonce, time.Expires)
 		FailedToExtend(request.Request, user.User, Nonce, time.Expires, error)
 		FailedToExtendBecauseTicketNotFound(request.Request, user.User, Nonce, time.Expires, error)
-		FailedToExtendBecauseUserMatchFailed(request.Request, user.User, Nonce, time.Expires, error)
 		Extend(request.Request, user.User, Nonce, time.Expires)
 	}
 )
