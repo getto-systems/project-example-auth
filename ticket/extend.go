@@ -29,7 +29,7 @@ func NewExtend(logger ticket.ExtendLogger, signer ticket.TicketSigner, exp ticke
 }
 
 func (action Extend) Extend(request request.Request, user user.User, oldTicket ticket.Ticket) (_ ticket.Ticket, _ time.Expires, err error) {
-	// ここの user が正しいことは確認済みでなければならない
+	// user が正しいことは確認済みでなければならない
 	expires := action.exp.Expires(request)
 	action.logger.TryToExtend(request, user, oldTicket.Nonce(), expires)
 
