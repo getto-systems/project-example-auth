@@ -54,29 +54,25 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 }
 
 func (handler Handler) errorResponse(err error) {
-	var e *errors.Error
-	if goerrors.As(err, &e) {
-		if e.TicketValidateError() {
-			handler.unauthorized(err)
-			return
-		}
+	if goerrors.Is(err, errors.ErrPasswordCheck) {
+		handler.badRequest(err)
+		return
+	}
+	if goerrors.Is(err, errors.ErrTicketValidate) {
+		handler.unauthorized(err)
+		return
+	}
 
-		if e.PasswordCheckError() {
-			handler.badRequest(err)
-			return
-		}
-	} else {
-		switch err {
-		case errEmptyBody,
-			errBodyParseFailed:
+	switch err {
+	case errEmptyBody,
+		errBodyParseFailed:
 
-			handler.badRequest(err)
-			return
+		handler.badRequest(err)
+		return
 
-		case errTicketTokenNotFound:
-			handler.unauthorized(err)
-			return
-		}
+	case errTicketTokenNotFound:
+		handler.unauthorized(err)
+		return
 	}
 
 	handler.internalServerError(err)

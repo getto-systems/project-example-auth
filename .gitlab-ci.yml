@@ -21,6 +21,7 @@ test:
   image: golang:1.14.4-buster
 
   script:
+    - go build main.go
     - go test github.com/getto-systems/project-example-id/client
 
 bump_version:

@@ -36,11 +36,8 @@ func (client Client) handleCredential(credential data.Credential, err error) {
 	}
 }
 func (client Client) handleCredentialError(err error) {
-	var e *errors.Error
-	if goerrors.As(err, &e) {
-		if e.TicketValidateError() {
-			client.handler.ClearCredential()
-		}
+	if goerrors.Is(err, errors.ErrTicketValidate) {
+		client.clearCredential()
 	}
 }
 func (client Client) clearCredential() {
