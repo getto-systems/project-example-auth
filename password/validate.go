@@ -42,7 +42,7 @@ func (action Validate) Validate(request request.Request, user user.User, raw pas
 	}
 	if !found {
 		err = errValidateNotFoundPassword
-		action.logger.FailedToValidate(request, user, err)
+		action.logger.FailedToValidateBecausePasswordNotFound(request, user, err)
 		return
 	}
 

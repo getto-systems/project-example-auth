@@ -15,6 +15,7 @@ type (
 		TryToValidate(request.Request, user.User)
 		FailedToValidate(request.Request, user.User, error)
 		FailedToValidateBecausePasswordCheckFailed(request.Request, user.User, error)
+		FailedToValidateBecausePasswordNotFound(request.Request, user.User, error)
 		FailedToValidateBecausePasswordMatchFailed(request.Request, user.User, error)
 		AuthByPassword(request.Request, user.User)
 	}

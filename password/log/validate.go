@@ -20,8 +20,11 @@ func (log Logger) TryToValidate(request request.Request, user user.User) {
 func (log Logger) FailedToValidateBecausePasswordCheckFailed(request request.Request, user user.User, err error) {
 	log.logger.Info(validateEntry("FailedToValidateBecausePasswordCheckFailed", request, user, err))
 }
+func (log Logger) FailedToValidateBecausePasswordNotFound(request request.Request, user user.User, err error) {
+	log.logger.Audit(validateEntry("FailedToValidateBecausePasswordNotFound", request, user, err))
+}
 func (log Logger) FailedToValidateBecausePasswordMatchFailed(request request.Request, user user.User, err error) {
-	log.logger.Info(validateEntry("FailedToValidateBecausePasswordMatchFailed", request, user, err))
+	log.logger.Audit(validateEntry("FailedToValidateBecausePasswordMatchFailed", request, user, err))
 }
 func (log Logger) FailedToValidate(request request.Request, user user.User, err error) {
 	log.logger.Audit(validateEntry("FailedToValidate", request, user, err))
