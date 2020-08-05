@@ -20,6 +20,12 @@ func (log Logger) TryToValidateToken(request request.Request, login user.Login) 
 func (log Logger) FailedToValidateToken(request request.Request, login user.Login, err error) {
 	log.logger.Info(validateEntry("FailedToValidateToken", request, login, nil, err))
 }
+func (log Logger) FailedToValidateTokenBecauseSessionNotFound(request request.Request, login user.Login, err error) {
+	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionNotFound", request, login, nil, err))
+}
+func (log Logger) FailedToValidateTokenBecauseSessionClosed(request request.Request, login user.Login, err error) {
+	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionClosed", request, login, nil, err))
+}
 func (log Logger) FailedToValidateTokenBecauseForbidden(request request.Request, login user.Login, err error) {
 	log.logger.Audit(validateEntry("FailedToValidateTokenBecauseForbidden", request, login, nil, err))
 }

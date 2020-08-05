@@ -52,6 +52,7 @@ type (
 		sendToken        password_reset.SendToken
 		getStatus        password_reset.GetStatus
 		validate         password_reset.Validate
+		closeSession     password_reset.CloseSession
 	}
 )
 
@@ -145,5 +146,6 @@ func NewPasswordResetAction(
 		sendToken:        password_reset.NewSendToken(logger, sessions, tokenQueue, tokenSender),
 		getStatus:        password_reset.NewGetStatus(logger, sessions),
 		validate:         password_reset.NewValidate(logger, sessions),
+		closeSession:     password_reset.NewCloseSession(logger, sessions),
 	}
 }

@@ -13,6 +13,7 @@ type (
 		SendTokenLogger
 		GetStatusLogger
 		ValidateLogger
+		CloseSessionLogger
 	}
 
 	CreateSessionLogger interface {
@@ -42,7 +43,15 @@ type (
 	ValidateLogger interface {
 		TryToValidateToken(request.Request, user.Login)
 		FailedToValidateToken(request.Request, user.Login, error)
+		FailedToValidateTokenBecauseSessionNotFound(request.Request, user.Login, error)
+		FailedToValidateTokenBecauseSessionClosed(request.Request, user.Login, error)
 		FailedToValidateTokenBecauseForbidden(request.Request, user.Login, error)
 		AuthByToken(request.Request, user.Login, user.User)
+	}
+
+	CloseSessionLogger interface {
+		TryToCloseSession(request.Request, Session)
+		FailedToCloseSession(request.Request, Session, error)
+		CloseSession(request.Request, Session)
 	}
 )
