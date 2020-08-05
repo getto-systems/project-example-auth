@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	errGetUserNotFoundUser = data.NewError("Password.GetUser", "NotFound.User")
+	errGetUserNotFoundUser = data.NewError("User.GetUser", "NotFound.User")
 )
 
 type GetUser struct {
@@ -32,7 +32,7 @@ func (action GetUser) Get(request request.Request, login user.Login) (_ user.Use
 	}
 	if !found {
 		err = errGetUserNotFoundUser
-		action.logger.FailedToGetUser(request, login, err)
+		action.logger.FailedToGetUserBecauseUserNotFound(request, login, err)
 		return
 	}
 

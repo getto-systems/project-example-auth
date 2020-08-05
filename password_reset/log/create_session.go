@@ -19,7 +19,7 @@ func (log Logger) TryToCreateSession(request request.Request, user user.User, lo
 	log.logger.Debug(createSessionEntry("TryToCreateSession", request, user, login, expires, nil, nil, nil))
 }
 func (log Logger) FailedToCreateSession(request request.Request, user user.User, login user.Login, expires time.Expires, err error) {
-	log.logger.Info(createSessionEntry("FailedToCreateSession", request, user, login, expires, nil, nil, err))
+	log.logger.Error(createSessionEntry("FailedToCreateSession", request, user, login, expires, nil, nil, err))
 }
 func (log Logger) CreateSession(request request.Request, user user.User, login user.Login, expires time.Expires, session password_reset.Session, dest password_reset.Destination) {
 	log.logger.Info(createSessionEntry("CreateSession", request, user, login, expires, &session, &dest, nil))

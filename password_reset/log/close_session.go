@@ -17,7 +17,7 @@ func (log Logger) TryToCloseSession(request request.Request, session password_re
 	log.logger.Debug(closeSessionEntry("TryToCloseSession", request, session, nil))
 }
 func (log Logger) FailedToCloseSession(request request.Request, session password_reset.Session, err error) {
-	log.logger.Info(closeSessionEntry("FailedToCloseSession", request, session, err))
+	log.logger.Error(closeSessionEntry("FailedToCloseSession", request, session, err))
 }
 func (log Logger) CloseSession(request request.Request, session password_reset.Session) {
 	log.logger.Info(closeSessionEntry("CloseSession", request, session, nil))

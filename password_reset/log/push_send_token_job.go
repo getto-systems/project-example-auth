@@ -17,7 +17,7 @@ func (log Logger) TryToPushSendTokenJob(request request.Request, session passwor
 	log.logger.Debug(pushSendTokenJobEntry("TryToPushSendTokenJob", request, session, dest, nil))
 }
 func (log Logger) FailedToPushSendTokenJob(request request.Request, session password_reset.Session, dest password_reset.Destination, err error) {
-	log.logger.Info(pushSendTokenJobEntry("FailedToPushSendTokenJob", request, session, dest, err))
+	log.logger.Error(pushSendTokenJobEntry("FailedToPushSendTokenJob", request, session, dest, err))
 }
 func (log Logger) PushSendTokenJob(request request.Request, session password_reset.Session, dest password_reset.Destination) {
 	log.logger.Info(pushSendTokenJobEntry("PushSendTokenJob", request, session, dest, nil))

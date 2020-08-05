@@ -17,7 +17,10 @@ func (log Logger) TryToGetUser(request request.Request, login user.Login) {
 	log.logger.Debug(getUserEntry("TryToGetUser", request, login, nil, nil))
 }
 func (log Logger) FailedToGetUser(request request.Request, login user.Login, err error) {
-	log.logger.Info(getUserEntry("FailedToGetUser", request, login, nil, err))
+	log.logger.Error(getUserEntry("FailedToGetUser", request, login, nil, err))
+}
+func (log Logger) FailedToGetUserBecauseUserNotFound(request request.Request, login user.Login, err error) {
+	log.logger.Info(getUserEntry("FailedToGetUserBecauseUserNotFound", request, login, nil, err))
 }
 func (log Logger) GetUser(request request.Request, login user.Login, user user.User) {
 	log.logger.Info(getUserEntry("GetUser", request, login, &user, nil))

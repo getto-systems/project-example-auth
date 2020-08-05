@@ -18,7 +18,7 @@ func (log Logger) TryToChange(request request.Request, user user.User) {
 	log.logger.Debug(registerEntry("TryToChange", request, user, nil))
 }
 func (log Logger) FailedToChange(request request.Request, user user.User, err error) {
-	log.logger.Info(registerEntry("FailedToChange", request, user, err))
+	log.logger.Error(registerEntry("FailedToChange", request, user, err))
 }
 func (log Logger) FailedToChangeBecausePasswordCheckFailed(request request.Request, user user.User, err error) {
 	log.logger.Info(registerEntry("FailedToChangeBecausePasswordCheckFailed", request, user, err))
