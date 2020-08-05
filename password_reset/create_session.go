@@ -43,7 +43,7 @@ func (action CreateSession) Create(request request.Request, user user.User, logi
 	}
 	if !found {
 		err = errCreateSessionNotFoundDestination
-		action.logger.FailedToCreateSession(request, user, login, expires, err)
+		action.logger.FailedToCreateSessionBecauseDestinationNotFound(request, user, login, expires, err)
 		return
 	}
 
