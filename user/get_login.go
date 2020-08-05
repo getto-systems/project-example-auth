@@ -31,8 +31,9 @@ func (action GetLogin) Get(request request.Request, user user.User) (_ user.Logi
 		return
 	}
 	if !found {
+		// user には必ず Login が存在するはずなのでログはエラーログ
 		err = errGetLoginNotFoundLogin
-		action.logger.FailedToGetLoginBecauseLoginNotFound(request, user, err)
+		action.logger.FailedToGetLogin(request, user, err)
 		return
 	}
 

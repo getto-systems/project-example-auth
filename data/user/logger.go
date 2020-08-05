@@ -13,7 +13,6 @@ type (
 	GetLoginLogger interface {
 		TryToGetLogin(request.Request, User)
 		FailedToGetLogin(request.Request, User, error)
-		FailedToGetLoginBecauseLoginNotFound(request.Request, User, error)
 		GetLogin(request.Request, User, Login)
 	}
 
