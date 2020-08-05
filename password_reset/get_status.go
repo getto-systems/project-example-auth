@@ -1,15 +1,15 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errGetStatusNotFoundSession = errors.NewError("PasswordReset.GetStatus", "NotFound.Session")
-	errGetStatusDifferentLogin  = errors.NewError("PasswordReset.GetStatus", "DifferentLogin")
+	errGetStatusNotFoundSession = data.NewError("PasswordReset.GetStatus", "NotFound.Session")
+	errGetStatusDifferentLogin  = data.NewError("PasswordReset.GetStatus", "DifferentLogin")
 )
 
 type GetStatus struct {

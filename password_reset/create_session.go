@@ -1,7 +1,7 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	errCreateSessionNotFoundDestination = errors.NewError("PasswordReset.CreateSession", "NotFound.Destination")
+	errCreateSessionNotFoundDestination = data.NewError("PasswordReset.CreateSession", "NotFound.Destination")
 )
 
 type CreateSession struct {

@@ -1,15 +1,15 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errValidateDifferentNonce = errors.NewError("Ticket.Validate", "DifferentNonce")
-	errValidateAlreadyExpired = errors.NewError("Ticket.Validate", "AlreadyExpired")
+	errValidateDifferentNonce = data.NewError("Ticket.Validate", "DifferentNonce")
+	errValidateAlreadyExpired = data.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
 type Validate struct {

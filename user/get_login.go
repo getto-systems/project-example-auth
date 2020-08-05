@@ -1,13 +1,13 @@
 package user
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errGetLoginNotFoundLogin = errors.NewError("User.GetLogin", "NotFound.Login")
+	errGetLoginNotFoundLogin = data.NewError("User.GetLogin", "NotFound.Login")
 )
 
 type GetLogin struct {
