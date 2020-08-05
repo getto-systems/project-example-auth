@@ -19,6 +19,9 @@ func (log Logger) TryToGetStatus(request request.Request, session password_reset
 func (log Logger) FailedToGetStatus(request request.Request, session password_reset.Session, err error) {
 	log.logger.Error(getStatusEntry("FailedToGetStatus", request, session, nil, err))
 }
+func (log Logger) FailedToGetStatusBecauseSessionNotFound(request request.Request, session password_reset.Session, err error) {
+	log.logger.Audit(getStatusEntry("FailedToGetStatusBecauseSessionNotFound", request, session, nil, err))
+}
 func (log Logger) GetStatus(request request.Request, session password_reset.Session, status password_reset.Status) {
 	log.logger.Info(getStatusEntry("GetStatus", request, session, &status, nil))
 }

@@ -34,6 +34,7 @@ func (action GetStatus) Get(request request.Request, login user.Login, session p
 	}
 	if !found {
 		err = errGetStatusNotFoundSession
+		action.logger.FailedToGetStatusBecauseSessionNotFound(request, session, err)
 		return
 	}
 	if data.Login().ID() != login.ID() {
