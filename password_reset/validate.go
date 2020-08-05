@@ -52,12 +52,12 @@ func (action Validate) Validate(request request.Request, login user.Login, token
 	}
 	if data.Login().ID() != login.ID() {
 		err = errValidateNotMatchedLogin
-		action.logger.FailedToValidateTokenBecauseForbidden(request, login, err)
+		action.logger.FailedToValidateTokenBecauseLoginNotMatched(request, login, err)
 		return
 	}
 	if request.RequestedAt().Expired(data.Expires()) {
 		err = errValidateAlreadyExpired
-		action.logger.FailedToValidateTokenBecauseForbidden(request, login, err)
+		action.logger.FailedToValidateTokenBecauseSessionExpired(request, login, err)
 		return
 	}
 

@@ -26,8 +26,11 @@ func (log Logger) FailedToValidateTokenBecauseSessionNotFound(request request.Re
 func (log Logger) FailedToValidateTokenBecauseSessionClosed(request request.Request, login user.Login, err error) {
 	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionClosed", request, login, nil, err))
 }
-func (log Logger) FailedToValidateTokenBecauseForbidden(request request.Request, login user.Login, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateTokenBecauseForbidden", request, login, nil, err))
+func (log Logger) FailedToValidateTokenBecauseSessionExpired(request request.Request, login user.Login, err error) {
+	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionExpired", request, login, nil, err))
+}
+func (log Logger) FailedToValidateTokenBecauseLoginNotMatched(request request.Request, login user.Login, err error) {
+	log.logger.Audit(validateEntry("FailedToValidateTokenBecauseLoginNotMatched", request, login, nil, err))
 }
 func (log Logger) AuthByToken(request request.Request, login user.Login, user user.User) {
 	log.logger.Audit(validateEntry("AuthByToken", request, login, &user, nil))
