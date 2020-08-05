@@ -64,7 +64,7 @@ func ExamplePasswordLogin_login_renew_logout() {
 	//
 }
 
-func ExamplePasswordLogin_loginLog() {
+func ExamplePasswordLogin_log() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -98,7 +98,7 @@ func ExamplePasswordLogin_loginLog() {
 	//
 }
 
-func ExamplePasswordLogin_renewLog() {
+func ExampleRenew_log() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -140,7 +140,7 @@ func ExamplePasswordLogin_renewLog() {
 	//
 }
 
-func ExamplePasswordLogin_logoutLog() {
+func ExampleLogout_log() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -178,7 +178,7 @@ func ExamplePasswordLogin_logoutLog() {
 	//
 }
 
-func ExamplePasswordLogin_loginFailed_emptyPassword() {
+func ExamplePasswordLogin_failedBecauseEmptyPassword() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "", []string{}) // 空のパスワードで登録
 
@@ -210,7 +210,7 @@ func ExamplePasswordLogin_loginFailed_emptyPassword() {
 	//
 }
 
-func ExamplePasswordLogin_loginFailed_tooLongPassword() {
+func ExamplePasswordLogin_failedBecauseTooLongPassword() {
 	longPassword := password.RawPassword(strings.Repeat("a", 73)) // 長すぎるパスワード(72 バイトまで)
 
 	h := newPasswordLoginTestHelper()
@@ -244,7 +244,7 @@ func ExamplePasswordLogin_loginFailed_tooLongPassword() {
 	//
 }
 
-func ExamplePasswordLogin_loginSuccess_longPassword() {
+func ExamplePasswordLogin_successWithLongPassword() {
 	longPassword := password.RawPassword(strings.Repeat("a", 72)) // 72 バイトのパスワード
 
 	h := newPasswordLoginTestHelper()
@@ -282,7 +282,7 @@ func ExamplePasswordLogin_loginSuccess_longPassword() {
 	//
 }
 
-func ExamplePasswordLogin_renew_limited() {
+func ExampleRenew_limited() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -320,7 +320,7 @@ func ExamplePasswordLogin_renew_limited() {
 	//
 }
 
-func ExamplePasswordLogin_renewFailed_alreadyExpired() {
+func ExampleRenew_failedBecauseAlreadyExpired() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -361,7 +361,7 @@ func ExamplePasswordLogin_renewFailed_alreadyExpired() {
 	//
 }
 
-func ExamplePasswordLogin_renewFailed_alreadyLogout() {
+func ExampleRenew_failedBecauseAlreadyLogout() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -419,7 +419,7 @@ func ExamplePasswordLogin_renewFailed_alreadyLogout() {
 	//
 }
 
-func ExamplePasswordLogin_renewFailed_differentNonce() {
+func ExampleRenew_failedBecauseDifferentNonce() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -462,7 +462,7 @@ func ExamplePasswordLogin_renewFailed_differentNonce() {
 	//
 }
 
-func ExamplePasswordLogin_renewFailed_ticketNotFound() {
+func ExampleRenew_failedBecauseTicketNotFound() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -506,7 +506,7 @@ func ExamplePasswordLogin_renewFailed_ticketNotFound() {
 	//
 }
 
-func ExamplePasswordLogin_renewFailed_differentUser() {
+func ExampleRenew_failedBecauseDifferentUser() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -549,7 +549,7 @@ func ExamplePasswordLogin_renewFailed_differentUser() {
 	//
 }
 
-func ExamplePasswordLogin_logoutFailed_alreadyExpired() {
+func ExampleLogout_failedBecauseAlreadyExpired() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
