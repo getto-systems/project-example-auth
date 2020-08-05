@@ -19,6 +19,7 @@ type (
 	CreateSessionLogger interface {
 		TryToCreateSession(request.Request, user.User, user.Login, time.Expires)
 		FailedToCreateSession(request.Request, user.User, user.Login, time.Expires, error)
+		FailedToCreateSessionBecauseDestinationNotFound(request.Request, user.User, user.Login, time.Expires, error)
 		CreateSession(request.Request, user.User, user.Login, time.Expires, Session, Destination)
 	}
 
