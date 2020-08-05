@@ -33,7 +33,7 @@ func (action Extend) Extend(request request.Request, user user.User, oldTicket t
 	expires := action.exp.Expires(request)
 	action.logger.TryToExtend(request, user, oldTicket.Nonce(), expires)
 
-	ticketUser, limit, found, err := action.tickets.FindUserAndExtendLimit(oldTicket.Nonce())
+	limit, found, err := action.tickets.FindExtendLimit(oldTicket.Nonce())
 	if err != nil {
 		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
 		return
@@ -41,11 +41,6 @@ func (action Extend) Extend(request request.Request, user user.User, oldTicket t
 	if !found {
 		err = errExtendNotFoundNonce
 		action.logger.FailedToExtendBecauseTicketNotFound(request, user, oldTicket.Nonce(), expires, err)
-		return
-	}
-	if ticketUser.ID() != user.ID() {
-		err = errExtendMatchFailedUser
-		action.logger.FailedToExtendBecauseUserMatchFailed(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 
