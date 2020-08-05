@@ -195,6 +195,68 @@ func ExamplePasswordReset_getStatusLog() {
 	//
 }
 
+func ExamplePasswordReset_disableOldPassword() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+	// 古いパスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// メッセージからトークンを取得
+	passwordResetHandler.fetchToken()
+
+	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 前のパスワードでログインを試みる
+	h.newRequest("PasswordLogin", time.Minute(2), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/SendToken
+	// err: nil
+	//
+	// PasswordReset/Reset
+	// err: nil
+	//
+	// PasswordLogin
+	// err: "Password.Validate/MatchFailed"
+	// log: "User/GetUser/TryToGetUser", debug
+	// log: "User/GetUser/GetUser", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", audit
+	//
+}
+
 func ExamplePasswordReset_resetLog() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
