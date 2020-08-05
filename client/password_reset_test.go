@@ -618,6 +618,112 @@ func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	//
 }
 
+func ExamplePasswordReset_resetFailedBecauseSessionExpired() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	passwordResetHandler.fetchToken()
+
+	// 有効期限切れ
+	h.newRequest("PasswordReset/Reset", time.Minute(31), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/SendToken
+	// err: nil
+	//
+	// PasswordReset/Reset
+	// err: "PasswordReset.Validate/AlreadyExpired"
+	// log: "PasswordReset/Validate/TryToValidateToken", debug
+	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseSessionExpired", info
+	//
+}
+
+func ExamplePasswordReset_resetSuccessWithTimeLimit() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	passwordResetHandler.fetchToken()
+
+	// 有効期限ぎりぎり
+	h.newRequest("PasswordReset/Reset", time.Minute(30), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/SendToken
+	// err: nil
+	//
+	// PasswordReset/Reset
+	// err: nil
+	// log: "PasswordReset/Validate/TryToValidateToken", debug
+	// log: "PasswordReset/Validate/AuthByToken", audit
+	// log: "Password/Change/TryToChange", debug
+	// log: "Password/Change/Change", audit
+	// log: "PasswordReset/CloseSession/TryToCloseSession", debug
+	// log: "PasswordReset/CloseSession/CloseSession", info
+	// log: "Ticket/Issue/TryToIssue", debug
+	// log: "Ticket/Issue/Issue", info
+	// log: "ApiToken/IssueApiToken/TryToIssue", debug
+	// log: "ApiToken/IssueApiToken/Issue", info
+	// log: "ApiToken/IssueContentToken/TryToIssue", debug
+	// log: "ApiToken/IssueContentToken/Issue", info
+	//
+}
+
 func ExamplePasswordReset_resetFailedBecauseUnknownLogin() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
