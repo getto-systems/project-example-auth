@@ -9,7 +9,7 @@ import (
 
 var (
 	errValidateNotFoundPassword = data.NewError("Password.Validate", "NotFound.Password")
-	errValidateNotMatched       = data.NewError("Password.Validate", "NotMatched")
+	errValidateMatchFailed      = data.NewError("Password.Validate", "MatchFailed")
 )
 
 type Validate struct {
@@ -52,8 +52,8 @@ func (action Validate) Validate(request request.Request, user user.User, raw pas
 		return
 	}
 	if !matched {
-		err = errValidateNotMatched
-		action.logger.FailedToValidate(request, user, err)
+		err = errValidateMatchFailed
+		action.logger.FailedToValidateBecausePasswordMatchFailed(request, user, err)
 		return
 	}
 
