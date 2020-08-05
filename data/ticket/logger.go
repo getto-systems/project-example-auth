@@ -9,7 +9,7 @@ import (
 type (
 	Logger interface {
 		ValidateLogger
-		ShrinkLogger
+		DeactivateLogger
 		IssueLogger
 		ExtendLogger
 	}
@@ -21,10 +21,10 @@ type (
 		AuthByTicket(request.Request, user.User, Nonce)
 	}
 
-	ShrinkLogger interface {
-		TryToShrink(request.Request, user.User, Nonce)
-		FailedToShrink(request.Request, user.User, Nonce, error)
-		Shrink(request.Request, user.User, Nonce)
+	DeactivateLogger interface {
+		TryToDeactivate(request.Request, user.User, Nonce)
+		FailedToDeactivate(request.Request, user.User, Nonce, error)
+		Deactivate(request.Request, user.User, Nonce)
 	}
 
 	IssueLogger interface {

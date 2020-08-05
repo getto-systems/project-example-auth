@@ -183,8 +183,8 @@ func ExamplePasswordLogin_logoutLog() {
 	// err: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
-	// log: "Ticket/Shrink/TryToShrink", debug
-	// log: "Ticket/Shrink/Shrink", info
+	// log: "Ticket/Deactivate/TryToDeactivate", debug
+	// log: "Ticket/Deactivate/Deactivate", info
 	//
 }
 

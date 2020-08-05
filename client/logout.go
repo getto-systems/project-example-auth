@@ -39,7 +39,7 @@ func (client Logout) logout(handler LogoutHandler) (err error) {
 		return
 	}
 
-	err = client.ticket.shrink.Shrink(request, user, ticket)
+	err = client.ticket.deactivate.Deactivate(request, user, ticket)
 	if err != nil {
 		return
 	}
