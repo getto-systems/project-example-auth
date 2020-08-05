@@ -626,6 +626,55 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	//
 }
 
+func ExamplePasswordReset_resetFailedBecauseEmptyPassword() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID で空のパスワードにリセットを試みる
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	passwordResetHandler.fetchToken()
+
+	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/SendToken
+	// err: nil
+	//
+	// PasswordReset/Reset
+	// err: "Password.Check/Length.Empty"
+	// log: "PasswordReset/Validate/TryToValidateToken", debug
+	// log: "PasswordReset/Validate/AuthByToken", audit
+	// log: "Password/Change/TryToChange", debug
+	// log: "Password/Change/FailedToChangeBecausePasswordCheckFailed", info
+	//
+}
+
 type (
 	passwordResetTestHelper struct {
 		*testBackend
