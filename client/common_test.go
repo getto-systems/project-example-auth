@@ -387,6 +387,14 @@ func (backend *testBackend) registerUserData(userID user.UserID, loginID user.Lo
 		golog.Fatalf("register api roles error: %s", err)
 	}
 }
+func (backend *testBackend) registerOnlyUserAndLogin(userID user.UserID, loginID user.LoginID) {
+	testUser := user.NewUser(userID)
+
+	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
+	if err != nil {
+		golog.Fatalf("register user error: %s", err)
+	}
+}
 
 func (backend *testBackend) newRequest(label string, nowSecond time.Second, handler testHandler, exec func(), format func(f testFormatter)) {
 	backend.nowSecond = nowSecond

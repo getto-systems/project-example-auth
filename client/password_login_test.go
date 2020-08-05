@@ -178,6 +178,38 @@ func ExampleLogout_log() {
 	//
 }
 
+func ExamplePasswordLogin_failedBecausePasswordNotFound() {
+	h := newPasswordLoginTestHelper()
+	h.registerOnlyUserAndLogin("user-id", "login-id") // ユーザーとログインだけ登録してパスワードは登録しない
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// パスワードの登録なしでログインを試みる
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// request: "2020-01-01T00:00:00Z"
+	// err: "Password.Validate/NotFound.Password"
+	// credential: nil
+	// log: "User/GetUser/TryToGetUser", debug
+	// log: "User/GetUser/GetUser", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/FailedToValidateBecausePasswordNotFound", audit
+	//
+}
+
 func ExamplePasswordLogin_failedBecauseDifferentPassword() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{}) // ユーザー登録
@@ -206,7 +238,7 @@ func ExamplePasswordLogin_failedBecauseDifferentPassword() {
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
-	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", info
+	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", audit
 	//
 }
 
