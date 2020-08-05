@@ -18,13 +18,15 @@ type (
 		TryToValidate(request.Request, Nonce)
 		FailedToValidate(request.Request, Nonce, error)
 		FailedToValidateBecauseExpired(request.Request, Nonce, error)
-		FailedToValidateBecauseDifferentInfo(request.Request, Nonce, error)
+		FailedToValidateBecauseTicketNotFound(request.Request, Nonce, error)
+		FailedToValidateBecauseMatchFailed(request.Request, Nonce, error)
 		AuthByTicket(request.Request, user.User, Nonce)
 	}
 
 	DeactivateLogger interface {
 		TryToDeactivate(request.Request, user.User, Nonce)
 		FailedToDeactivate(request.Request, user.User, Nonce, error)
+		FailedToDeactivateBecauseUserMatchFailed(request.Request, user.User, Nonce, error)
 		Deactivate(request.Request, user.User, Nonce)
 	}
 
@@ -37,6 +39,8 @@ type (
 	ExtendLogger interface {
 		TryToExtend(request.Request, user.User, Nonce, time.Expires)
 		FailedToExtend(request.Request, user.User, Nonce, time.Expires, error)
+		FailedToExtendBecauseTicketNotFound(request.Request, user.User, Nonce, time.Expires, error)
+		FailedToExtendBecauseUserMatchFailed(request.Request, user.User, Nonce, time.Expires, error)
 		Extend(request.Request, user.User, Nonce, time.Expires)
 	}
 )

@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	errCloseNotFoundSession = data.NewError("PasswordReset.Close", "NotFound.Session")
-	errCloseNotMatchedLogin = data.NewError("PasswordReset.Close", "NotMatched.Login")
-	errCloseAlreadyExpired  = data.NewError("PasswordReset.Close", "AlreadyExpired")
+	errCloseNotFoundSession  = data.NewError("PasswordReset.Close", "NotFound.Session")
+	errCloseMatchFailedLogin = data.NewError("PasswordReset.Close", "MatchFailed.Login")
+	errCloseAlreadyExpired   = data.NewError("PasswordReset.Close", "AlreadyExpired")
 )
 
 type CloseSession struct {

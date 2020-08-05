@@ -20,8 +20,11 @@ func (log Logger) TryToValidate(request request.Request, nonce ticket.Nonce) {
 func (log Logger) FailedToValidate(request request.Request, nonce ticket.Nonce, err error) {
 	log.logger.Error(validateEntry("FailedToValidate", request, nil, nonce, err))
 }
-func (log Logger) FailedToValidateBecauseDifferentInfo(request request.Request, nonce ticket.Nonce, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateBecauseDifferentInfo", request, nil, nonce, err))
+func (log Logger) FailedToValidateBecauseTicketNotFound(request request.Request, nonce ticket.Nonce, err error) {
+	log.logger.Audit(validateEntry("FailedToValidateBecauseTicketNotFound", request, nil, nonce, err))
+}
+func (log Logger) FailedToValidateBecauseMatchFailed(request request.Request, nonce ticket.Nonce, err error) {
+	log.logger.Audit(validateEntry("FailedToValidateBecauseMatchFailed", request, nil, nonce, err))
 }
 func (log Logger) FailedToValidateBecauseExpired(request request.Request, nonce ticket.Nonce, err error) {
 	log.logger.Info(validateEntry("FailedToValidateBecauseExpired", request, nil, nonce, err))

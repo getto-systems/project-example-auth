@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	errValidateNotFoundSession = data.NewError("PasswordReset.Validate", "NotFound.Session")
-	errValidateNotMatchedLogin = data.NewError("PasswordReset.Validate", "NotMatched.Login")
-	errValidateAlreadyExpired  = data.NewError("PasswordReset.Validate", "AlreadyExpired")
-	errValidateAlreadyClosed   = data.NewError("PasswordReset.Validate", "AlreadyClosed")
+	errValidateNotFoundSession  = data.NewError("PasswordReset.Validate", "NotFound.Session")
+	errValidateMatchFailedLogin = data.NewError("PasswordReset.Validate", "MatchFailed.Login")
+	errValidateAlreadyExpired   = data.NewError("PasswordReset.Validate", "AlreadyExpired")
+	errValidateAlreadyClosed    = data.NewError("PasswordReset.Validate", "AlreadyClosed")
 )
 
 type Validate struct {
@@ -51,8 +51,8 @@ func (action Validate) Validate(request request.Request, login user.Login, token
 		return
 	}
 	if data.Login().ID() != login.ID() {
-		err = errValidateNotMatchedLogin
-		action.logger.FailedToValidateTokenBecauseLoginNotMatched(request, login, err)
+		err = errValidateMatchFailedLogin
+		action.logger.FailedToValidateTokenBecauseLoginMatchFailed(request, login, err)
 		return
 	}
 	if request.RequestedAt().Expired(data.Expires()) {

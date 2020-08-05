@@ -39,6 +39,7 @@ type (
 		TryToGetStatus(request.Request, Session)
 		FailedToGetStatus(request.Request, Session, error)
 		FailedToGetStatusBecauseSessionNotFound(request.Request, Session, error)
+		FailedToGetStatusBecauseLoginMatchFailed(request.Request, Session, error)
 		GetStatus(request.Request, Session, Status)
 	}
 
@@ -48,7 +49,7 @@ type (
 		FailedToValidateTokenBecauseSessionNotFound(request.Request, user.Login, error)
 		FailedToValidateTokenBecauseSessionClosed(request.Request, user.Login, error)
 		FailedToValidateTokenBecauseSessionExpired(request.Request, user.Login, error)
-		FailedToValidateTokenBecauseLoginNotMatched(request.Request, user.Login, error)
+		FailedToValidateTokenBecauseLoginMatchFailed(request.Request, user.Login, error)
 		AuthByToken(request.Request, user.Login, user.User)
 	}
 

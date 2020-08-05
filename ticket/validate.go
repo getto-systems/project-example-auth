@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	errValidateDifferentNonce = data.NewError("Ticket.Validate", "DifferentNonce")
-	errValidateNotFoundTicket = data.NewError("Ticket.Validate", "NotFound.Ticket")
-	errValidateDifferentUser  = data.NewError("Ticket.Validate", "DifferentUser")
-	errValidateAlreadyExpired = data.NewError("Ticket.Validate", "AlreadyExpired")
+	errValidateMatchFailedNonce = data.NewError("Ticket.Validate", "MatchFailed.Nonce")
+	errValidateNotFoundTicket   = data.NewError("Ticket.Validate", "NotFound.Ticket")
+	errValidateMatchFailedUser  = data.NewError("Ticket.Validate", "MatchFailed.User")
+	errValidateAlreadyExpired   = data.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
 type Validate struct {
@@ -38,8 +38,8 @@ func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (
 	}
 
 	if nonce != ticket.Nonce() {
-		err = errValidateDifferentNonce
-		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
+		err = errValidateMatchFailedNonce
+		action.logger.FailedToValidateBecauseMatchFailed(request, ticket.Nonce(), err)
 		return
 	}
 
@@ -50,12 +50,12 @@ func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (
 	}
 	if !found {
 		err = errValidateNotFoundTicket
-		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseTicketNotFound(request, ticket.Nonce(), err)
 		return
 	}
 	if ticketUser.ID() != dataUser.ID() {
-		err = errValidateDifferentUser
-		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
+		err = errValidateMatchFailedUser
+		action.logger.FailedToValidateBecauseMatchFailed(request, ticket.Nonce(), err)
 		return
 	}
 

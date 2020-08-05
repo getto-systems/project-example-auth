@@ -21,6 +21,12 @@ func (log Logger) TryToExtend(request request.Request, user user.User, nonce tic
 func (log Logger) FailedToExtend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
 	log.logger.Error(extendEntry("FailedToExtend", request, user, nonce, expires, err))
 }
+func (log Logger) FailedToExtendBecauseTicketNotFound(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
+	log.logger.Audit(extendEntry("FailedToExtendBecauseTicketNotFound", request, user, nonce, expires, err))
+}
+func (log Logger) FailedToExtendBecauseUserMatchFailed(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
+	log.logger.Audit(extendEntry("FailedToExtendBecauseUserMatchFailed", request, user, nonce, expires, err))
+}
 func (log Logger) Extend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
 	log.logger.Info(extendEntry("Extend", request, user, nonce, expires, nil))
 }

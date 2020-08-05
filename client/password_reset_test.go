@@ -569,9 +569,9 @@ func ExamplePasswordReset_resetFailedBecauseUnknownLogin() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/NotMatched.Login"
+	// err: "PasswordReset.Validate/MatchFailed.Login"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
-	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginNotMatched", audit
+	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginMatchFailed", audit
 	//
 }
 
@@ -620,9 +620,9 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/NotMatched.Login"
+	// err: "PasswordReset.Validate/MatchFailed.Login"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
-	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginNotMatched", audit
+	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginMatchFailed", audit
 	//
 }
 

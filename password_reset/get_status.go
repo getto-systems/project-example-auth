@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	errGetStatusNotFoundSession = data.NewError("PasswordReset.GetStatus", "NotFound.Session")
-	errGetStatusDifferentLogin  = data.NewError("PasswordReset.GetStatus", "DifferentLogin")
+	errGetStatusNotFoundSession  = data.NewError("PasswordReset.GetStatus", "NotFound.Session")
+	errGetStatusMatchFailedLogin = data.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
 )
 
 type GetStatus struct {
@@ -38,7 +38,8 @@ func (action GetStatus) Get(request request.Request, login user.Login, session p
 		return
 	}
 	if data.Login().ID() != login.ID() {
-		err = errGetStatusDifferentLogin
+		err = errGetStatusMatchFailedLogin
+		action.logger.FailedToGetStatusBecauseLoginMatchFailed(request, session, err)
 		return
 	}
 

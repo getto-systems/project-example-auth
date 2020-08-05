@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	errDeactivateNotFoundNonce = data.NewError("Ticket.Deactivate", "NotFound.Nonce")
-	errDeactivateDifferentUser = data.NewError("Ticket.Deactivate", "DifferentUser")
+	errDeactivateNotFoundNonce   = data.NewError("Ticket.Deactivate", "NotFound.Nonce")
+	errDeactivateMatchFailedUser = data.NewError("Ticket.Deactivate", "MatchFailed.User")
 )
 
 type Deactivate struct {
@@ -38,8 +38,8 @@ func (action Deactivate) Deactivate(request request.Request, user user.User, tic
 		return
 	}
 	if ticketUser.ID() != user.ID() {
-		err = errDeactivateDifferentUser
-		action.logger.FailedToDeactivate(request, user, ticket.Nonce(), err)
+		err = errDeactivateMatchFailedUser
+		action.logger.FailedToDeactivateBecauseUserMatchFailed(request, user, ticket.Nonce(), err)
 		return
 	}
 
