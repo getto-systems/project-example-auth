@@ -44,6 +44,7 @@ type (
 
 		nowSecond  time.Second
 		credential *data.Credential
+		nonce      *ticket.Nonce
 
 		ticket        ticketTestBackend
 		apiToken      apiTokenTestBackend
@@ -318,13 +319,21 @@ func (backend *testBackend) GetTicket() (_ ticket.Ticket, err error) {
 		return
 	}
 
-	return backend.credential.Ticket(), nil
+	if backend.nonce == nil {
+		return backend.credential.Ticket(), nil
+	}
+
+	return ticket.NewTicket(backend.credential.Ticket().Token(), *backend.nonce), nil
 }
 func (backend *testBackend) SetCredential(credential data.Credential) {
 	backend.credential = &credential
 }
 func (backend *testBackend) ClearCredential() {
 	backend.credential = nil
+}
+
+func (backend *testBackend) setNonce(nonce ticket.Nonce) {
+	backend.nonce = &nonce
 }
 
 func (backend *testBackend) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
