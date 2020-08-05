@@ -25,7 +25,7 @@ func (action Change) Change(request request.Request, user user.User, raw passwor
 
 	err = checkLength(raw)
 	if err != nil {
-		action.logger.FailedToChange(request, user, err)
+		action.logger.FailedToChangeBecausePasswordCheckFailed(request, user, err)
 		return
 	}
 

@@ -261,7 +261,6 @@ func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
 	}, func(f testFormatter) {
 		f.printRequest()
 		f.printError()
-		f.printLogin(passwordChangeHandler.login)
 		f.printLog()
 	})
 
@@ -272,9 +271,92 @@ func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
 	// PasswordChange/Change
 	// request: "2020-01-01T00:10:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
-	// login: {}
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
+	//
+}
+
+func ExamplePasswordChange_changeFailedBecauseDifferentPassword() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと異なるパスワードで確認、空のパスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "different-password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 登録されているものと違うパスワードで変更を試みる
+	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:01:00Z"
+	// err: "Password.Validate/MatchFailed"
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", audit
+	//
+}
+
+func ExamplePasswordChange_changeFailedBecauseEmptyPassword() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、空のパスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 空のパスワードへの変更を試みる
+	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:01:00Z"
+	// err: "Password.Check/Length.Empty"
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/AuthByTicket", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/AuthByPassword", audit
+	// log: "Password/Change/TryToChange", debug
+	// log: "Password/Change/FailedToChangeBecausePasswordCheckFailed", info
 	//
 }
 

@@ -20,6 +20,9 @@ func (log Logger) TryToChange(request request.Request, user user.User) {
 func (log Logger) FailedToChange(request request.Request, user user.User, err error) {
 	log.logger.Info(registerEntry("FailedToChange", request, user, err))
 }
+func (log Logger) FailedToChangeBecausePasswordCheckFailed(request request.Request, user user.User, err error) {
+	log.logger.Info(registerEntry("FailedToChangeBecausePasswordCheckFailed", request, user, err))
+}
 func (log Logger) Change(request request.Request, user user.User) {
 	log.logger.Audit(registerEntry("Change", request, user, nil))
 }
