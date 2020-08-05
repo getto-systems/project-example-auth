@@ -26,7 +26,6 @@ type (
 	DeactivateLogger interface {
 		TryToDeactivate(request.Request, user.User, Nonce)
 		FailedToDeactivate(request.Request, user.User, Nonce, error)
-		FailedToDeactivateBecauseUserMatchFailed(request.Request, user.User, Nonce, error)
 		Deactivate(request.Request, user.User, Nonce)
 	}
 

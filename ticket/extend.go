@@ -9,8 +9,7 @@ import (
 )
 
 var (
-	errExtendNotFoundNonce   = data.NewError("Ticket.Extend", "NotFound.Nonce")
-	errExtendMatchFailedUser = data.NewError("Ticket.Extend", "MatchFailed.User")
+	errExtendNotFoundNonce = data.NewError("Ticket.Extend", "NotFound.Nonce")
 )
 
 type Extend struct {
