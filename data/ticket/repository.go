@@ -7,10 +7,12 @@ import (
 
 type (
 	TicketRepository interface {
+		FindUserAndExpires(Nonce) (user.User, time.Expires, bool, error)
+
 		FindUserAndExtendLimit(Nonce) (user.User, time.ExtendLimit, bool, error)
 
 		FindUser(Nonce) (user.User, bool, error)
-		ShrinkExtendLimit(Nonce) error
+		DeactivateExpiresAndExtendLimit(Nonce) error
 
 		RegisterTicket(NonceGenerator, user.User, time.Expires, time.ExtendLimit) (Nonce, error)
 	}
