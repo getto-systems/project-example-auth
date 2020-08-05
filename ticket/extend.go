@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	errExtendNotFoundNonce = data.NewError("Ticket.Extend", "NotFound.Nonce")
-	errExtendDifferentUser = data.NewError("Ticket.Extend", "DifferentUser")
+	errExtendNotFoundNonce   = data.NewError("Ticket.Extend", "NotFound.Nonce")
+	errExtendMatchFailedUser = data.NewError("Ticket.Extend", "MatchFailed.User")
 )
 
 type Extend struct {
@@ -40,12 +40,12 @@ func (action Extend) Extend(request request.Request, user user.User, oldTicket t
 	}
 	if !found {
 		err = errExtendNotFoundNonce
-		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
+		action.logger.FailedToExtendBecauseTicketNotFound(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 	if ticketUser.ID() != user.ID() {
-		err = errExtendDifferentUser
-		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), expires, err)
+		err = errExtendMatchFailedUser
+		action.logger.FailedToExtendBecauseUserMatchFailed(request, user, oldTicket.Nonce(), expires, err)
 		return
 	}
 

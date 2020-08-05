@@ -519,10 +519,10 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/DifferentNonce"
+	// err: "Ticket.Validate/MatchFailed.Nonce"
 	// credential: nil
 	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	// log: "Ticket/Validate/FailedToValidateBecauseMatchFailed", audit
 	//
 }
 
@@ -566,7 +566,7 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	// err: "Ticket.Validate/NotFound.Ticket"
 	// credential: nil
 	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	// log: "Ticket/Validate/FailedToValidateBecauseTicketNotFound", audit
 	//
 }
 
@@ -606,10 +606,10 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/DifferentUser"
+	// err: "Ticket.Validate/MatchFailed.User"
 	// credential: nil
 	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	// log: "Ticket/Validate/FailedToValidateBecauseMatchFailed", audit
 	//
 }
 

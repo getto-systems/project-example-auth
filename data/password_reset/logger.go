@@ -39,6 +39,7 @@ type (
 		TryToGetStatus(request.Request, Session)
 		FailedToGetStatus(request.Request, Session, error)
 		FailedToGetStatusBecauseSessionNotFound(request.Request, Session, error)
+		FailedToGetStatusBecauseLoginMatchFailed(request.Request, Session, error)
 		GetStatus(request.Request, Session, Status)
 	}
 

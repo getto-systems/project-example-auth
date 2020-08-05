@@ -20,6 +20,9 @@ func (log Logger) TryToDeactivate(request request.Request, user user.User, nonce
 func (log Logger) FailedToDeactivate(request request.Request, user user.User, nonce ticket.Nonce, err error) {
 	log.logger.Error(deactivateEntry("FailedToDeactivate", request, user, nonce, err))
 }
+func (log Logger) FailedToDeactivateBecauseUserMatchFailed(request request.Request, user user.User, nonce ticket.Nonce, err error) {
+	log.logger.Audit(deactivateEntry("FailedToDeactivateBecauseUserMatchFailed", request, user, nonce, err))
+}
 func (log Logger) Deactivate(request request.Request, user user.User, nonce ticket.Nonce) {
 	log.logger.Info(deactivateEntry("Deactivate", request, user, nonce, nil))
 }
