@@ -25,10 +25,10 @@ type (
 	}
 
 	TicketAction struct {
-		validate ticket.Validate
-		extend   ticket.Extend
-		shrink   ticket.Shrink
-		issue    ticket.Issue
+		validate   ticket.Validate
+		extend     ticket.Extend
+		deactivate ticket.Deactivate
+		issue      ticket.Issue
 	}
 
 	ApiTokenAction struct {
@@ -81,10 +81,10 @@ func NewTicketAction(
 	tickets ticket_data.TicketRepository,
 ) TicketAction {
 	return TicketAction{
-		validate: ticket.NewValidate(logger, sign, tickets),
-		extend:   ticket.NewExtend(logger, sign, exp, tickets),
-		shrink:   ticket.NewShrink(logger, tickets),
-		issue:    ticket.NewIssue(logger, sign, exp, gen, tickets),
+		validate:   ticket.NewValidate(logger, sign, tickets),
+		extend:     ticket.NewExtend(logger, sign, exp, tickets),
+		deactivate: ticket.NewDeactivate(logger, tickets),
+		issue:      ticket.NewIssue(logger, sign, exp, gen, tickets),
 	}
 }
 
