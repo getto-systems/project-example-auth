@@ -25,7 +25,7 @@ func (signer TicketSigner) sign() ticket.TicketSign {
 	return signer
 }
 
-func (signer TicketSigner) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, _ time.Expires, err error) {
+func (signer TicketSigner) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, err error) {
 	claims, err := signer.jwt.Parse(string(token))
 	if err != nil {
 		return
@@ -33,9 +33,8 @@ func (signer TicketSigner) Parse(token ticket.Token) (_ user.User, _ ticket.Nonc
 
 	nonce := parseNonce(claims["jti"])
 	user := parseUser(claims["sub"])
-	expires := parseExpires(claims["exp"])
 
-	return user, nonce, expires, nil
+	return user, nonce, nil
 }
 func parseNonce(raw interface{}) (_ ticket.Nonce) {
 	nonce, ok := raw.(string)
@@ -52,19 +51,6 @@ func parseUser(raw interface{}) (_ user.User) {
 	}
 
 	return user.NewUser(user.UserID(userID))
-}
-func parseExpires(raw interface{}) (_ time.Expires) {
-	timeString, ok := raw.(string)
-	if !ok {
-		return
-	}
-
-	unix, err := strconv.Atoi(timeString)
-	if err != nil {
-		return
-	}
-
-	return time.Expires(gotime.Unix(int64(unix), 0))
 }
 
 func (signer TicketSigner) Sign(user user.User, nonce ticket.Nonce, expires time.Expires) (_ ticket.Token, err error) {

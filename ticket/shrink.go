@@ -43,7 +43,7 @@ func (action Shrink) Shrink(request request.Request, user user.User, ticket tick
 		return
 	}
 
-	err = action.tickets.ShrinkExtendLimit(ticket.Nonce())
+	err = action.tickets.DeactivateExpiresAndExtendLimit(ticket.Nonce())
 	if err != nil {
 		action.logger.FailedToShrink(request, user, ticket.Nonce(), err)
 		return

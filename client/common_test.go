@@ -271,7 +271,7 @@ func (ticketTestSign) Sign(user user.User, nonce ticket.Nonce, expires time.Expi
 
 	return ticket.Token(data), nil
 }
-func (ticketTestSign) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, _ time.Expires, err error) {
+func (ticketTestSign) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, err error) {
 	var data ticketTestSignToken
 
 	err = json.Unmarshal(token, &data)
@@ -279,7 +279,7 @@ func (ticketTestSign) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, _ 
 		return
 	}
 
-	return user.NewUser(user.UserID(data.UserID)), ticket.Nonce(data.Nonce), time.Expires(gotime.Unix(data.Expires, 0)), nil
+	return user.NewUser(user.UserID(data.UserID)), ticket.Nonce(data.Nonce), nil
 }
 
 func (ticketTestNonceGenerator) GenerateNonce() (_ ticket.Nonce, err error) {

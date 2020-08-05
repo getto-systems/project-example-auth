@@ -11,7 +11,7 @@ type (
 	}
 
 	TicketParser interface {
-		Parse(Token) (user.User, Nonce, time.Expires, error)
+		Parse(Token) (user.User, Nonce, error)
 	}
 
 	TicketSign interface {

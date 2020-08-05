@@ -81,7 +81,7 @@ func NewTicketAction(
 	tickets ticket_data.TicketRepository,
 ) TicketAction {
 	return TicketAction{
-		validate: ticket.NewValidate(logger, sign),
+		validate: ticket.NewValidate(logger, sign, tickets),
 		extend:   ticket.NewExtend(logger, sign, exp, tickets),
 		shrink:   ticket.NewShrink(logger, tickets),
 		issue:    ticket.NewIssue(logger, sign, exp, gen, tickets),

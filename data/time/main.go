@@ -53,6 +53,9 @@ func (expires Expires) Limit(limit ExtendLimit) Expires {
 	return expires
 }
 
+func EmptyExpires() (_ Expires) {
+	return
+}
 func EmptyExtendLimit() (_ ExtendLimit) {
 	return
 }
