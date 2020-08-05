@@ -387,6 +387,24 @@ func (backend *testBackend) registerUserData(userID user.UserID, loginID user.Lo
 		golog.Fatalf("register api roles error: %s", err)
 	}
 }
+func (backend *testBackend) registerUserDataWithoutApiRoles(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword) {
+	testUser := user.NewUser(userID)
+
+	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
+	if err != nil {
+		golog.Fatalf("register user error: %s", err)
+	}
+
+	hashed, err := backend.password.enc.GeneratePassword(rawPassword)
+	if err != nil {
+		golog.Fatalf("generate password error: %s", err)
+	}
+
+	err = backend.password.passwords.ChangePassword(testUser, hashed)
+	if err != nil {
+		golog.Fatalf("change password error: %s", err)
+	}
+}
 func (backend *testBackend) registerOnlyUserAndLogin(userID user.UserID, loginID user.LoginID) {
 	testUser := user.NewUser(userID)
 
