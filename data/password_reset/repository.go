@@ -7,9 +7,11 @@ import (
 type (
 	SessionRepository interface {
 		FindStatus(Session) (SessionData, Status, bool, error)
-		FindSession(Token) (SessionData, bool, error)
+		FindSession(Token) (Session, SessionData, bool, error)
+		CheckClosedSessionExists(Token) (bool, error)
 
-		RegisterSession(SessionGenerator, SessionData) (Session, Token, error)
+		CreateSession(SessionGenerator, SessionData) (Session, Token, error)
+		CloseSession(Session) error
 
 		UpdateStatusToProcessing(Session) error
 		UpdateStatusToFailed(Session, error) error

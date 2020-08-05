@@ -195,6 +195,73 @@ func ExamplePasswordReset_getStatusLog() {
 	//
 }
 
+func ExamplePasswordReset_resetLog() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// メッセージからトークンを取得
+	passwordResetHandler.fetchToken()
+
+	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/SendToken
+	// err: nil
+	//
+	// PasswordReset/GetStatus
+	// err: nil
+	//
+	// PasswordReset/Reset
+	// err: nil
+	// log: "PasswordReset/Validate/TryToValidateToken", debug
+	// log: "PasswordReset/Validate/AuthByToken", audit
+	// log: "Password/Change/TryToChange", debug
+	// log: "Password/Change/Change", audit
+	// log: "PasswordReset/CloseSession/TryToCloseSession", debug
+	// log: "PasswordReset/CloseSession/CloseSession", info
+	// log: "Ticket/Issue/TryToIssue", debug
+	// log: "Ticket/Issue/Issue", info
+	// log: "ApiToken/IssueApiToken/TryToIssue", debug
+	// log: "ApiToken/IssueApiToken/Issue", info
+	// log: "ApiToken/IssueContentToken/TryToIssue", debug
+	// log: "ApiToken/IssueContentToken/Issue", info
+	//
+}
+
 func ExamplePasswordReset_disableOldPassword() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
@@ -257,7 +324,7 @@ func ExamplePasswordReset_disableOldPassword() {
 	//
 }
 
-func ExamplePasswordReset_resetLog() {
+func ExamplePasswordReset_disableResetSession() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 	h.registerResetDestination("user-id")                                   // 宛先を登録
@@ -281,16 +348,17 @@ func ExamplePasswordReset_resetLog() {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
-		NewPasswordReset(client).GetStatus(passwordResetHandler)
-	}, func(f testFormatter) {
-		f.printError()
-	})
-
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
 	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+		NewPasswordReset(client).Reset(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// もう一度同じトークンを使用してリセットを試みる
+	h.newRequest("PasswordReset/Reset", time.Minute(4), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -304,21 +372,13 @@ func ExamplePasswordReset_resetLog() {
 	// PasswordReset/SendToken
 	// err: nil
 	//
-	// PasswordReset/GetStatus
+	// PasswordReset/Reset
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: nil
+	// err: "PasswordReset.Validate/AlreadyClosed"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
-	// log: "PasswordReset/Validate/AuthByToken", audit
-	// log: "Password/Change/TryToChange", debug
-	// log: "Password/Change/Change", audit
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseSessionClosed", info
 	//
 }
 

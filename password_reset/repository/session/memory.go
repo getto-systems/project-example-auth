@@ -12,17 +12,24 @@ const (
 
 type (
 	MemoryStore struct {
-		session map[password_reset.Session]password_reset.SessionData
+		session map[password_reset.Session]sessionData
 		token   map[password_reset.Token]password_reset.Session
-		status  map[password_reset.Session]password_reset.Status
+		closed  map[password_reset.Token]sessionData
+	}
+
+	sessionData struct {
+		session password_reset.Session
+		token   password_reset.Token
+		data    password_reset.SessionData
+		status  password_reset.Status
 	}
 )
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		session: make(map[password_reset.Session]password_reset.SessionData),
+		session: make(map[password_reset.Session]sessionData),
 		token:   make(map[password_reset.Token]password_reset.Session),
-		status:  make(map[password_reset.Session]password_reset.Status),
+		closed:  make(map[password_reset.Token]sessionData),
 	}
 }
 
@@ -31,20 +38,15 @@ func (store *MemoryStore) db() password_reset.SessionRepository {
 }
 
 func (store *MemoryStore) FindStatus(session password_reset.Session) (_ password_reset.SessionData, _ password_reset.Status, found bool, err error) {
-	status, found := store.status[session]
-	if !found {
-		return
-	}
-
 	data, found := store.session[session]
 	if !found {
 		return
 	}
 
-	return data, status, found, nil
+	return data.data, data.status, found, nil
 }
 
-func (store *MemoryStore) FindSession(token password_reset.Token) (_ password_reset.SessionData, found bool, err error) {
+func (store *MemoryStore) FindSession(token password_reset.Token) (_ password_reset.Session, _ password_reset.SessionData, found bool, err error) {
 	session, found := store.token[token]
 	if !found {
 		return
@@ -55,10 +57,19 @@ func (store *MemoryStore) FindSession(token password_reset.Token) (_ password_re
 		return
 	}
 
-	return data, true, nil
+	return session, data.data, true, nil
 }
 
-func (store *MemoryStore) RegisterSession(gen password_reset.SessionGenerator, data password_reset.SessionData) (_ password_reset.Session, _ password_reset.Token, err error) {
+func (store *MemoryStore) CheckClosedSessionExists(token password_reset.Token) (found bool, err error) {
+	_, found = store.closed[token]
+	if !found {
+		return
+	}
+
+	return true, nil
+}
+
+func (store *MemoryStore) CreateSession(gen password_reset.SessionGenerator, data password_reset.SessionData) (_ password_reset.Session, _ password_reset.Token, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		id, token, genErr := gen.GenerateSession()
 		if genErr != nil {
@@ -78,9 +89,13 @@ func (store *MemoryStore) RegisterSession(gen password_reset.SessionGenerator, d
 			continue
 		}
 
-		store.session[session] = data
+		store.session[session] = sessionData{
+			session: session,
+			data:    data,
+			status:  password_reset.NewStatus(),
+			token:   token,
+		}
 		store.token[token] = session
-		store.status[session] = password_reset.NewStatus()
 
 		return session, token, nil
 	}
@@ -89,10 +104,26 @@ func (store *MemoryStore) RegisterSession(gen password_reset.SessionGenerator, d
 	return
 }
 
-func (store *MemoryStore) UpdateStatusToProcessing(session password_reset.Session) (err error) {
-	_, found := store.status[session]
+func (store *MemoryStore) CloseSession(session password_reset.Session) (err error) {
+	data, found := store.session[session]
 	if !found {
-		return errors.New("status not found")
+		err = errors.New("session not found")
+		return
+	}
+
+	delete(store.session, session)
+	delete(store.token, data.token)
+
+	store.closed[data.token] = data
+
+	return nil
+}
+
+func (store *MemoryStore) UpdateStatusToProcessing(session password_reset.Session) (err error) {
+	_, found := store.session[session]
+	if !found {
+		err = errors.New("session not found")
+		return
 	}
 
 	// TODO ステータス変更
@@ -101,9 +132,9 @@ func (store *MemoryStore) UpdateStatusToProcessing(session password_reset.Sessio
 	return nil
 }
 func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, cause error) (err error) {
-	_, found := store.status[session]
+	_, found := store.session[session]
 	if !found {
-		return errors.New("status not found")
+		return errors.New("session not found")
 	}
 
 	// TODO ステータス変更
@@ -112,19 +143,13 @@ func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, c
 	return nil
 }
 func (store *MemoryStore) UpdateStatusToSuccess(session password_reset.Session, dest password_reset.Destination) (err error) {
-	_, found := store.status[session]
+	_, found := store.session[session]
 	if !found {
-		return errors.New("status not found")
+		return errors.New("session not found")
 	}
 
 	// TODO ステータス変更
 	//store.status[session] = status.Success(dest)
 
 	return nil
-}
-
-// for test
-func (store *MemoryStore) GetResetSessionData(session password_reset.Session) (password_reset.SessionData, bool) {
-	data, found := store.session[session]
-	return data, found
 }

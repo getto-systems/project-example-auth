@@ -94,12 +94,17 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ data.Credenti
 		return
 	}
 
-	user, err := client.passwordReset.validate.Validate(request, login, token)
+	user, session, err := client.passwordReset.validate.Validate(request, login, token)
 	if err != nil {
 		return
 	}
 
 	err = client.password.change.Change(request, user, newPassword)
+	if err != nil {
+		return
+	}
+
+	err = client.passwordReset.closeSession.Close(request, session)
 	if err != nil {
 		return
 	}
