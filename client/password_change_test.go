@@ -7,7 +7,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func ExamplePasswordChange_change() {
+func ExamplePasswordChange_getLogin_change() {
 	h := newPasswordChangeTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -145,6 +145,62 @@ func ExamplePasswordChange_changeLog() {
 	// log: "Password/Change/Change", audit
 	//
 }
+
+/*
+func ExamplePasswordChange_disableOldPassword() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+		NewPasswordChange(client).GetLogin(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 前のパスワードでログインを試みる
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// Output:
+	// PasswordLogin
+	// request: "2020-01-01T00:00:00Z"
+	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
+	// err: nil
+	//
+	// PasswordChange/GetLogin
+	// request: "2020-01-01T00:01:00Z"
+	// err: nil
+	// login: {login-id}
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:02:00Z"
+	// err: nil
+	//
+}
+*/
 
 type (
 	passwordChangeTestHelper struct {

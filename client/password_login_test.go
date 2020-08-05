@@ -178,6 +178,38 @@ func ExampleLogout_log() {
 	//
 }
 
+func ExamplePasswordLogin_failedBecauseDifferentPassword() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{}) // ユーザー登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 違うパスワードでログインを試みる
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "different-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// request: "2020-01-01T00:00:00Z"
+	// err: "Password.Validate/MatchFailed"
+	// credential: nil
+	// log: "User/GetUser/TryToGetUser", debug
+	// log: "User/GetUser/GetUser", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", info
+	//
+}
+
 func ExamplePasswordLogin_failedBecauseEmptyPassword() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "", []string{}) // 空のパスワードで登録
