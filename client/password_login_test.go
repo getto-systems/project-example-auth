@@ -150,7 +150,6 @@ func ExamplePasswordLogin_logoutLog() {
 
 	// 登録済みデータと同じログインID・パスワードでログイン
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
-	renewHandler := newRenewHandler(handler)
 	logoutHandler := newLogoutHandler(handler)
 
 	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
@@ -159,13 +158,7 @@ func ExamplePasswordLogin_logoutLog() {
 		f.printError()
 	})
 
-	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
-		NewRenew(client).Renew(renewHandler)
-	}, func(f testFormatter) {
-		f.printError()
-	})
-
-	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
+	h.newRequest("Logout", time.Minute(1), logoutHandler, func() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -174,9 +167,6 @@ func ExamplePasswordLogin_logoutLog() {
 
 	// Output:
 	// PasswordLogin
-	// err: nil
-	//
-	// Renew
 	// err: nil
 	//
 	// Logout
@@ -330,7 +320,7 @@ func ExamplePasswordLogin_renew_limited() {
 	//
 }
 
-func ExamplePasswordLogin_renew_failed_alreadyExpired() {
+func ExamplePasswordLogin_renewFailed_alreadyExpired() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -371,7 +361,7 @@ func ExamplePasswordLogin_renew_failed_alreadyExpired() {
 	//
 }
 
-func ExamplePasswordLogin_renew_failed_alreadyLogout() {
+func ExamplePasswordLogin_renewFailed_alreadyLogout() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -429,7 +419,7 @@ func ExamplePasswordLogin_renew_failed_alreadyLogout() {
 	//
 }
 
-func ExamplePasswordLogin_renew_failed_differentNonce() {
+func ExamplePasswordLogin_renewFailed_differentNonce() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 
@@ -469,6 +459,133 @@ func ExamplePasswordLogin_renew_failed_differentNonce() {
 	// credential: nil
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	//
+}
+
+func ExamplePasswordLogin_renewFailed_ticketNotFound() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	renewHandler := newRenewHandler(handler)
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// Nonce を別なものにして認証を試みる
+	h.setNonce("another-nonce")
+	h.setCredentialNonce("another-nonce")
+
+	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+		NewRenew(client).Renew(renewHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// Renew
+	// request: "2020-01-01T00:02:00Z"
+	// err: "Ticket.Validate/NotFound.Ticket"
+	// credential: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	//
+}
+
+func ExamplePasswordLogin_renewFailed_differentUser() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	renewHandler := newRenewHandler(handler)
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// User を別なものにして認証を試みる
+	h.setCredentialUser(user.NewUser("another-user-id"))
+
+	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+		NewRenew(client).Renew(renewHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// Renew
+	// request: "2020-01-01T00:02:00Z"
+	// err: "Ticket.Validate/DifferentUser"
+	// credential: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/FailedToValidateBecauseDifferentInfo", audit
+	//
+}
+
+func ExamplePasswordLogin_logoutFailed_alreadyExpired() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	logoutHandler := newLogoutHandler(handler)
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("Logout", time.Minute(10), logoutHandler, func() {
+		NewLogout(client).Logout(logoutHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// Logout
+	// request: "2020-01-01T00:10:00Z"
+	// err: "Ticket.Validate/AlreadyExpired"
+	// credential: nil
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
 }
 

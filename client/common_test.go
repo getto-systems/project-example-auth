@@ -335,6 +335,34 @@ func (backend *testBackend) ClearCredential() {
 func (backend *testBackend) setNonce(nonce ticket.Nonce) {
 	backend.nonce = &nonce
 }
+func (backend *testBackend) setCredentialNonce(nonce ticket.Nonce) {
+	if backend.credential != nil {
+		user, _, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
+		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
+
+		credential := data.NewCredential(
+			ticket.NewTicket(token, nonce),
+			backend.credential.ApiToken(),
+			backend.credential.ContentToken(),
+			backend.credential.Expires(),
+		)
+		backend.credential = &credential
+	}
+}
+func (backend *testBackend) setCredentialUser(user user.User) {
+	if backend.credential != nil {
+		_, nonce, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
+		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
+
+		credential := data.NewCredential(
+			ticket.NewTicket(token, nonce),
+			backend.credential.ApiToken(),
+			backend.credential.ContentToken(),
+			backend.credential.Expires(),
+		)
+		backend.credential = &credential
+	}
+}
 
 func (backend *testBackend) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
 	testUser := user.NewUser(userID)
