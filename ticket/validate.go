@@ -39,7 +39,7 @@ func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (
 
 	if nonce != ticket.Nonce() {
 		err = errValidateDifferentNonce
-		action.logger.FailedToValidate(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
 		return
 	}
 
@@ -50,12 +50,12 @@ func (action Validate) Validate(request request.Request, ticket ticket.Ticket) (
 	}
 	if !found {
 		err = errValidateNotFoundTicket
-		action.logger.FailedToValidate(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
 		return
 	}
 	if ticketUser.ID() != dataUser.ID() {
 		err = errValidateDifferentUser
-		action.logger.FailedToValidate(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseDifferentInfo(request, ticket.Nonce(), err)
 		return
 	}
 

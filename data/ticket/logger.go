@@ -18,6 +18,7 @@ type (
 		TryToValidate(request.Request, Nonce)
 		FailedToValidate(request.Request, Nonce, error)
 		FailedToValidateBecauseExpired(request.Request, Nonce, error)
+		FailedToValidateBecauseDifferentInfo(request.Request, Nonce, error)
 		AuthByTicket(request.Request, user.User, Nonce)
 	}
 
