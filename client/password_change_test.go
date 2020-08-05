@@ -196,6 +196,88 @@ func ExamplePasswordChange_disableOldPassword() {
 	//
 }
 
+func ExamplePasswordChange_getLoginFailedBecauseTicketExpired() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 有効期限切れでログイン情報の取得を試みる
+	h.newRequest("PasswordChange/GetLogin", time.Minute(10), passwordChangeHandler, func() {
+		NewPasswordChange(client).GetLogin(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printLogin(passwordChangeHandler.login)
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/GetLogin
+	// request: "2020-01-01T00:10:00Z"
+	// err: "Ticket.Validate/AlreadyExpired"
+	// login: {}
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
+	//
+}
+
+func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
+	h := newPasswordChangeTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+	// 登録済みデータと同じパスワードで確認、新パスワードに変更
+	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 有効期限切れでパスワードの変更を試みる
+	h.newRequest("PasswordChange/Change", time.Minute(10), passwordChangeHandler, func() {
+		NewPasswordChange(client).Change(passwordChangeHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printLogin(passwordChangeHandler.login)
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordLogin
+	// err: nil
+	//
+	// PasswordChange/Change
+	// request: "2020-01-01T00:10:00Z"
+	// err: "Ticket.Validate/AlreadyExpired"
+	// login: {}
+	// log: "Ticket/Validate/TryToValidate", debug
+	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
+	//
+}
+
 type (
 	passwordChangeTestHelper struct {
 		*testBackend
