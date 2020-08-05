@@ -23,6 +23,7 @@ type (
 	ChangeLogger interface {
 		TryToChange(request.Request, user.User)
 		FailedToChange(request.Request, user.User, error)
+		FailedToChangeBecausePasswordCheckFailed(request.Request, user.User, error)
 		Change(request.Request, user.User)
 	}
 )
