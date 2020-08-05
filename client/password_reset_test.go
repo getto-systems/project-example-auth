@@ -382,7 +382,7 @@ func ExamplePasswordReset_disableResetSession() {
 	//
 }
 
-func ExamplePasswordReset_failedBecauseLoginNotFound() {
+func ExamplePasswordReset_createSessionFailedBecauseLoginNotFound() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 	h.registerResetDestination("user-id")                                   // 宛先を登録
@@ -409,7 +409,7 @@ func ExamplePasswordReset_failedBecauseLoginNotFound() {
 	//
 }
 
-func ExamplePasswordReset_failedBecauseDestinationNotFound() {
+func ExamplePasswordReset_createSessionFailedBecauseDestinationNotFound() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 	//h.registerResetDestination("user-id")                                 // 宛先を登録しない
@@ -438,7 +438,46 @@ func ExamplePasswordReset_failedBecauseDestinationNotFound() {
 	//
 }
 
-func ExamplePasswordReset_failedBecauseSessionNotFound() {
+func ExamplePasswordReset_getStatusFailedBecauseSessionNotFound() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 存在しないセッションステータスの取得を試みる
+	passwordResetHandler.session = password_reset.NewSession("unknown-session")
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/GetStatus
+	// err: "PasswordReset.GetStatus/NotFound.Session"
+	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
+	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseSessionNotFound", audit
+	//
+}
+
+func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
 	h.registerResetDestination("user-id")                                   // 宛先を登録
