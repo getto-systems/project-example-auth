@@ -146,7 +146,6 @@ func ExamplePasswordChange_changeLog() {
 	//
 }
 
-/*
 func ExamplePasswordChange_disableOldPassword() {
 	h := newPasswordChangeTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
@@ -165,42 +164,37 @@ func ExamplePasswordChange_disableOldPassword() {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
-		NewPasswordChange(client).GetLogin(passwordChangeHandler)
-	}, func(f testFormatter) {
-		f.printError()
-	})
-
-	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 前のパスワードでログインを試みる
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", time.Minute(2), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
+		f.printRequest()
 		f.printError()
+		f.printLog()
 	})
 
 	// Output:
 	// PasswordLogin
-	// request: "2020-01-01T00:00:00Z"
-	// credential: expires: "2020-01-01T00:05:00Z", roles: [role]
 	// err: nil
-	//
-	// PasswordChange/GetLogin
-	// request: "2020-01-01T00:01:00Z"
-	// err: nil
-	// login: {login-id}
 	//
 	// PasswordChange/Change
-	// request: "2020-01-01T00:02:00Z"
 	// err: nil
 	//
+	// PasswordLogin
+	// request: "2020-01-01T00:02:00Z"
+	// err: "Password.Validate/MatchFailed"
+	// log: "User/GetUser/TryToGetUser", debug
+	// log: "User/GetUser/GetUser", info
+	// log: "Password/Validate/TryToValidate", debug
+	// log: "Password/Validate/FailedToValidateBecausePasswordMatchFailed", audit
+	//
 }
-*/
 
 type (
 	passwordChangeTestHelper struct {
