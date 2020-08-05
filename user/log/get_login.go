@@ -19,9 +19,6 @@ func (log Logger) TryToGetLogin(request request.Request, user user.User) {
 func (log Logger) FailedToGetLogin(request request.Request, user user.User, err error) {
 	log.logger.Error(getLoginEntry("FailedToGetLogin", request, user, nil, err))
 }
-func (log Logger) FailedToGetLoginBecauseLoginNotFound(request request.Request, user user.User, err error) {
-	log.logger.Info(getLoginEntry("FailedToGetLoginBecauseLoginNotFound", request, user, nil, err))
-}
 func (log Logger) GetLogin(request request.Request, user user.User, login user.Login) {
 	log.logger.Info(getLoginEntry("GetLogin", request, user, &login, nil))
 }
