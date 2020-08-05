@@ -174,7 +174,6 @@ func ExamplePasswordChange_disableOldPassword() {
 	h.newRequest("PasswordLogin", time.Minute(2), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
-		f.printRequest()
 		f.printError()
 		f.printLog()
 	})
@@ -187,7 +186,6 @@ func ExamplePasswordChange_disableOldPassword() {
 	// err: nil
 	//
 	// PasswordLogin
-	// request: "2020-01-01T00:02:00Z"
 	// err: "Password.Validate/MatchFailed"
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
