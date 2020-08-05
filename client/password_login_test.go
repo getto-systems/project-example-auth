@@ -64,6 +64,33 @@ func ExamplePasswordLogin_login_renew_logout() {
 	//
 }
 
+func ExamplePasswordLogin_loginWithNoApiRoles() {
+	h := newPasswordLoginTestHelper()
+	h.registerUserDataWithoutApiRoles("user-id", "login-id", "password") // ユーザーを登録(ApiRoles なし)
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録済みデータと同じログインID・パスワードでログイン
+	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
+
+	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+		NewPasswordLogin(client).Login(passwordLoginHandler)
+	}, func(f testFormatter) {
+		f.printRequest()
+		f.printError()
+		f.printCredential()
+	})
+
+	// Output:
+	// PasswordLogin
+	// request: "2020-01-01T00:00:00Z"
+	// err: nil
+	// credential: expires: "2020-01-01T00:05:00Z", roles: []
+	//
+}
+
 func ExamplePasswordLogin_log() {
 	h := newPasswordLoginTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
