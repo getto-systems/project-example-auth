@@ -71,6 +71,8 @@ type (
 		passwords password.PasswordRepository
 	}
 	passwordResetTestBackend struct {
+		gen *passwordResetTestSessionGenerator
+
 		sessions     password_reset.SessionRepository
 		destinations password_reset.DestinationRepository
 
@@ -97,7 +99,10 @@ type (
 
 	passwordTestEncrypter struct{}
 
-	passwordResetTestSessionGenerator struct{}
+	passwordResetTestSessionGenerator struct {
+		id    password_reset.SessionID
+		token password_reset.Token
+	}
 )
 
 type (
@@ -149,6 +154,11 @@ func newTestBackend() *testBackend {
 			passwords: password_repository_password.NewMemoryStore(),
 		},
 		passwordReset: passwordResetTestBackend{
+			gen: &passwordResetTestSessionGenerator{
+				id:    "reset-session-id",
+				token: "reset-token",
+			},
+
 			sessions:     password_reset_repository_session.NewMemoryStore(),
 			destinations: password_reset_repository_destination.NewMemoryStore(),
 
@@ -195,7 +205,7 @@ func (backend *testBackend) newBackend() Backend {
 			password_reset_log.NewLogger(backend.logger),
 
 			time.Minute(30),
-			passwordResetTestSessionGenerator{},
+			backend.passwordReset.gen,
 
 			backend.passwordReset.sessions,
 			backend.passwordReset.destinations,
@@ -306,8 +316,12 @@ func (passwordTestEncrypter) MatchPassword(hashed password.HashedPassword, raw p
 	return string(hashed) == string(raw), nil
 }
 
-func (passwordResetTestSessionGenerator) GenerateSession() (password_reset.SessionID, password_reset.Token, error) {
-	return "reset-session-id", "reset-token", nil
+func (gen *passwordResetTestSessionGenerator) GenerateSession() (password_reset.SessionID, password_reset.Token, error) {
+	return gen.id, gen.token, nil
+}
+func (gen *passwordResetTestSessionGenerator) another() {
+	gen.id = "another-reset-session-id"
+	gen.token = "another-reset-token"
 }
 
 func (backend *testBackend) credentialHandler() CredentialHandler {
