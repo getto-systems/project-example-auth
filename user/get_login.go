@@ -32,7 +32,7 @@ func (action GetLogin) Get(request request.Request, user user.User) (_ user.Logi
 	}
 	if !found {
 		err = errGetLoginNotFoundLogin
-		action.logger.FailedToGetLogin(request, user, err)
+		action.logger.FailedToGetLoginBecauseLoginNotFound(request, user, err)
 		return
 	}
 

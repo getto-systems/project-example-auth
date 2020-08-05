@@ -17,7 +17,7 @@ func (log Logger) TryToSendToken(request request.Request, session password_reset
 	log.logger.Debug(sendTokenEntry("TryToSendToken", request, session, dest, nil))
 }
 func (log Logger) FailedToSendToken(request request.Request, session password_reset.Session, dest password_reset.Destination, err error) {
-	log.logger.Info(sendTokenEntry("FailedToSendToken", request, session, dest, err))
+	log.logger.Error(sendTokenEntry("FailedToSendToken", request, session, dest, err))
 }
 func (log Logger) SendToken(request request.Request, session password_reset.Session, dest password_reset.Destination) {
 	log.logger.Info(sendTokenEntry("SendToken", request, session, dest, nil))

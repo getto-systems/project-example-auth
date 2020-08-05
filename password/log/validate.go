@@ -27,7 +27,7 @@ func (log Logger) FailedToValidateBecausePasswordMatchFailed(request request.Req
 	log.logger.Audit(validateEntry("FailedToValidateBecausePasswordMatchFailed", request, user, err))
 }
 func (log Logger) FailedToValidate(request request.Request, user user.User, err error) {
-	log.logger.Audit(validateEntry("FailedToValidate", request, user, err))
+	log.logger.Error(validateEntry("FailedToValidate", request, user, err))
 }
 func (log Logger) AuthByPassword(request request.Request, user user.User) {
 	log.logger.Audit(validateEntry("AuthByPassword", request, user, nil))

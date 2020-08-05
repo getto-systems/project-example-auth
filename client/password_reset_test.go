@@ -382,6 +382,33 @@ func ExamplePasswordReset_disableResetSession() {
 	//
 }
 
+func ExamplePasswordReset_failedBecauseLoginNotFound() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録ていないログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "unknown-login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: "User.GetUser/NotFound.User"
+	// log: "User/GetUser/TryToGetUser", debug
+	// log: "User/GetUser/FailedToGetUserBecauseUserNotFound", info
+	//
+}
+
 type (
 	passwordResetTestHelper struct {
 		*testBackend
