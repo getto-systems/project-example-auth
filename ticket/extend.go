@@ -1,7 +1,7 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	errExtendNotFoundNonce = errors.NewError("Ticket.Extend", "NotFound.Nonce")
-	errExtendDifferentUser = errors.NewError("Ticket.Extend", "DifferentUser")
+	errExtendNotFoundNonce = data.NewError("Ticket.Extend", "NotFound.Nonce")
+	errExtendDifferentUser = data.NewError("Ticket.Extend", "DifferentUser")
 )
 
 type Extend struct {

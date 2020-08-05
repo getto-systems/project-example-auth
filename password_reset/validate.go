@@ -1,16 +1,16 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errValidateNotFoundSession = errors.NewError("PasswordReset.Validate", "NotFound.Session")
-	errValidateNotMatchedLogin = errors.NewError("PasswordReset.Validate", "NotMatched.Login")
-	errValidateAlreadyExpired  = errors.NewError("PasswordReset.Validate", "AlreadyExpired")
+	errValidateNotFoundSession = data.NewError("PasswordReset.Validate", "NotFound.Session")
+	errValidateNotMatchedLogin = data.NewError("PasswordReset.Validate", "NotMatched.Login")
+	errValidateAlreadyExpired  = data.NewError("PasswordReset.Validate", "AlreadyExpired")
 )
 
 type Validate struct {

@@ -1,15 +1,15 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errShrinkNotFoundNonce = errors.NewError("Ticket.Shrink", "NotFound.Nonce")
-	errShrinkDifferentUser = errors.NewError("Ticket.Shrink", "DifferentUser")
+	errShrinkNotFoundNonce = data.NewError("Ticket.Shrink", "NotFound.Nonce")
+	errShrinkDifferentUser = data.NewError("Ticket.Shrink", "DifferentUser")
 )
 
 type Shrink struct {

@@ -1,15 +1,15 @@
 package password
 
 import (
-	"github.com/getto-systems/project-example-id/data/errors"
+	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 var (
-	errValidateNotFoundPassword = errors.NewError("Password.Validate", "NotFound.Password")
-	errValidateNotMatched       = errors.NewError("Password.Validate", "NotMatched")
+	errValidateNotFoundPassword = data.NewError("Password.Validate", "NotFound.Password")
+	errValidateNotMatched       = data.NewError("Password.Validate", "NotMatched")
 )
 
 type Validate struct {
