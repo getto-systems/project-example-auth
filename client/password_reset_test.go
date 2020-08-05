@@ -477,6 +477,99 @@ func ExamplePasswordReset_getStatusFailedBecauseSessionNotFound() {
 	//
 }
 
+func ExamplePasswordReset_getStatusFailedBecauseUnknownLogin() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 存在しないログインID でステータスの取得を試みる
+	passwordResetHandler.login = user.NewLogin("unknown-login-id")
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/GetStatus
+	// err: "PasswordReset.GetStatus/MatchFailed.Login"
+	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
+	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseLoginMatchFailed", audit
+	//
+}
+
+func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"})                         // ユーザーを登録
+	h.registerUserData("another-user-id", "another-login-id", "another-password", []string{"role"}) // 別なユーザーを登録
+	h.registerResetDestination("user-id")                                                           // 宛先を登録
+	h.registerResetDestination("another-user-id")                                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+	// 別なユーザーでも並行してリセット
+	another_passwordResetHandler := newPasswordResetHandler(handler, "another-login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 並行してリセット
+	h.passwordReset.gen.another()
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 別なログインID のステータス取得を試みる
+	passwordResetHandler.login = user.NewLogin("another-login-id")
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printLog()
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/GetStatus
+	// err: "PasswordReset.GetStatus/MatchFailed.Login"
+	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
+	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseLoginMatchFailed", audit
+	//
+}
+
 func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	h := newPasswordResetTestHelper()
 	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
@@ -580,6 +673,7 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	h.registerUserData("user-id", "login-id", "password", []string{"role"})                         // ユーザーを登録
 	h.registerUserData("another-user-id", "another-login-id", "another-password", []string{"role"}) // 別なユーザーを登録
 	h.registerResetDestination("user-id")                                                           // 宛先を登録
+	h.registerResetDestination("another-user-id")                                                   // 宛先を登録
 
 	client := NewClient(h.newBackend(), h.credentialHandler())
 
@@ -587,9 +681,19 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+	// 別なユーザーでも並行してリセット
+	another_passwordResetHandler := newPasswordResetHandler(handler, "another-login-id", "new-password")
 
 	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	// 並行してリセット
+	h.passwordReset.gen.another()
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
@@ -613,6 +717,9 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	})
 
 	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
 	// PasswordReset/CreateSession
 	// err: nil
 	//
