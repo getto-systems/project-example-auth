@@ -48,7 +48,7 @@ type (
 		FailedToValidateTokenBecauseSessionNotFound(request.Request, user.Login, error)
 		FailedToValidateTokenBecauseSessionClosed(request.Request, user.Login, error)
 		FailedToValidateTokenBecauseSessionExpired(request.Request, user.Login, error)
-		FailedToValidateTokenBecauseLoginNotMatched(request.Request, user.Login, error)
+		FailedToValidateTokenBecauseLoginMatchFailed(request.Request, user.Login, error)
 		AuthByToken(request.Request, user.Login, user.User)
 	}
 
