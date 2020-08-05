@@ -4,6 +4,11 @@ import (
 	"fmt"
 )
 
+var (
+	ErrTicketValidate = NewError("Ticket.Validate", "")
+	ErrPasswordCheck  = NewError("Password.Check", "")
+)
+
 type (
 	Error struct {
 		action  string
@@ -22,9 +27,10 @@ func (err Error) Error() string {
 	return fmt.Sprintf("%s/%s", err.action, err.message)
 }
 
-func (err Error) TicketValidateError() bool {
-	return err.action == "Ticket.Validate"
-}
-func (err Error) PasswordCheckError() bool {
-	return err.action == "Password.Check"
+func (err Error) Is(target error) bool {
+	t, ok := target.(Error)
+	if !ok {
+		return false
+	}
+	return err.action == t.action
 }

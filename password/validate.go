@@ -31,7 +31,7 @@ func (action Validate) Validate(request request.Request, user user.User, raw pas
 
 	err = checkLength(raw)
 	if err != nil {
-		action.logger.FailedToValidate(request, user, err)
+		action.logger.FailedToValidateBecausePasswordCheckFailed(request, user, err)
 		return
 	}
 

@@ -17,6 +17,9 @@ func (log Logger) validate() password.ValidateLogger {
 func (log Logger) TryToValidate(request request.Request, user user.User) {
 	log.logger.Debug(validateEntry("TryToValidate", request, user, nil))
 }
+func (log Logger) FailedToValidateBecausePasswordCheckFailed(request request.Request, user user.User, err error) {
+	log.logger.Info(validateEntry("FailedToValidateBecausePasswordCheckFailed", request, user, err))
+}
 func (log Logger) FailedToValidate(request request.Request, user user.User, err error) {
 	log.logger.Audit(validateEntry("FailedToValidate", request, user, err))
 }
