@@ -360,7 +360,7 @@ func ExamplePasswordChange_changeFailedBecauseEmptyPassword() {
 
 type (
 	passwordChangeTestHelper struct {
-		*testBackend
+		*testInfra
 	}
 
 	passwordChangeTestHandler struct {
@@ -375,7 +375,7 @@ type (
 
 func newPasswordChangeTestHelper() passwordChangeTestHelper {
 	return passwordChangeTestHelper{
-		testBackend: newTestBackend(),
+		testInfra: newTestInfra(),
 	}
 }
 

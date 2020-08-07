@@ -64,6 +64,10 @@ type (
 		key  string
 	}
 
+	infra struct {
+		logger logger.Logger
+		exp    expiration
+	}
 	expiration struct {
 		password      ticket.Expiration
 		passwordReset password_reset.Expiration
@@ -152,20 +156,26 @@ func newServer() server {
 }
 
 func newBackend() client.Backend {
-	appLogger := newAppLogger()
-	exp := newExpiration()
+	infra := newInfra()
 
 	return client.NewBackend(
-		newTicketAction(appLogger),
-		newApiTokenAction(appLogger),
-		newUserAction(appLogger),
-		newPasswordAction(appLogger, exp),
-		newPasswordResetAction(appLogger, exp),
+		infra.newTicketAction(),
+		infra.newApiTokenAction(),
+		infra.newUserAction(),
+		infra.newPasswordAction(),
+		infra.newPasswordResetAction(),
 	)
 }
-func newTicketAction(appLogger logger.Logger) client.TicketAction {
+
+func newInfra() infra {
+	return infra{
+		logger: newAppLogger(),
+		exp:    newExpiration(),
+	}
+}
+func (infra infra) newTicketAction() client.TicketAction {
 	return client.NewTicketAction(
-		ticket_log.NewLogger(appLogger),
+		ticket_log.NewLogger(infra.logger),
 
 		newTicketSigner(),
 		nonce_generator.NewNonceGenerator(),
@@ -173,13 +183,13 @@ func newTicketAction(appLogger logger.Logger) client.TicketAction {
 		ticket_repository_ticket.NewMemoryStore(),
 	)
 }
-func newApiTokenAction(appLogger logger.Logger) client.ApiTokenAction {
+func (infra infra) newApiTokenAction() client.ApiTokenAction {
 	api_users := api_token_repository_api_user.NewMemoryStore()
 
 	initApiUserRepository(api_users)
 
 	return client.NewApiTokenAction(
-		api_token_log.NewLogger(appLogger),
+		api_token_log.NewLogger(infra.logger),
 
 		newApiTokenSigner(),
 		newContentTokenSigner(),
@@ -187,42 +197,42 @@ func newApiTokenAction(appLogger logger.Logger) client.ApiTokenAction {
 		api_users,
 	)
 }
-func newUserAction(appLogger logger.Logger) client.UserAction {
+func (infra infra) newUserAction() client.UserAction {
 	users := user_repository_user.NewMemoryStore()
 
 	initUserRepository(users)
 
 	return client.NewUserAction(
-		user_log.NewLogger(appLogger),
+		user_log.NewLogger(infra.logger),
 
 		users,
 	)
 }
-func newPasswordAction(appLogger logger.Logger, exp expiration) client.PasswordAction {
+func (infra infra) newPasswordAction() client.PasswordAction {
 	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
 	initPasswordRepository(passwords, enc)
 
 	return client.NewPasswordAction(
-		password_log.NewLogger(appLogger),
+		password_log.NewLogger(infra.logger),
 
-		exp.password,
+		infra.exp.password,
 		enc,
 
 		passwords,
 	)
 }
-func newPasswordResetAction(appLogger logger.Logger, exp expiration) client.PasswordResetAction {
+func (infra infra) newPasswordResetAction() client.PasswordResetAction {
 	destinations := password_reset_repository_destination.NewMemoryStore()
 
 	initPasswordResetDestinationRepository(destinations)
 
 	return client.NewPasswordResetAction(
-		password_reset_log.NewLogger(appLogger),
+		password_reset_log.NewLogger(infra.logger),
 
-		exp.password,
-		exp.passwordReset,
+		infra.exp.password,
+		infra.exp.passwordReset,
 		reset_session_generator.NewGenerator(),
 
 		password_reset_repository_session.NewMemoryStore(),

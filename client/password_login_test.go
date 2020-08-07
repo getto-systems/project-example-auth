@@ -682,7 +682,7 @@ func ExampleLogout_failedBecauseAlreadyExpired() {
 
 type (
 	passwordLoginTestHelper struct {
-		*testBackend
+		*testInfra
 	}
 
 	passwordLoginTestHandler struct {
@@ -695,7 +695,7 @@ type (
 
 func newPasswordLoginTestHelper() passwordLoginTestHelper {
 	return passwordLoginTestHelper{
-		testBackend: newTestBackend(),
+		testInfra: newTestInfra(),
 	}
 }
 
