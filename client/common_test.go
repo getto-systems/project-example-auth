@@ -484,10 +484,7 @@ func (f testFormatter) printError() {
 	}
 }
 func (f testFormatter) printRequest() {
-	fmt.Printf(
-		"request: \"%s\"\n",
-		gotime.Time(f.context.request.RequestedAt()).Format(gotime.RFC3339),
-	)
+	fmt.Printf("request: \"%s\"\n", formatTime(f.context.request.RequestedAt().Time()))
 }
 func (f testFormatter) printCredential() {
 	if f.credential == nil {
@@ -495,7 +492,7 @@ func (f testFormatter) printCredential() {
 	} else {
 		fmt.Printf(
 			"credential: expires: \"%s\", roles: %s\n",
-			gotime.Time(f.credential.Expires()).Format(gotime.RFC3339),
+			formatTime(f.credential.Expires().Time()),
 			f.credential.ApiToken().ApiRoles(),
 		)
 	}
@@ -506,8 +503,22 @@ func (f testFormatter) printLogin(login user.Login) {
 func (f testFormatter) printResetSession(session password_reset.Session) {
 	fmt.Printf("session: {%s}\n", session.ID())
 }
+func (f testFormatter) printResetDestination(dest password_reset.Destination) {
+	fmt.Printf("dest: %v\n", dest) // TODO ちゃんとする
+}
 func (f testFormatter) printResetStatus(status password_reset.Status) {
-	fmt.Printf("status: %v\n", status) // TODO ちゃんとする
+	if status.Waiting() {
+		fmt.Printf("status: {waiting: {since: \"%s\"}}\n", formatTime(status.WaitingSince()))
+	} else if status.Sending() {
+		fmt.Printf("status: {sending: {since: \"%s\"}}\n", formatTime(status.SendingSince()))
+	} else if status.Complete() {
+		fmt.Printf("status: {complete: {at: \"%s\"}}\n", formatTime(status.CompleteAt()))
+	} else if status.Failed() {
+		at, reason := status.FailedAtAndReason()
+		fmt.Printf("status: {failed: {at: \"%s\", reason: \"%s\"}}\n", formatTime(at), reason)
+	} else {
+		fmt.Println("status: {EMPTY}")
+	}
 }
 func (f testFormatter) printResetToken(token password_reset.Token) {
 	fmt.Printf("token: \"%s\"\n", token)
@@ -522,4 +533,8 @@ func (f testFormatter) printMessage() {
 	for _, message := range f.message.log {
 		fmt.Printf("message: %s\n", message)
 	}
+}
+
+func formatTime(t time.Time) string {
+	return gotime.Time(t).Format(gotime.RFC3339)
 }

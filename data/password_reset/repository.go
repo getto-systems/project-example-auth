@@ -1,21 +1,22 @@
 package password_reset
 
 import (
+	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type (
 	SessionRepository interface {
-		FindStatus(Session) (SessionData, Status, bool, error)
+		FindSessionDataAndDestinationAndStatus(Session) (SessionData, Destination, Status, bool, error)
 		FindSession(Token) (Session, SessionData, bool, error)
 		CheckClosedSessionExists(Token) (bool, error)
 
-		CreateSession(SessionGenerator, SessionData) (Session, Token, error)
+		CreateSession(SessionGenerator, SessionData, Destination) (Session, Token, error)
 		CloseSession(Session) error
 
-		UpdateStatusToProcessing(Session) error
-		UpdateStatusToFailed(Session, error) error
-		UpdateStatusToSuccess(Session, Destination) error
+		UpdateStatusToSending(Session, time.RequestedAt) error
+		UpdateStatusToFailed(Session, time.RequestedAt, error) error
+		UpdateStatusToComplete(Session, time.RequestedAt) error
 	}
 
 	DestinationRepository interface {

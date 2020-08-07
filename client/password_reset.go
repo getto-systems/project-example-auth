@@ -19,7 +19,7 @@ type (
 		SendTokenResponse(error)
 
 		GetStatusRequest() (request.Request, user.Login, password_reset.Session, error)
-		GetStatusResponse(password_reset.Status, error)
+		GetStatusResponse(password_reset.Destination, password_reset.Status, error)
 
 		ResetRequest() (request.Request, user.Login, password_reset.Token, password.RawPassword, error)
 		ResetResponse(error)
@@ -70,11 +70,11 @@ func (client PasswordReset) sendToken(handler PasswordResetHandler) error {
 }
 
 func (client PasswordReset) GetStatus(handler PasswordResetHandler) {
-	status, err := client.getStatus(handler)
+	dest, status, err := client.getStatus(handler)
 	client.handleCredentialError(err)
-	handler.GetStatusResponse(status, err)
+	handler.GetStatusResponse(dest, status, err)
 }
-func (client PasswordReset) getStatus(handler PasswordResetHandler) (_ password_reset.Status, err error) {
+func (client PasswordReset) getStatus(handler PasswordResetHandler) (_ password_reset.Destination, _ password_reset.Status, err error) {
 	request, login, session, err := handler.GetStatusRequest()
 	if err != nil {
 		return

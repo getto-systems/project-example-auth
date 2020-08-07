@@ -32,7 +32,7 @@ func (action SendToken) Send() (err error) {
 	if err != nil {
 		action.logger.FailedToSendToken(request, session, dest, err)
 
-		updateErr := action.sessions.UpdateStatusToFailed(session, err)
+		updateErr := action.sessions.UpdateStatusToFailed(session, request.RequestedAt(), err)
 		if updateErr != nil {
 			// ここのステータスの更新失敗では送信エラーの内容を上書きしない
 			action.logger.FailedToSendToken(request, session, dest, updateErr)
@@ -41,7 +41,7 @@ func (action SendToken) Send() (err error) {
 		return
 	}
 
-	err = action.sessions.UpdateStatusToSuccess(session, dest)
+	err = action.sessions.UpdateStatusToComplete(session, request.RequestedAt())
 	if err != nil {
 		action.logger.FailedToSendToken(request, session, dest, err)
 		return
