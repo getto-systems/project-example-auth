@@ -9,29 +9,27 @@ import (
 
 type Issue struct {
 	logger  ticket.IssueLogger
-	exp     expiration
 	gen     ticket.NonceGenerator
 	signer  ticket.TicketSigner
 	tickets ticket.TicketRepository
 }
 
-func NewIssue(logger ticket.IssueLogger, signer ticket.TicketSigner, exp ticket.ExpirationParam, gen ticket.NonceGenerator, tickets ticket.TicketRepository) Issue {
+func NewIssue(logger ticket.IssueLogger, signer ticket.TicketSigner, gen ticket.NonceGenerator, tickets ticket.TicketRepository) Issue {
 	return Issue{
 		logger:  logger,
-		exp:     newExpiration(exp),
 		gen:     gen,
 		signer:  signer,
 		tickets: tickets,
 	}
 }
 
-func (action Issue) Issue(request request.Request, user user.User) (_ ticket.Ticket, _ time.Expires, err error) {
-	expires := action.exp.Expires(request)
-	limit := action.exp.ExtendLimit(request)
+func (action Issue) Issue(request request.Request, user user.User, exp ticket.Expiration) (_ ticket.Ticket, _ time.Expires, err error) {
+	expires := exp.Expires(request)
+	limit := exp.ExtendLimit(request)
 
 	action.logger.TryToIssue(request, user, expires, limit)
 
-	nonce, err := action.tickets.RegisterTicket(action.gen, user, expires, limit)
+	nonce, err := action.tickets.RegisterTicket(action.gen, user, expires, exp.ExpireSecond(), limit)
 	if err != nil {
 		action.logger.FailedToIssue(request, user, expires, limit, err)
 		return

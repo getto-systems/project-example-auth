@@ -42,6 +42,8 @@ type (
 		logger  *testLogger
 		message *testMessage
 
+		ticketExpiration ticket.Expiration
+
 		nowSecond  time.Second
 		credential *data.Credential
 		nonce      *ticket.Nonce
@@ -136,6 +138,11 @@ func newTestBackend() *testBackend {
 
 		nowSecond: time.Second(0),
 
+		ticketExpiration: ticket.NewExpiration(ticket.ExpirationParam{
+			Expires:     time.Minute(5),
+			ExtendLimit: time.Minute(8),
+		}),
+
 		ticket: ticketTestBackend{
 			sign: ticketTestSign{},
 			gen:  ticketTestNonceGenerator{},
@@ -173,10 +180,6 @@ func (backend *testBackend) newBackend() Backend {
 			ticket_log.NewLogger(backend.logger),
 
 			backend.ticket.sign,
-			ticket.ExpirationParam{
-				Expires:     time.Minute(5),
-				ExtendLimit: time.Minute(8),
-			},
 			backend.ticket.gen,
 
 			backend.ticket.tickets,
@@ -197,6 +200,7 @@ func (backend *testBackend) newBackend() Backend {
 		NewPasswordAction(
 			password_log.NewLogger(backend.logger),
 
+			backend.ticketExpiration,
 			backend.password.enc,
 
 			backend.password.passwords,
@@ -204,6 +208,7 @@ func (backend *testBackend) newBackend() Backend {
 		NewPasswordResetAction(
 			password_reset_log.NewLogger(backend.logger),
 
+			backend.ticketExpiration,
 			time.Minute(30),
 			backend.passwordReset.gen,
 

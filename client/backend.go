@@ -76,16 +76,15 @@ func NewTicketAction(
 	logger ticket_data.Logger,
 
 	sign ticket_data.TicketSign,
-	exp ticket_data.ExpirationParam,
 	gen ticket_data.NonceGenerator,
 
 	tickets ticket_data.TicketRepository,
 ) TicketAction {
 	return TicketAction{
 		validate:   ticket.NewValidate(logger, sign, tickets),
-		extend:     ticket.NewExtend(logger, sign, exp, tickets),
+		extend:     ticket.NewExtend(logger, sign, tickets),
 		deactivate: ticket.NewDeactivate(logger, tickets),
-		issue:      ticket.NewIssue(logger, sign, exp, gen, tickets),
+		issue:      ticket.NewIssue(logger, sign, gen, tickets),
 	}
 }
 
@@ -117,12 +116,13 @@ func NewUserAction(
 func NewPasswordAction(
 	logger password_data.Logger,
 
+	exp ticket_data.Expiration,
 	enc password_data.PasswordEncrypter,
 
 	passwords password_data.PasswordRepository,
 ) PasswordAction {
 	return PasswordAction{
-		validate: password.NewValidate(logger, enc, passwords),
+		validate: password.NewValidate(logger, exp, enc, passwords),
 		change:   password.NewChange(logger, enc, passwords),
 	}
 }
@@ -130,6 +130,7 @@ func NewPasswordAction(
 func NewPasswordResetAction(
 	logger password_reset_data.Logger,
 
+	ticketExp ticket_data.Expiration,
 	exp time.Second,
 	gen password_reset_data.SessionGenerator,
 
@@ -145,7 +146,7 @@ func NewPasswordResetAction(
 		pushSendTokenJob: password_reset.NewPushSendTokenJob(logger, sessions, tokenQueue),
 		sendToken:        password_reset.NewSendToken(logger, sessions, tokenQueue, tokenSender),
 		getStatus:        password_reset.NewGetStatus(logger, sessions),
-		validate:         password_reset.NewValidate(logger, sessions),
+		validate:         password_reset.NewValidate(logger, ticketExp, sessions),
 		closeSession:     password_reset.NewCloseSession(logger, sessions),
 	}
 }

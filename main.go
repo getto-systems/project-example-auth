@@ -148,13 +148,14 @@ func newServer() server {
 
 func newBackend() client.Backend {
 	appLogger := newAppLogger()
+	passwordExpiration := newPasswordExpiration()
 
 	return client.NewBackend(
 		newTicketAction(appLogger),
 		newApiTokenAction(appLogger),
 		newUserAction(appLogger),
-		newPasswordAction(appLogger),
-		newPasswordResetAction(appLogger),
+		newPasswordAction(appLogger, passwordExpiration),
+		newPasswordResetAction(appLogger, passwordExpiration),
 	)
 }
 func newTicketAction(appLogger logger.Logger) client.TicketAction {
@@ -162,10 +163,6 @@ func newTicketAction(appLogger logger.Logger) client.TicketAction {
 		ticket_log.NewLogger(appLogger),
 
 		newTicketSigner(),
-		ticket.ExpirationParam{
-			Expires:     time.Minute(5),
-			ExtendLimit: time.Day(14),
-		},
 		nonce_generator.NewNonceGenerator(),
 
 		ticket_repository_ticket.NewMemoryStore(),
@@ -196,7 +193,7 @@ func newUserAction(appLogger logger.Logger) client.UserAction {
 		users,
 	)
 }
-func newPasswordAction(appLogger logger.Logger) client.PasswordAction {
+func newPasswordAction(appLogger logger.Logger, exp ticket.Expiration) client.PasswordAction {
 	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
@@ -205,12 +202,13 @@ func newPasswordAction(appLogger logger.Logger) client.PasswordAction {
 	return client.NewPasswordAction(
 		password_log.NewLogger(appLogger),
 
+		exp,
 		enc,
 
 		passwords,
 	)
 }
-func newPasswordResetAction(appLogger logger.Logger) client.PasswordResetAction {
+func newPasswordResetAction(appLogger logger.Logger, exp ticket.Expiration) client.PasswordResetAction {
 	destinations := password_reset_repository_destination.NewMemoryStore()
 
 	initPasswordResetDestinationRepository(destinations)
@@ -218,6 +216,7 @@ func newPasswordResetAction(appLogger logger.Logger) client.PasswordResetAction 
 	return client.NewPasswordResetAction(
 		password_reset_log.NewLogger(appLogger),
 
+		exp,
 		time.Minute(30),
 		reset_session_generator.NewGenerator(),
 
@@ -266,6 +265,14 @@ func adminUser() user.User {
 
 func newAppLogger() logger.Logger {
 	return logger.NewLogger(os.Getenv("LOG_LEVEL"))
+}
+
+func newPasswordExpiration() ticket.Expiration {
+	// パスワードで認証した場合、有効期限 5分、最大延長 14日
+	return ticket.NewExpiration(ticket.ExpirationParam{
+		Expires:     time.Minute(5),
+		ExtendLimit: time.Day(14),
+	})
 }
 
 func newTicketSigner() signer.TicketSigner {

@@ -18,9 +18,10 @@ type (
 	}
 
 	memoryTicketData struct {
-		user    user.User
-		expires time.Expires
-		limit   time.ExtendLimit
+		user         user.User
+		expires      time.Expires
+		expireSecond time.Second
+		limit        time.ExtendLimit
 	}
 )
 
@@ -42,12 +43,12 @@ func (store *MemoryStore) FindUserAndExpires(nonce ticket.Nonce) (_ user.User, _
 	return data.user, data.expires, true, nil
 }
 
-func (store *MemoryStore) FindExtendLimit(nonce ticket.Nonce) (_ time.ExtendLimit, found bool, err error) {
+func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce ticket.Nonce) (_ time.Second, _ time.ExtendLimit, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
 	}
-	return data.limit, true, nil
+	return data.expireSecond, data.limit, true, nil
 }
 
 func (store *MemoryStore) FindUser(nonce ticket.Nonce) (_ user.User, found bool, err error) {
@@ -72,7 +73,7 @@ func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce ticket.Nonce) (e
 	return nil
 }
 
-func (store *MemoryStore) RegisterTicket(gen ticket.NonceGenerator, user user.User, expires time.Expires, limit time.ExtendLimit) (_ ticket.Nonce, err error) {
+func (store *MemoryStore) RegisterTicket(gen ticket.NonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ ticket.Nonce, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		nonce, genErr := gen.GenerateNonce()
 		if genErr != nil {
@@ -86,9 +87,10 @@ func (store *MemoryStore) RegisterTicket(gen ticket.NonceGenerator, user user.Us
 		}
 
 		store.ticket[nonce] = memoryTicketData{
-			user:    user,
-			expires: expires,
-			limit:   limit,
+			user:         user,
+			expires:      expires,
+			expireSecond: expireSecond,
+			limit:        limit,
 		}
 
 		return nonce, nil

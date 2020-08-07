@@ -9,8 +9,8 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (h Backend) issueCredential(request request.Request, user user.User) (_ data.Credential, err error) {
-	newTicket, expires, err := h.ticket.issue.Issue(request, user)
+func (h Backend) issueCredential(request request.Request, user user.User, exp ticket.Expiration) (_ data.Credential, err error) {
+	newTicket, expires, err := h.ticket.issue.Issue(request, user, exp)
 	if err != nil {
 		return
 	}

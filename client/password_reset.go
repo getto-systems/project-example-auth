@@ -94,7 +94,7 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ data.Credenti
 		return
 	}
 
-	user, session, err := client.passwordReset.validate.Validate(request, login, token)
+	user, session, exp, err := client.passwordReset.validate.Validate(request, login, token)
 	if err != nil {
 		return
 	}
@@ -109,5 +109,5 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ data.Credenti
 		return
 	}
 
-	return client.issueCredential(request, user)
+	return client.issueCredential(request, user, exp)
 }

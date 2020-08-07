@@ -15,29 +15,24 @@ func (log Logger) extend() ticket.ExtendLogger {
 	return log
 }
 
-func (log Logger) TryToExtend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
-	log.logger.Debug(extendEntry("TryToExtend", request, user, nonce, expires, nil))
+func (log Logger) TryToExtend(request request.Request, user user.User, nonce ticket.Nonce) {
+	log.logger.Debug(extendEntry("TryToExtend", request, user, nonce, nil, nil, nil))
 }
-func (log Logger) FailedToExtend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
-	log.logger.Error(extendEntry("FailedToExtend", request, user, nonce, expires, err))
+func (log Logger) FailedToExtend(request request.Request, user user.User, nonce ticket.Nonce, err error) {
+	log.logger.Error(extendEntry("FailedToExtend", request, user, nonce, nil, nil, err))
 }
-func (log Logger) FailedToExtendBecauseTicketNotFound(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
-	log.logger.Audit(extendEntry("FailedToExtendBecauseTicketNotFound", request, user, nonce, expires, err))
-}
-func (log Logger) FailedToExtendBecauseUserMatchFailed(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) {
-	log.logger.Audit(extendEntry("FailedToExtendBecauseUserMatchFailed", request, user, nonce, expires, err))
-}
-func (log Logger) Extend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires) {
-	log.logger.Info(extendEntry("Extend", request, user, nonce, expires, nil))
+func (log Logger) Extend(request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, limit time.ExtendLimit) {
+	log.logger.Info(extendEntry("Extend", request, user, nonce, &expires, &limit, nil))
 }
 
-func extendEntry(event string, request request.Request, user user.User, nonce ticket.Nonce, expires time.Expires, err error) log.Entry {
+func extendEntry(event string, request request.Request, user user.User, nonce ticket.Nonce, expires *time.Expires, limit *time.ExtendLimit, err error) log.Entry {
 	return log.Entry{
-		Message: fmt.Sprintf("Ticket/Extend/%s", event),
-		Request: request,
-		User:    &user,
-		Nonce:   &nonce,
-		Expires: &expires,
-		Error:   err,
+		Message:     fmt.Sprintf("Ticket/Extend/%s", event),
+		Request:     request,
+		User:        &user,
+		Nonce:       &nonce,
+		Expires:     expires,
+		ExtendLimit: limit,
+		Error:       err,
 	}
 }

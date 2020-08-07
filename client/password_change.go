@@ -73,7 +73,7 @@ func (client PasswordChange) change(handler PasswordChangeHandler) (err error) {
 		return
 	}
 
-	err = client.password.validate.Validate(request, user, param.OldPassword)
+	_, err = client.password.validate.Validate(request, user, param.OldPassword)
 	if err != nil {
 		return
 	}

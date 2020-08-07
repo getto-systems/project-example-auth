@@ -36,9 +36,8 @@ type (
 	}
 
 	ExtendLogger interface {
-		TryToExtend(request.Request, user.User, Nonce, time.Expires)
-		FailedToExtend(request.Request, user.User, Nonce, time.Expires, error)
-		FailedToExtendBecauseTicketNotFound(request.Request, user.User, Nonce, time.Expires, error)
-		Extend(request.Request, user.User, Nonce, time.Expires)
+		TryToExtend(request.Request, user.User, Nonce)
+		FailedToExtend(request.Request, user.User, Nonce, error)
+		Extend(request.Request, user.User, Nonce, time.Expires, time.ExtendLimit)
 	}
 )
