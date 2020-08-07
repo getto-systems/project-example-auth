@@ -4,6 +4,7 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
@@ -14,19 +15,21 @@ var (
 
 type Validate struct {
 	logger    password.ValidateLogger
+	exp       ticket.Expiration
 	matcher   password.PasswordMatcher
 	passwords password.PasswordRepository
 }
 
-func NewValidate(logger password.ValidateLogger, matcher password.PasswordMatcher, passwords password.PasswordRepository) Validate {
+func NewValidate(logger password.ValidateLogger, exp ticket.Expiration, matcher password.PasswordMatcher, passwords password.PasswordRepository) Validate {
 	return Validate{
 		logger:    logger,
-		passwords: passwords,
+		exp:       exp,
 		matcher:   matcher,
+		passwords: passwords,
 	}
 }
 
-func (action Validate) Validate(request request.Request, user user.User, raw password.RawPassword) (err error) {
+func (action Validate) Validate(request request.Request, user user.User, raw password.RawPassword) (_ ticket.Expiration, err error) {
 	action.logger.TryToValidate(request, user)
 
 	err = checkLength(raw)
@@ -58,5 +61,5 @@ func (action Validate) Validate(request request.Request, user user.User, raw pas
 	}
 
 	action.logger.AuthByPassword(request, user)
-	return nil
+	return action.exp, nil
 }

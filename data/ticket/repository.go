@@ -9,11 +9,11 @@ type (
 	TicketRepository interface {
 		FindUserAndExpires(Nonce) (user.User, time.Expires, bool, error)
 
-		FindExtendLimit(Nonce) (time.ExtendLimit, bool, error)
+		FindExpireSecondAndExtendLimit(Nonce) (time.Second, time.ExtendLimit, bool, error)
 
 		FindUser(Nonce) (user.User, bool, error)
 		DeactivateExpiresAndExtendLimit(Nonce) error
 
-		RegisterTicket(NonceGenerator, user.User, time.Expires, time.ExtendLimit) (Nonce, error)
+		RegisterTicket(NonceGenerator, user.User, time.Expires, time.Second, time.ExtendLimit) (Nonce, error)
 	}
 )

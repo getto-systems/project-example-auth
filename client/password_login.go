@@ -37,10 +37,10 @@ func (client PasswordLogin) login(handler PasswordLoginHandler) (_ data.Credenti
 		return
 	}
 
-	err = client.password.validate.Validate(request, user, raw)
+	exp, err := client.password.validate.Validate(request, user, raw)
 	if err != nil {
 		return
 	}
 
-	return client.issueCredential(request, user)
+	return client.issueCredential(request, user, exp)
 }
