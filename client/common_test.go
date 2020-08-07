@@ -38,7 +38,7 @@ import (
 )
 
 type (
-	testBackend struct {
+	testInfra struct {
 		logger  *testLogger
 		message *testMessage
 
@@ -48,11 +48,11 @@ type (
 		credential *data.Credential
 		nonce      *ticket.Nonce
 
-		ticket        ticketTestBackend
-		apiToken      apiTokenTestBackend
-		user          userTestBackend
-		password      passwordTestBackend
-		passwordReset passwordResetTestBackend
+		ticket        ticketTestInfra
+		apiToken      apiTokenTestInfra
+		user          userTestInfra
+		password      passwordTestInfra
+		passwordReset passwordResetTestInfra
 	}
 
 	testExpiration struct {
@@ -60,24 +60,24 @@ type (
 		passwordReset password_reset.Expiration
 	}
 
-	ticketTestBackend struct {
+	ticketTestInfra struct {
 		sign ticket.TicketSign
 		gen  ticket.NonceGenerator
 
 		tickets ticket.TicketRepository
 	}
-	apiTokenTestBackend struct {
+	apiTokenTestInfra struct {
 		apiUsers api_token.ApiUserRepository
 	}
-	userTestBackend struct {
+	userTestInfra struct {
 		users user.UserRepository
 	}
-	passwordTestBackend struct {
+	passwordTestInfra struct {
 		enc password.PasswordEncrypter
 
 		passwords password.PasswordRepository
 	}
-	passwordResetTestBackend struct {
+	passwordResetTestInfra struct {
 		gen *passwordResetTestSessionGenerator
 
 		sessions     password_reset.SessionRepository
@@ -118,7 +118,7 @@ type (
 	}
 
 	commonTestHandler struct {
-		*testBackend
+		*testInfra
 		context testContext
 	}
 
@@ -136,8 +136,8 @@ type (
 	}
 )
 
-func newTestBackend() *testBackend {
-	return &testBackend{
+func newTestInfra() *testInfra {
+	return &testInfra{
 		logger:  newTestLogger(),
 		message: newTestMessage(),
 
@@ -151,24 +151,24 @@ func newTestBackend() *testBackend {
 			passwordReset: password_reset.NewExpiration(time.Minute(30)),
 		},
 
-		ticket: ticketTestBackend{
+		ticket: ticketTestInfra{
 			sign: ticketTestSign{},
 			gen:  ticketTestNonceGenerator{},
 
 			tickets: ticket_repository_ticket.NewMemoryStore(),
 		},
-		apiToken: apiTokenTestBackend{
+		apiToken: apiTokenTestInfra{
 			apiUsers: api_token_repository_api_user.NewMemoryStore(),
 		},
-		user: userTestBackend{
+		user: userTestInfra{
 			users: user_repository_user.NewMemoryStore(),
 		},
-		password: passwordTestBackend{
+		password: passwordTestInfra{
 			enc: passwordTestEncrypter{},
 
 			passwords: password_repository_password.NewMemoryStore(),
 		},
-		passwordReset: passwordResetTestBackend{
+		passwordReset: passwordResetTestInfra{
 			gen: &passwordResetTestSessionGenerator{
 				id:    "reset-session-id",
 				token: "reset-token",
@@ -182,7 +182,7 @@ func newTestBackend() *testBackend {
 	}
 }
 
-func (backend *testBackend) newBackend() Backend {
+func (backend *testInfra) newBackend() Backend {
 	return NewBackend(
 		NewTicketAction(
 			ticket_log.NewLogger(backend.logger),
@@ -229,7 +229,7 @@ func (backend *testBackend) newBackend() Backend {
 	)
 }
 
-func (backend *testBackend) now() time.RequestedAt {
+func (backend *testInfra) now() time.RequestedAt {
 	now, err := gotime.Parse(gotime.RFC3339, "2020-01-01T00:00:00Z")
 	if err != nil {
 		golog.Fatalf("failed to initialize 'now': %s", err)
@@ -337,10 +337,10 @@ func (gen *passwordResetTestSessionGenerator) another() {
 	gen.token = "another-reset-token"
 }
 
-func (backend *testBackend) credentialHandler() CredentialHandler {
+func (backend *testInfra) credentialHandler() CredentialHandler {
 	return backend
 }
-func (backend *testBackend) GetTicket() (_ ticket.Ticket, err error) {
+func (backend *testInfra) GetTicket() (_ ticket.Ticket, err error) {
 	if backend.credential == nil {
 		err = errors.New("credential not set")
 		return
@@ -352,17 +352,17 @@ func (backend *testBackend) GetTicket() (_ ticket.Ticket, err error) {
 
 	return ticket.NewTicket(backend.credential.Ticket().Token(), *backend.nonce), nil
 }
-func (backend *testBackend) SetCredential(credential data.Credential) {
+func (backend *testInfra) SetCredential(credential data.Credential) {
 	backend.credential = &credential
 }
-func (backend *testBackend) ClearCredential() {
+func (backend *testInfra) ClearCredential() {
 	backend.credential = nil
 }
 
-func (backend *testBackend) setNonce(nonce ticket.Nonce) {
+func (backend *testInfra) setNonce(nonce ticket.Nonce) {
 	backend.nonce = &nonce
 }
-func (backend *testBackend) setCredentialNonce(nonce ticket.Nonce) {
+func (backend *testInfra) setCredentialNonce(nonce ticket.Nonce) {
 	if backend.credential != nil {
 		user, _, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
 		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
@@ -376,7 +376,7 @@ func (backend *testBackend) setCredentialNonce(nonce ticket.Nonce) {
 		backend.credential = &credential
 	}
 }
-func (backend *testBackend) setCredentialUser(user user.User) {
+func (backend *testInfra) setCredentialUser(user user.User) {
 	if backend.credential != nil {
 		_, nonce, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
 		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
@@ -391,7 +391,7 @@ func (backend *testBackend) setCredentialUser(user user.User) {
 	}
 }
 
-func (backend *testBackend) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
+func (backend *testInfra) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
 	testUser := user.NewUser(userID)
 
 	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
@@ -414,7 +414,7 @@ func (backend *testBackend) registerUserData(userID user.UserID, loginID user.Lo
 		golog.Fatalf("register api roles error: %s", err)
 	}
 }
-func (backend *testBackend) registerUserDataWithoutApiRoles(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword) {
+func (backend *testInfra) registerUserDataWithoutApiRoles(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword) {
 	testUser := user.NewUser(userID)
 
 	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
@@ -432,7 +432,7 @@ func (backend *testBackend) registerUserDataWithoutApiRoles(userID user.UserID, 
 		golog.Fatalf("change password error: %s", err)
 	}
 }
-func (backend *testBackend) registerOnlyUserAndLogin(userID user.UserID, loginID user.LoginID) {
+func (backend *testInfra) registerOnlyUserAndLogin(userID user.UserID, loginID user.LoginID) {
 	testUser := user.NewUser(userID)
 
 	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))
@@ -441,7 +441,7 @@ func (backend *testBackend) registerOnlyUserAndLogin(userID user.UserID, loginID
 	}
 }
 
-func (backend *testBackend) newRequest(label string, nowSecond time.Second, handler testHandler, exec func(), format func(f testFormatter)) {
+func (backend *testInfra) newRequest(label string, nowSecond time.Second, handler testHandler, exec func(), format func(f testFormatter)) {
 	backend.nowSecond = nowSecond
 
 	fmt.Println(label)
@@ -456,9 +456,9 @@ func (backend *testBackend) newRequest(label string, nowSecond time.Second, hand
 	backend.logger.clear()
 }
 
-func (backend *testBackend) newHandler() *commonTestHandler {
+func (backend *testInfra) newHandler() *commonTestHandler {
 	return &commonTestHandler{
-		testBackend: backend,
+		testInfra: backend,
 	}
 }
 func (handler *commonTestHandler) handler() testHandler {

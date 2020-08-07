@@ -890,7 +890,7 @@ func ExamplePasswordReset_resetFailedBecauseEmptyPassword() {
 
 type (
 	passwordResetTestHelper struct {
-		*testBackend
+		*testInfra
 	}
 
 	passwordResetTestHandler struct {
@@ -907,7 +907,7 @@ type (
 
 func newPasswordResetTestHelper() passwordResetTestHelper {
 	return passwordResetTestHelper{
-		testBackend: newTestBackend(),
+		testInfra: newTestInfra(),
 	}
 }
 
