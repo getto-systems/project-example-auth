@@ -5,16 +5,16 @@ import (
 )
 
 type (
-	expiration struct {
+	Expiration struct {
 		expires time.Second
 	}
 )
 
-func newExpiration(second time.Second) expiration {
-	return expiration{
+func NewExpiration(second time.Second) Expiration {
+	return Expiration{
 		expires: second,
 	}
 }
-func (exp expiration) Expires(requestedAt time.RequestedAt) time.Expires {
+func (exp Expiration) Expires(requestedAt time.RequestedAt) time.Expires {
 	return requestedAt.Expires(exp.expires)
 }

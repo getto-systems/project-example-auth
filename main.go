@@ -63,6 +63,11 @@ type (
 		cert string
 		key  string
 	}
+
+	expiration struct {
+		password      ticket.Expiration
+		passwordReset password_reset.Expiration
+	}
 )
 
 func main() {
@@ -148,14 +153,14 @@ func newServer() server {
 
 func newBackend() client.Backend {
 	appLogger := newAppLogger()
-	passwordExpiration := newPasswordExpiration()
+	exp := newExpiration()
 
 	return client.NewBackend(
 		newTicketAction(appLogger),
 		newApiTokenAction(appLogger),
 		newUserAction(appLogger),
-		newPasswordAction(appLogger, passwordExpiration),
-		newPasswordResetAction(appLogger, passwordExpiration),
+		newPasswordAction(appLogger, exp),
+		newPasswordResetAction(appLogger, exp),
 	)
 }
 func newTicketAction(appLogger logger.Logger) client.TicketAction {
@@ -193,7 +198,7 @@ func newUserAction(appLogger logger.Logger) client.UserAction {
 		users,
 	)
 }
-func newPasswordAction(appLogger logger.Logger, exp ticket.Expiration) client.PasswordAction {
+func newPasswordAction(appLogger logger.Logger, exp expiration) client.PasswordAction {
 	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
@@ -202,13 +207,13 @@ func newPasswordAction(appLogger logger.Logger, exp ticket.Expiration) client.Pa
 	return client.NewPasswordAction(
 		password_log.NewLogger(appLogger),
 
-		exp,
+		exp.password,
 		enc,
 
 		passwords,
 	)
 }
-func newPasswordResetAction(appLogger logger.Logger, exp ticket.Expiration) client.PasswordResetAction {
+func newPasswordResetAction(appLogger logger.Logger, exp expiration) client.PasswordResetAction {
 	destinations := password_reset_repository_destination.NewMemoryStore()
 
 	initPasswordResetDestinationRepository(destinations)
@@ -216,8 +221,8 @@ func newPasswordResetAction(appLogger logger.Logger, exp ticket.Expiration) clie
 	return client.NewPasswordResetAction(
 		password_reset_log.NewLogger(appLogger),
 
-		exp,
-		time.Minute(30),
+		exp.password,
+		exp.passwordReset,
 		reset_session_generator.NewGenerator(),
 
 		password_reset_repository_session.NewMemoryStore(),
@@ -267,12 +272,15 @@ func newAppLogger() logger.Logger {
 	return logger.NewLogger(os.Getenv("LOG_LEVEL"))
 }
 
-func newPasswordExpiration() ticket.Expiration {
+func newExpiration() expiration {
 	// パスワードで認証した場合、有効期限 5分、最大延長 14日
-	return ticket.NewExpiration(ticket.ExpirationParam{
-		Expires:     time.Minute(5),
-		ExtendLimit: time.Day(14),
-	})
+	return expiration{
+		password: ticket.NewExpiration(ticket.ExpirationParam{
+			Expires:     time.Minute(5),
+			ExtendLimit: time.Day(14),
+		}),
+		passwordReset: password_reset.NewExpiration(time.Minute(30)),
+	}
 }
 
 func newTicketSigner() signer.TicketSigner {

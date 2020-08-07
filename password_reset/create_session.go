@@ -4,7 +4,6 @@ import (
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
@@ -14,16 +13,16 @@ var (
 
 type CreateSession struct {
 	logger       password_reset.CreateSessionLogger
-	exp          expiration
+	exp          password_reset.Expiration
 	gen          password_reset.SessionGenerator
 	sessions     password_reset.SessionRepository
 	destinations password_reset.DestinationRepository
 }
 
-func NewCreateSession(logger password_reset.CreateSessionLogger, exp time.Second, gen password_reset.SessionGenerator, sessions password_reset.SessionRepository, destinations password_reset.DestinationRepository) CreateSession {
+func NewCreateSession(logger password_reset.CreateSessionLogger, exp password_reset.Expiration, gen password_reset.SessionGenerator, sessions password_reset.SessionRepository, destinations password_reset.DestinationRepository) CreateSession {
 	return CreateSession{
 		logger:       logger,
-		exp:          newExpiration(exp),
+		exp:          exp,
 		gen:          gen,
 		sessions:     sessions,
 		destinations: destinations,
