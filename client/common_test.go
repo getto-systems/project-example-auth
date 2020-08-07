@@ -42,7 +42,7 @@ type (
 		logger  *testLogger
 		message *testMessage
 
-		ticketExpiration ticket.Expiration
+		exp testExpiration
 
 		nowSecond  time.Second
 		credential *data.Credential
@@ -53,6 +53,11 @@ type (
 		user          userTestBackend
 		password      passwordTestBackend
 		passwordReset passwordResetTestBackend
+	}
+
+	testExpiration struct {
+		password      ticket.Expiration
+		passwordReset password_reset.Expiration
 	}
 
 	ticketTestBackend struct {
@@ -138,10 +143,13 @@ func newTestBackend() *testBackend {
 
 		nowSecond: time.Second(0),
 
-		ticketExpiration: ticket.NewExpiration(ticket.ExpirationParam{
-			Expires:     time.Minute(5),
-			ExtendLimit: time.Minute(8),
-		}),
+		exp: testExpiration{
+			password: ticket.NewExpiration(ticket.ExpirationParam{
+				Expires:     time.Minute(5),
+				ExtendLimit: time.Minute(8),
+			}),
+			passwordReset: password_reset.NewExpiration(time.Minute(30)),
+		},
 
 		ticket: ticketTestBackend{
 			sign: ticketTestSign{},
@@ -200,7 +208,7 @@ func (backend *testBackend) newBackend() Backend {
 		NewPasswordAction(
 			password_log.NewLogger(backend.logger),
 
-			backend.ticketExpiration,
+			backend.exp.password,
 			backend.password.enc,
 
 			backend.password.passwords,
@@ -208,8 +216,8 @@ func (backend *testBackend) newBackend() Backend {
 		NewPasswordResetAction(
 			password_reset_log.NewLogger(backend.logger),
 
-			backend.ticketExpiration,
-			password_reset.NewExpiration(time.Minute(30)),
+			backend.exp.password,
+			backend.exp.passwordReset,
 			backend.passwordReset.gen,
 
 			backend.passwordReset.sessions,
