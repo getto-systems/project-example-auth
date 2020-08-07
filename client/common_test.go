@@ -209,7 +209,7 @@ func (backend *testBackend) newBackend() Backend {
 			password_reset_log.NewLogger(backend.logger),
 
 			backend.ticketExpiration,
-			time.Minute(30),
+			password_reset.NewExpiration(time.Minute(30)),
 			backend.passwordReset.gen,
 
 			backend.passwordReset.sessions,

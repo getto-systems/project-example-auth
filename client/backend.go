@@ -5,7 +5,6 @@ import (
 	password_data "github.com/getto-systems/project-example-id/data/password"
 	password_reset_data "github.com/getto-systems/project-example-id/data/password_reset"
 	ticket_data "github.com/getto-systems/project-example-id/data/ticket"
-	"github.com/getto-systems/project-example-id/data/time"
 	user_data "github.com/getto-systems/project-example-id/data/user"
 
 	"github.com/getto-systems/project-example-id/api_token"
@@ -131,7 +130,7 @@ func NewPasswordResetAction(
 	logger password_reset_data.Logger,
 
 	ticketExp ticket_data.Expiration,
-	exp time.Second,
+	exp password_reset_data.Expiration,
 	gen password_reset_data.SessionGenerator,
 
 	sessions password_reset_data.SessionRepository,

@@ -217,7 +217,7 @@ func newPasswordResetAction(appLogger logger.Logger, exp ticket.Expiration) clie
 		password_reset_log.NewLogger(appLogger),
 
 		exp,
-		time.Minute(30),
+		password_reset.NewExpiration(time.Minute(30)),
 		reset_session_generator.NewGenerator(),
 
 		password_reset_repository_session.NewMemoryStore(),
