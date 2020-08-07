@@ -77,12 +77,13 @@ func (handler PasswordReset) GetStatusRequest() (_ request.Request, _ user.Login
 
 	return handler.newRequest(), login, session, nil
 }
-func (handler PasswordReset) GetStatusResponse(status password_reset.Status, err error) {
+func (handler PasswordReset) GetStatusResponse(dest password_reset.Destination, status password_reset.Status, err error) {
 	if err != nil {
 		handler.errorResponse(err)
 		return
 	}
 
+	// TODO dest をちゃんと返す
 	// TODO status をちゃんと返す
 	handler.ok("STATUS")
 }
