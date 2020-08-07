@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"log"
 	"strings"
 
@@ -31,15 +32,23 @@ func ExamplePasswordReset_reset() {
 		f.printResetSession(passwordResetHandler.session)
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
-		NewPasswordReset(client).SendToken(passwordResetHandler)
+	h.newRequest("PasswordReset/GetStatus", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
+		f.printError()
+		f.printResetDestination(passwordResetHandler.dest)
+		f.printResetStatus(passwordResetHandler.status)
+	})
+
+	h.newRequest("PasswordReset/SendToken", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).SendToken(passwordResetHandler)
+	}, func(f testFormatter) {
 		f.printError()
 		f.printMessage()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", time.Minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -50,7 +59,7 @@ func ExamplePasswordReset_reset() {
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", time.Minute(4), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -65,21 +74,26 @@ func ExamplePasswordReset_reset() {
 	// err: nil
 	// session: {reset-session-id}
 	//
+	// PasswordReset/GetStatus
+	// request: "2020-01-01T00:01:00Z"
+	// err: nil
+	// dest: {Log}
+	// status: {sending: {since: "2020-01-01T00:00:00Z"}}
+	//
 	// PasswordReset/SendToken
-	// request: "2020-01-01T00:00:00Z"
 	// err: nil
 	// message: password reset token: reset-token
 	//
 	// PasswordReset/GetStatus
-	// request: "2020-01-01T00:02:00Z"
+	// request: "2020-01-01T00:03:00Z"
 	// err: nil
-	// status: {}
+	// status: {complete: {at: "2020-01-01T00:00:00Z"}}
 	//
 	// PasswordReset/Reset
-	// request: "2020-01-01T00:03:00Z"
+	// request: "2020-01-01T00:04:00Z"
 	// token: "reset-token"
 	// err: nil
-	// credential: expires: "2020-01-01T00:08:00Z", roles: [role]
+	// credential: expires: "2020-01-01T00:09:00Z", roles: [role]
 	//
 }
 
@@ -435,6 +449,55 @@ func ExamplePasswordReset_createSessionFailedBecauseDestinationNotFound() {
 	// log: "User/GetUser/GetUser", info
 	// log: "PasswordReset/CreateSession/TryToCreateSession", debug
 	// log: "PasswordReset/CreateSession/FailedToCreateSessionBecauseDestinationNotFound", info
+	//
+}
+
+func ExamplePasswordReset_getStatus() {
+	h := newPasswordResetTestHelper()
+	h.registerUserData("user-id", "login-id", "password", []string{"role"}) // ユーザーを登録
+	h.registerResetDestination("user-id")                                   // 宛先を登録
+
+	client := NewClient(h.newBackend(), h.credentialHandler())
+
+	handler := h.newHandler()
+
+	// 登録されたログインID でリセット
+	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
+
+	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+		NewPasswordReset(client).CreateSession(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+	})
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(1), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printResetStatus(passwordResetHandler.status)
+	})
+
+	// 疑似的にステータスを変更
+	h.passwordReset.sessions.UpdateStatusToFailed(passwordResetHandler.session, h.now(), errors.New("send token error"))
+
+	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+		NewPasswordReset(client).GetStatus(passwordResetHandler)
+	}, func(f testFormatter) {
+		f.printError()
+		f.printResetStatus(passwordResetHandler.status)
+	})
+
+	// Output:
+	// PasswordReset/CreateSession
+	// err: nil
+	//
+	// PasswordReset/GetStatus
+	// err: nil
+	// status: {sending: {since: "2020-01-01T00:00:00Z"}}
+	//
+	// PasswordReset/GetStatus
+	// err: nil
+	// status: {failed: {at: "2020-01-01T00:01:00Z", reason: "send token error"}}
 	//
 }
 
@@ -900,6 +963,7 @@ type (
 		newPassword password.RawPassword
 
 		session password_reset.Session
+		dest    password_reset.Destination
 		status  password_reset.Status
 		token   password_reset.Token
 	}
@@ -945,8 +1009,9 @@ func (handler *passwordResetTestHandler) SendTokenResponse(err error) {
 func (handler *passwordResetTestHandler) GetStatusRequest() (request.Request, user.Login, password_reset.Session, error) {
 	return handler.newRequest(), handler.login, handler.session, nil
 }
-func (handler *passwordResetTestHandler) GetStatusResponse(status password_reset.Status, err error) {
+func (handler *passwordResetTestHandler) GetStatusResponse(dest password_reset.Destination, status password_reset.Status, err error) {
 	handler.setError(err)
+	handler.dest = dest
 	handler.status = status
 }
 func (handler *passwordResetTestHandler) ResetRequest() (request.Request, user.Login, password_reset.Token, password.RawPassword, error) {

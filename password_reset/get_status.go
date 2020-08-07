@@ -24,10 +24,10 @@ func NewGetStatus(logger password_reset.GetStatusLogger, sessions password_reset
 	}
 }
 
-func (action GetStatus) Get(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Status, err error) {
+func (action GetStatus) Get(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Destination, _ password_reset.Status, err error) {
 	action.logger.TryToGetStatus(request, session)
 
-	data, status, found, err := action.sessions.FindStatus(session)
+	data, dest, status, found, err := action.sessions.FindSessionDataAndDestinationAndStatus(session)
 	if err != nil {
 		action.logger.FailedToGetStatus(request, session, err)
 		return
@@ -44,5 +44,5 @@ func (action GetStatus) Get(request request.Request, login user.Login, session p
 	}
 
 	action.logger.GetStatus(request, session, status)
-	return status, nil
+	return dest, status, nil
 }

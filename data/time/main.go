@@ -41,6 +41,9 @@ func (requestedAt RequestedAt) addSecond(second Second) time.Time {
 func (requestedAt RequestedAt) Time() Time {
 	return Time(requestedAt)
 }
+func (expires Expires) Time() Time {
+	return Time(expires)
+}
 
 func (requestedAt RequestedAt) Expired(expires Expires) bool {
 	return time.Time(expires).Before(time.Time(requestedAt))

@@ -49,6 +49,7 @@ func (action CreateSession) Create(request request.Request, user user.User, logi
 	session, token, err := action.sessions.CreateSession(
 		action.gen,
 		password_reset.NewSessionData(user, login, requestedAt, expires),
+		dest,
 	)
 	if err != nil {
 		action.logger.FailedToCreateSession(request, user, login, expires, err)
