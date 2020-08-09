@@ -1,6 +1,8 @@
 package user
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/user"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -11,11 +13,11 @@ var (
 )
 
 type GetLogin struct {
-	logger user.GetLoginLogger
-	users  user.UserRepository
+	logger infra.GetLoginLogger
+	users  infra.UserRepository
 }
 
-func NewGetLogin(logger user.GetLoginLogger, users user.UserRepository) GetLogin {
+func NewGetLogin(logger infra.GetLoginLogger, users infra.UserRepository) GetLogin {
 	return GetLogin{
 		logger: logger,
 		users:  users,

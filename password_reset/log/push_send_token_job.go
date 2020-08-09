@@ -5,11 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 )
 
-func (log Logger) pushSendTokenJob() password_reset.PushSendTokenJobLogger {
+func (log Logger) pushSendTokenJob() password_reset_infra.PushSendTokenJobLogger {
 	return log
 }
 

@@ -5,13 +5,14 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) validate() ticket.ValidateLogger {
+func (log Logger) validate() ticket_infra.ValidateLogger {
 	return log
 }
 

@@ -1,6 +1,7 @@
 package password_reset
 
 import (
+	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -20,27 +21,27 @@ type (
 		TryToCreateSession(request.Request, user.User, user.Login, time.Expires)
 		FailedToCreateSession(request.Request, user.User, user.Login, time.Expires, error)
 		FailedToCreateSessionBecauseDestinationNotFound(request.Request, user.User, user.Login, time.Expires, error)
-		CreateSession(request.Request, user.User, user.Login, time.Expires, Session, Destination)
+		CreateSession(request.Request, user.User, user.Login, time.Expires, password_reset.Session, password_reset.Destination)
 	}
 
 	PushSendTokenJobLogger interface {
-		TryToPushSendTokenJob(request.Request, Session, Destination)
-		FailedToPushSendTokenJob(request.Request, Session, Destination, error)
-		PushSendTokenJob(request.Request, Session, Destination)
+		TryToPushSendTokenJob(request.Request, password_reset.Session, password_reset.Destination)
+		FailedToPushSendTokenJob(request.Request, password_reset.Session, password_reset.Destination, error)
+		PushSendTokenJob(request.Request, password_reset.Session, password_reset.Destination)
 	}
 
 	SendTokenLogger interface {
-		TryToSendToken(request.Request, Session, Destination)
-		FailedToSendToken(request.Request, Session, Destination, error)
-		SendToken(request.Request, Session, Destination)
+		TryToSendToken(request.Request, password_reset.Session, password_reset.Destination)
+		FailedToSendToken(request.Request, password_reset.Session, password_reset.Destination, error)
+		SendToken(request.Request, password_reset.Session, password_reset.Destination)
 	}
 
 	GetStatusLogger interface {
-		TryToGetStatus(request.Request, Session)
-		FailedToGetStatus(request.Request, Session, error)
-		FailedToGetStatusBecauseSessionNotFound(request.Request, Session, error)
-		FailedToGetStatusBecauseLoginMatchFailed(request.Request, Session, error)
-		GetStatus(request.Request, Session, Status)
+		TryToGetStatus(request.Request, password_reset.Session)
+		FailedToGetStatus(request.Request, password_reset.Session, error)
+		FailedToGetStatusBecauseSessionNotFound(request.Request, password_reset.Session, error)
+		FailedToGetStatusBecauseLoginMatchFailed(request.Request, password_reset.Session, error)
+		GetStatus(request.Request, password_reset.Session, password_reset.Status)
 	}
 
 	ValidateLogger interface {
@@ -54,8 +55,8 @@ type (
 	}
 
 	CloseSessionLogger interface {
-		TryToCloseSession(request.Request, Session)
-		FailedToCloseSession(request.Request, Session, error)
-		CloseSession(request.Request, Session)
+		TryToCloseSession(request.Request, password_reset.Session)
+		FailedToCloseSession(request.Request, password_reset.Session, error)
+		CloseSession(request.Request, password_reset.Session)
 	}
 )

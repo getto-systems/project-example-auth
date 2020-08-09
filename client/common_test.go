@@ -9,14 +9,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/credential"
-	"github.com/getto-systems/project-example-id/data/password"
-	"github.com/getto-systems/project-example-id/data/password_reset"
-	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
-	"github.com/getto-systems/project-example-id/data/time"
-	"github.com/getto-systems/project-example-id/data/user"
-
 	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
 	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
 
@@ -34,6 +26,20 @@ import (
 	password_reset_repository_destination "github.com/getto-systems/project-example-id/password_reset/repository/destination"
 	password_reset_repository_session "github.com/getto-systems/project-example-id/password_reset/repository/session"
 	password_reset_sender "github.com/getto-systems/project-example-id/password_reset/sender"
+
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+	user_infra "github.com/getto-systems/project-example-id/infra/user"
+
+	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type (
@@ -64,29 +70,29 @@ type (
 	}
 
 	ticketTestInfra struct {
-		gen credential.TicketNonceGenerator
+		gen credential_infra.TicketNonceGenerator
 
-		tickets ticket.TicketRepository
+		tickets ticket_infra.TicketRepository
 	}
 	credentialTestInfra struct {
-		ticketSign credential.TicketSign
-		apiUsers   credential.ApiUserRepository
+		ticketSign credential_infra.TicketSign
+		apiUsers   credential_infra.ApiUserRepository
 	}
 	userTestInfra struct {
-		users user.UserRepository
+		users user_infra.UserRepository
 	}
 	passwordTestInfra struct {
-		enc password.PasswordEncrypter
+		enc password_infra.PasswordEncrypter
 
-		passwords password.PasswordRepository
+		passwords password_infra.PasswordRepository
 	}
 	passwordResetTestInfra struct {
 		gen *passwordResetTestSessionGenerator
 
-		sessions     password_reset.SessionRepository
-		destinations password_reset.DestinationRepository
+		sessions     password_reset_infra.SessionRepository
+		destinations password_reset_infra.DestinationRepository
 
-		sendTokenQueue password_reset.SendTokenJobQueue
+		sendTokenQueue password_reset_infra.SendTokenJobQueue
 	}
 
 	testLogger struct {

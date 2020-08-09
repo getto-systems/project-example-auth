@@ -1,6 +1,8 @@
 package credential
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -8,11 +10,11 @@ import (
 )
 
 type IssueContentToken struct {
-	logger credential.IssueContentTokenLogger
-	signer credential.ContentTokenSigner
+	logger infra.IssueContentTokenLogger
+	signer infra.ContentTokenSigner
 }
 
-func NewIssueContentToken(logger credential.IssueContentTokenLogger, signer credential.ContentTokenSigner) IssueContentToken {
+func NewIssueContentToken(logger infra.IssueContentTokenLogger, signer infra.ContentTokenSigner) IssueContentToken {
 	return IssueContentToken{
 		logger: logger,
 		signer: signer,

@@ -1,18 +1,20 @@
 package password
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password"
+
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type Change struct {
-	logger    password.ChangeLogger
-	gen       password.PasswordGenerator
-	passwords password.PasswordRepository
+	logger    infra.ChangeLogger
+	gen       infra.PasswordGenerator
+	passwords infra.PasswordRepository
 }
 
-func NewChange(logger password.ChangeLogger, gen password.PasswordGenerator, passwords password.PasswordRepository) Change {
+func NewChange(logger infra.ChangeLogger, gen infra.PasswordGenerator, passwords infra.PasswordRepository) Change {
 	return Change{
 		logger:    logger,
 		gen:       gen,

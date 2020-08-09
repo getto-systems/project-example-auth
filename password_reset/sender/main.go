@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/message"
 )
@@ -20,7 +22,7 @@ func NewTokenSender(log message.LogMessage) TokenSender {
 	}
 }
 
-func (sender TokenSender) tokenSender() password_reset.TokenSender {
+func (sender TokenSender) tokenSender() password_reset_infra.TokenSender {
 	return sender
 }
 

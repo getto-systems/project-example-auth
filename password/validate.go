@@ -1,6 +1,8 @@
 package password
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -14,13 +16,13 @@ var (
 )
 
 type Validate struct {
-	logger    password.ValidateLogger
+	logger    infra.ValidateLogger
 	exp       ticket.Expiration
-	matcher   password.PasswordMatcher
-	passwords password.PasswordRepository
+	matcher   infra.PasswordMatcher
+	passwords infra.PasswordRepository
 }
 
-func NewValidate(logger password.ValidateLogger, exp ticket.Expiration, matcher password.PasswordMatcher, passwords password.PasswordRepository) Validate {
+func NewValidate(logger infra.ValidateLogger, exp ticket.Expiration, matcher infra.PasswordMatcher, passwords infra.PasswordRepository) Validate {
 	return Validate{
 		logger:    logger,
 		exp:       exp,

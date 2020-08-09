@@ -5,13 +5,14 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) deactivate() ticket.DeactivateLogger {
+func (log Logger) deactivate() ticket_infra.DeactivateLogger {
 	return log
 }
 

@@ -5,12 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/password"
+	password_infra "github.com/getto-systems/project-example-id/infra/password"
+
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) register() password.ChangeLogger {
+func (log Logger) register() password_infra.ChangeLogger {
 	return log
 }
 

@@ -1,17 +1,19 @@
 package password_reset
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 )
 
 type PushSendTokenJob struct {
-	logger    password_reset.PushSendTokenJobLogger
-	sessions  password_reset.SessionRepository
-	sendQueue password_reset.SendTokenJobQueue
+	logger    infra.PushSendTokenJobLogger
+	sessions  infra.SessionRepository
+	sendQueue infra.SendTokenJobQueue
 }
 
-func NewPushSendTokenJob(logger password_reset.PushSendTokenJobLogger, sessions password_reset.SessionRepository, sendQueue password_reset.SendTokenJobQueue) PushSendTokenJob {
+func NewPushSendTokenJob(logger infra.PushSendTokenJobLogger, sessions infra.SessionRepository, sendQueue infra.SendTokenJobQueue) PushSendTokenJob {
 	return PushSendTokenJob{
 		logger:    logger,
 		sessions:  sessions,

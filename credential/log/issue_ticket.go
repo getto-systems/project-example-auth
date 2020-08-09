@@ -5,13 +5,15 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) issueTicket() credential.IssueTicketLogger {
+func (log Logger) issueTicket() credential_infra.IssueTicketLogger {
 	return log
 }
 

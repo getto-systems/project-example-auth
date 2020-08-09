@@ -1,6 +1,8 @@
 package password_reset
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,11 +15,11 @@ var (
 )
 
 type GetStatus struct {
-	logger   password_reset.GetStatusLogger
-	sessions password_reset.SessionRepository
+	logger   infra.GetStatusLogger
+	sessions infra.SessionRepository
 }
 
-func NewGetStatus(logger password_reset.GetStatusLogger, sessions password_reset.SessionRepository) GetStatus {
+func NewGetStatus(logger infra.GetStatusLogger, sessions infra.SessionRepository) GetStatus {
 	return GetStatus{
 		logger:   logger,
 		sessions: sessions,

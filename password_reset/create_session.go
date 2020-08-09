@@ -1,6 +1,8 @@
 package password_reset
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -12,14 +14,14 @@ var (
 )
 
 type CreateSession struct {
-	logger       password_reset.CreateSessionLogger
+	logger       infra.CreateSessionLogger
 	exp          password_reset.Expiration
-	gen          password_reset.SessionGenerator
-	sessions     password_reset.SessionRepository
-	destinations password_reset.DestinationRepository
+	gen          infra.SessionGenerator
+	sessions     infra.SessionRepository
+	destinations infra.DestinationRepository
 }
 
-func NewCreateSession(logger password_reset.CreateSessionLogger, exp password_reset.Expiration, gen password_reset.SessionGenerator, sessions password_reset.SessionRepository, destinations password_reset.DestinationRepository) CreateSession {
+func NewCreateSession(logger infra.CreateSessionLogger, exp password_reset.Expiration, gen infra.SessionGenerator, sessions infra.SessionRepository, destinations infra.DestinationRepository) CreateSession {
 	return CreateSession{
 		logger:       logger,
 		exp:          exp,

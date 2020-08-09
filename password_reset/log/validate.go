@@ -5,12 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/password_reset"
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) validate() password_reset.ValidateLogger {
+func (log Logger) validate() password_reset_infra.ValidateLogger {
 	return log
 }
 

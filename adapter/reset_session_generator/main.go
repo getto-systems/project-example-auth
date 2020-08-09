@@ -3,6 +3,8 @@ package reset_session_generator
 import (
 	"github.com/google/uuid"
 
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/password_reset"
 )
 
@@ -13,7 +15,7 @@ func NewGenerator() Generator {
 	return Generator{}
 }
 
-func (gen Generator) gen() password_reset.SessionGenerator {
+func (gen Generator) gen() password_reset_infra.SessionGenerator {
 	return gen
 }
 
