@@ -30,7 +30,9 @@ func closeSessionEntry(event string, request request.Request, session password_r
 		Message: fmt.Sprintf("PasswordReset/CloseSession/%s", event),
 		Request: request,
 
-		ResetSession: &session,
+		PasswordReset: &log.PasswordResetEntry{
+			Session: &session,
+		},
 
 		Error: err,
 	}

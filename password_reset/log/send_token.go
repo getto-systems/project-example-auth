@@ -30,8 +30,10 @@ func sendTokenEntry(event string, request request.Request, session password_rese
 		Message: fmt.Sprintf("PasswordReset/SendToken/%s", event),
 		Request: request,
 
-		ResetSession:     &session,
-		ResetDestination: &dest,
+		PasswordReset: &log.PasswordResetEntry{
+			Session:     &session,
+			Destination: &dest,
+		},
 
 		Error: err,
 	}
