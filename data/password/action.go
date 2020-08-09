@@ -7,11 +7,8 @@ import (
 )
 
 type (
-	Validate interface {
+	Action interface {
 		Validate(request request.Request, user user.User, raw RawPassword) (ticket.Expiration, error)
-	}
-
-	Change interface {
 		Change(request request.Request, user user.User, raw RawPassword) error
 	}
 )

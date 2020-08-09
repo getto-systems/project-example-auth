@@ -1,28 +1,12 @@
 package password
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password"
-
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-type Change struct {
-	logger    infra.ChangeLogger
-	gen       infra.PasswordGenerator
-	passwords infra.PasswordRepository
-}
-
-func NewChange(logger infra.ChangeLogger, gen infra.PasswordGenerator, passwords infra.PasswordRepository) Change {
-	return Change{
-		logger:    logger,
-		gen:       gen,
-		passwords: passwords,
-	}
-}
-
-func (action Change) Change(request request.Request, user user.User, raw password.RawPassword) (err error) {
+func (action action) Change(request request.Request, user user.User, raw password.RawPassword) (err error) {
 	action.logger.TryToChange(request, user)
 
 	err = checkLength(raw)

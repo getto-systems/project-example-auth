@@ -41,6 +41,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 
+	password_core "github.com/getto-systems/project-example-id/password"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
 
@@ -218,7 +219,7 @@ func (backend *testInfra) newBackend() Backend {
 
 			backend.user.users,
 		),
-		NewPasswordAction(
+		password_core.NewAction(
 			password_log.NewLogger(backend.logger),
 
 			backend.exp.password,

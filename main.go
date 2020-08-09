@@ -49,6 +49,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 
+	password_core "github.com/getto-systems/project-example-id/password"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
 
@@ -215,13 +216,13 @@ func (infra infra) newUserAction() user.Action {
 		users,
 	)
 }
-func (infra infra) newPasswordAction() client.PasswordAction {
+func (infra infra) newPasswordAction() password.Action {
 	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
 	initPasswordRepository(passwords, enc)
 
-	return client.NewPasswordAction(
+	return password_core.NewAction(
 		password_log.NewLogger(infra.logger),
 
 		infra.exp.password,
