@@ -1,4 +1,4 @@
-package credential
+package ticket
 
 import (
 	"github.com/getto-systems/project-example-id/data/credential"
@@ -6,6 +6,6 @@ import (
 
 type (
 	TicketNonceGenerator interface {
-		GenerateNonce() (credential.TicketNonce, error)
+		GenerateTicketNonce() (credential.TicketNonce, error)
 	}
 )
