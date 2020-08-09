@@ -38,18 +38,18 @@ func (exp Expiration) ExtendLimit(request request.Request) ExtendLimit {
 	return NewExtendLimit(request.RequestedAt(), exp.extendLimit)
 }
 
-func NewExpires(requestedAt time.RequestedAt, second time.Second) Expires {
+func NewExpires(requestedAt request.RequestedAt, second time.Second) Expires {
 	return Expires(addSecond(requestedAt, second))
 }
-func NewExtendLimit(requestedAt time.RequestedAt, second time.Second) ExtendLimit {
+func NewExtendLimit(requestedAt request.RequestedAt, second time.Second) ExtendLimit {
 	return ExtendLimit(addSecond(requestedAt, second))
 }
-func addSecond(requestedAt time.RequestedAt, second time.Second) gotime.Time {
+func addSecond(requestedAt request.RequestedAt, second time.Second) gotime.Time {
 	duration := gotime.Duration(second * 1_000_000_000)
 	return gotime.Time(requestedAt).Add(duration)
 }
 
-func (expires Expires) Expired(requestedAt time.RequestedAt) bool {
+func (expires Expires) Expired(requestedAt request.RequestedAt) bool {
 	return gotime.Time(expires).Before(gotime.Time(requestedAt))
 }
 

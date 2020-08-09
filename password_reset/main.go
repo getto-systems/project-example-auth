@@ -3,7 +3,7 @@ package password_reset
 import (
 	gotime "time"
 
-	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -18,7 +18,7 @@ type (
 	SessionData struct {
 		user        user.User
 		login       user.Login
-		requestedAt time.RequestedAt
+		requestedAt request.RequestedAt
 		expires     Expires
 	}
 
@@ -65,7 +65,7 @@ func (session Session) ID() SessionID {
 	return session.id
 }
 
-func NewSessionData(user user.User, login user.Login, requestedAt time.RequestedAt, expires Expires) SessionData {
+func NewSessionData(user user.User, login user.Login, requestedAt request.RequestedAt, expires Expires) SessionData {
 	return SessionData{
 		user:        user,
 		login:       login,
@@ -79,7 +79,7 @@ func (data SessionData) User() user.User {
 func (data SessionData) Login() user.Login {
 	return data.login
 }
-func (data SessionData) RequestedAt() time.RequestedAt {
+func (data SessionData) RequestedAt() request.RequestedAt {
 	return data.requestedAt
 }
 func (data SessionData) Expires() Expires {
@@ -92,41 +92,41 @@ func NewLogDestination() Destination {
 	}
 }
 
-func NewStatusWaiting(requestedAt time.RequestedAt) Status {
+func NewStatusWaiting(requestedAt request.RequestedAt) Status {
 	waiting := newStatusWaiting(requestedAt)
 	return Status{
 		waiting: &waiting,
 	}
 }
-func NewStatusSending(requestedAt time.RequestedAt) Status {
+func NewStatusSending(requestedAt request.RequestedAt) Status {
 	sending := newStatusSending(requestedAt)
 	return Status{
 		sending: &sending,
 	}
 }
-func NewStatusComplete(requestedAt time.RequestedAt) Status {
+func NewStatusComplete(requestedAt request.RequestedAt) Status {
 	complete := newStatusComplete(requestedAt)
 	return Status{
 		complete: &complete,
 	}
 }
-func NewStatusFailed(requestedAt time.RequestedAt, reason string) Status {
+func NewStatusFailed(requestedAt request.RequestedAt, reason string) Status {
 	failed := newStatusFailed(requestedAt, reason)
 	return Status{
 		failed: &failed,
 	}
 }
 
-func newStatusWaiting(requestedAt time.RequestedAt) StatusWaiting {
+func newStatusWaiting(requestedAt request.RequestedAt) StatusWaiting {
 	return StatusWaiting{since: WaitingSince(requestedAt)}
 }
-func newStatusSending(requestedAt time.RequestedAt) StatusSending {
+func newStatusSending(requestedAt request.RequestedAt) StatusSending {
 	return StatusSending{since: SendingSince(requestedAt)}
 }
-func newStatusComplete(requestedAt time.RequestedAt) StatusComplete {
+func newStatusComplete(requestedAt request.RequestedAt) StatusComplete {
 	return StatusComplete{at: CompleteAt(requestedAt)}
 }
-func newStatusFailed(requestedAt time.RequestedAt, reason string) StatusFailed {
+func newStatusFailed(requestedAt request.RequestedAt, reason string) StatusFailed {
 	return StatusFailed{at: FailedAt(requestedAt), reason: reason}
 }
 
