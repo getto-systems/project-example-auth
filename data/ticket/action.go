@@ -8,19 +8,10 @@ import (
 )
 
 type (
-	Register interface {
+	Action interface {
 		Register(request request.Request, user user.User, exp Expiration) (credential.TicketNonce, time.Expires, error)
-	}
-
-	Validate interface {
 		Validate(request request.Request, user user.User, ticket credential.Ticket) error
-	}
-
-	Extend interface {
 		Extend(request request.Request, user user.User, ticket credential.Ticket) (time.Expires, error)
-	}
-
-	Deactivate interface {
 		Deactivate(request request.Request, user user.User, ticket credential.Ticket) error
 	}
 )

@@ -42,6 +42,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 
 	password_core "github.com/getto-systems/project-example-id/password"
+	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
 
@@ -198,7 +199,7 @@ func newTestInfra() *testInfra {
 
 func (backend *testInfra) newBackend() Backend {
 	return NewBackend(
-		NewTicketAction(
+		ticket_core.NewAction(
 			ticket_log.NewLogger(backend.logger),
 
 			backend.ticket.gen,

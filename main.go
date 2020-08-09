@@ -50,6 +50,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 
 	password_core "github.com/getto-systems/project-example-id/password"
+	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
 
@@ -181,8 +182,8 @@ func newInfra() infra {
 		exp:    newExpiration(),
 	}
 }
-func (infra infra) newTicketAction() client.TicketAction {
-	return client.NewTicketAction(
+func (infra infra) newTicketAction() ticket.Action {
+	return ticket_core.NewAction(
 		ticket_log.NewLogger(infra.logger),
 
 		nonce_generator.NewNonceGenerator(),

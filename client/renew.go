@@ -42,12 +42,12 @@ func (client Renew) renew(handler RenewHandler) (_ credential.Credential, err er
 		return
 	}
 
-	err = client.ticket.validate.Validate(request, user, ticket)
+	err = client.ticket.Validate(request, user, ticket)
 	if err != nil {
 		return
 	}
 
-	expires, err := client.ticket.extend.Extend(request, user, ticket)
+	expires, err := client.ticket.Extend(request, user, ticket)
 	if err != nil {
 		return
 	}

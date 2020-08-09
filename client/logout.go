@@ -39,12 +39,12 @@ func (client Logout) logout(handler LogoutHandler) (err error) {
 		return
 	}
 
-	err = client.ticket.validate.Validate(request, user, ticket)
+	err = client.ticket.Validate(request, user, ticket)
 	if err != nil {
 		return
 	}
 
-	err = client.ticket.deactivate.Deactivate(request, user, ticket)
+	err = client.ticket.Deactivate(request, user, ticket)
 	if err != nil {
 		return
 	}

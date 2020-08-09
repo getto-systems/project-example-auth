@@ -1,8 +1,6 @@
 package ticket
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -14,20 +12,8 @@ var (
 	errExtendNotFoundNonce = data.NewError("Ticket.Extend", "NotFound.Nonce")
 )
 
-type Extend struct {
-	logger  infra.ExtendLogger
-	tickets infra.TicketRepository
-}
-
-func NewExtend(logger infra.ExtendLogger, tickets infra.TicketRepository) Extend {
-	return Extend{
-		logger:  logger,
-		tickets: tickets,
-	}
-}
-
 // user が正しいことは確認済みでなければならない
-func (action Extend) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ time.Expires, err error) {
+func (action action) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ time.Expires, err error) {
 	action.logger.TryToExtend(request, user, ticket.Nonce())
 
 	expireSecond, limit, found, err := action.tickets.FindExpireSecondAndExtendLimit(ticket.Nonce())
