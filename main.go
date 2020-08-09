@@ -41,7 +41,6 @@ import (
 	user_infra "github.com/getto-systems/project-example-id/user/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/ticket"
@@ -79,7 +78,7 @@ type (
 	}
 	extendSecond struct {
 		password      expiration.ExtendSecond
-		passwordReset password_reset.Expiration
+		passwordReset expiration.ExtendSecond
 	}
 )
 
@@ -241,8 +240,10 @@ func (infra infra) newPasswordResetAction() password_reset.Action {
 	return password_reset_core.NewAction(
 		password_reset_log.NewLogger(infra.logger),
 
+		// パスワードリセットはパスワード認証と同等なので、最大延長期間はパスワード認証と同じ
 		infra.extend.password,
-		infra.extend.passwordReset,
+		expiration.ExpireSecond(30),
+
 		reset_session_generator.NewGenerator(),
 
 		password_reset_repository_session.NewMemoryStore(),
@@ -295,8 +296,7 @@ func newAppLogger() logger.Logger {
 func newExtend() extendSecond {
 	// パスワードで認証した場合、有効期限 5分、最大延長 14日
 	return extendSecond{
-		password:      expiration.ExtendDay(14),
-		passwordReset: password_reset.NewExpiration(time.Minute(30)),
+		password: expiration.ExtendDay(14),
 	}
 }
 

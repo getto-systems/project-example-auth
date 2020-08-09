@@ -32,7 +32,7 @@ type Entry struct {
 	ResetSession        *password_reset.Session
 	ResetStatus         *password_reset.Status
 	ResetDestination    *password_reset.Destination
-	ResetSessionExpires *password_reset.Expires
+	ResetSessionExpires *expiration.Expires
 
 	Error error
 }

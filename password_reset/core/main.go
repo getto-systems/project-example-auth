@@ -12,9 +12,9 @@ type (
 	action struct {
 		logger infra.Logger
 
-		credentialExtendSecond expiration.ExtendSecond
+		extendSecond expiration.ExtendSecond
+		expireSecond expiration.ExpireSecond
 
-		exp              password_reset.Expiration
 		sessionGenerator infra.SessionGenerator
 
 		sessions     infra.SessionRepository
@@ -29,9 +29,9 @@ type (
 func NewAction(
 	logger infra.Logger,
 
-	credentialExtendSecond expiration.ExtendSecond,
+	extendSecond expiration.ExtendSecond,
+	expireSecond expiration.ExpireSecond,
 
-	exp password_reset.Expiration,
 	sessionGenerator infra.SessionGenerator,
 
 	sessions infra.SessionRepository,
@@ -44,9 +44,9 @@ func NewAction(
 	return action{
 		logger: logger,
 
-		credentialExtendSecond: credentialExtendSecond,
+		extendSecond: extendSecond,
+		expireSecond: expireSecond,
 
-		exp:              exp,
 		sessionGenerator: sessionGenerator,
 
 		sessions:     sessions,

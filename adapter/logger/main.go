@@ -244,7 +244,7 @@ func resetDestinationLog(dest *password_reset.Destination) *ResetDestinationLog 
 	// TODO あとでちゃんとする
 	return &ResetDestinationLog{}
 }
-func resetSessionExpiresLog(expires *password_reset.Expires) *ResetSessionExpiresLog {
+func resetSessionExpiresLog(expires *expiration.Expires) *ResetSessionExpiresLog {
 	return &ResetSessionExpiresLog{
 		Expires: time.Time(*expires).String(),
 	}
