@@ -51,6 +51,7 @@ import (
 
 	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_core "github.com/getto-systems/project-example-id/password"
+	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
@@ -233,12 +234,12 @@ func (infra infra) newPasswordAction() password.Action {
 		passwords,
 	)
 }
-func (infra infra) newPasswordResetAction() client.PasswordResetAction {
+func (infra infra) newPasswordResetAction() password_reset.Action {
 	destinations := password_reset_repository_destination.NewMemoryStore()
 
 	initPasswordResetDestinationRepository(destinations)
 
-	return client.NewPasswordResetAction(
+	return password_reset_core.NewAction(
 		password_reset_log.NewLogger(infra.logger),
 
 		infra.exp.password,

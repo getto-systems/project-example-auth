@@ -1,8 +1,6 @@
 package password_reset
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -17,21 +15,7 @@ var (
 	errValidateAlreadyClosed    = data.NewError("PasswordReset.Validate", "AlreadyClosed")
 )
 
-type Validate struct {
-	logger   infra.ValidateLogger
-	exp      ticket.Expiration
-	sessions infra.SessionRepository
-}
-
-func NewValidate(logger infra.ValidateLogger, exp ticket.Expiration, sessions infra.SessionRepository) Validate {
-	return Validate{
-		logger:   logger,
-		exp:      exp,
-		sessions: sessions,
-	}
-}
-
-func (action Validate) Validate(request request.Request, login user.Login, token password_reset.Token) (_ user.User, _ password_reset.Session, _ ticket.Expiration, err error) {
+func (action action) Validate(request request.Request, login user.Login, token password_reset.Token) (_ user.User, _ password_reset.Session, _ ticket.Expiration, err error) {
 	action.logger.TryToValidateToken(request, login)
 
 	session, data, found, err := action.sessions.FindSession(token)
@@ -67,5 +51,5 @@ func (action Validate) Validate(request request.Request, login user.Login, token
 	}
 
 	action.logger.AuthByToken(request, login, data.User())
-	return data.User(), session, action.exp, nil
+	return data.User(), session, action.ticketExp, nil
 }

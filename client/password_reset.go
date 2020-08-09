@@ -46,13 +46,13 @@ func (client PasswordReset) createSession(handler PasswordResetHandler) (_ passw
 		return
 	}
 
-	session, dest, token, err := client.passwordReset.createSession.Create(request, user, login)
+	session, dest, token, err := client.passwordReset.CreateSession(request, user, login)
 	if err != nil {
 		return
 	}
 
 	// job の追加は一番最後 : この後にエラーが発生した場合、再試行により job が 2重に登録されてしまう
-	err = client.passwordReset.pushSendTokenJob.Push(request, session, dest, token)
+	err = client.passwordReset.PushSendTokenJob(request, session, dest, token)
 	if err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (client PasswordReset) SendToken(handler PasswordResetHandler) {
 	handler.SendTokenResponse(err)
 }
 func (client PasswordReset) sendToken(handler PasswordResetHandler) error {
-	return client.passwordReset.sendToken.Send()
+	return client.passwordReset.SendToken()
 }
 
 func (client PasswordReset) GetStatus(handler PasswordResetHandler) {
@@ -80,7 +80,7 @@ func (client PasswordReset) getStatus(handler PasswordResetHandler) (_ password_
 		return
 	}
 
-	return client.passwordReset.getStatus.Get(request, login, session)
+	return client.passwordReset.GetStatus(request, login, session)
 }
 
 func (client PasswordReset) Reset(handler PasswordResetHandler) {
@@ -94,7 +94,7 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ credential.Cr
 		return
 	}
 
-	user, session, exp, err := client.passwordReset.validate.Validate(request, login, token)
+	user, session, exp, err := client.passwordReset.Validate(request, login, token)
 	if err != nil {
 		return
 	}
@@ -104,7 +104,7 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ credential.Cr
 		return
 	}
 
-	err = client.passwordReset.closeSession.Close(request, session)
+	err = client.passwordReset.CloseSession(request, session)
 	if err != nil {
 		return
 	}

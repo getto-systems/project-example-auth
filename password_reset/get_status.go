@@ -1,8 +1,6 @@
 package password_reset
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -14,19 +12,7 @@ var (
 	errGetStatusMatchFailedLogin = data.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
 )
 
-type GetStatus struct {
-	logger   infra.GetStatusLogger
-	sessions infra.SessionRepository
-}
-
-func NewGetStatus(logger infra.GetStatusLogger, sessions infra.SessionRepository) GetStatus {
-	return GetStatus{
-		logger:   logger,
-		sessions: sessions,
-	}
-}
-
-func (action GetStatus) Get(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Destination, _ password_reset.Status, err error) {
+func (action action) GetStatus(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Destination, _ password_reset.Status, err error) {
 	action.logger.TryToGetStatus(request, session)
 
 	data, dest, status, found, err := action.sessions.FindSessionDataAndDestinationAndStatus(session)

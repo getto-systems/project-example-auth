@@ -1,8 +1,6 @@
 package password_reset
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,25 +11,7 @@ var (
 	errCreateSessionNotFoundDestination = data.NewError("PasswordReset.CreateSession", "NotFound.Destination")
 )
 
-type CreateSession struct {
-	logger       infra.CreateSessionLogger
-	exp          password_reset.Expiration
-	gen          infra.SessionGenerator
-	sessions     infra.SessionRepository
-	destinations infra.DestinationRepository
-}
-
-func NewCreateSession(logger infra.CreateSessionLogger, exp password_reset.Expiration, gen infra.SessionGenerator, sessions infra.SessionRepository, destinations infra.DestinationRepository) CreateSession {
-	return CreateSession{
-		logger:       logger,
-		exp:          exp,
-		gen:          gen,
-		sessions:     sessions,
-		destinations: destinations,
-	}
-}
-
-func (action CreateSession) Create(request request.Request, user user.User, login user.Login) (_ password_reset.Session, _ password_reset.Destination, _ password_reset.Token, err error) {
+func (action action) CreateSession(request request.Request, user user.User, login user.Login) (_ password_reset.Session, _ password_reset.Destination, _ password_reset.Token, err error) {
 	requestedAt := request.RequestedAt()
 	expires := action.exp.Expires(requestedAt)
 
