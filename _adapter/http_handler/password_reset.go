@@ -1,7 +1,7 @@
 package http_handler
 
 import (
-	"github.com/getto-systems/project-example-id/_usecase"
+	"github.com/getto-systems/project-example-id"
 
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"

@@ -9,7 +9,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/_misc/expiration"
 
-	"github.com/getto-systems/project-example-id/_usecase"
+	"github.com/getto-systems/project-example-id"
 
 	"github.com/getto-systems/project-example-id/credential"
 )
