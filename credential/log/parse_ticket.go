@@ -1,4 +1,4 @@
-package log
+package credential_log
 
 import (
 	"fmt"
