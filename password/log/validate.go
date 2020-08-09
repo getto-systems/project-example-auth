@@ -5,12 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/password"
+	password_infra "github.com/getto-systems/project-example-id/infra/password"
+
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) validate() password.ValidateLogger {
+func (log Logger) validate() password_infra.ValidateLogger {
 	return log
 }
 

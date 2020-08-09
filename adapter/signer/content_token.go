@@ -5,6 +5,8 @@ import (
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 )
@@ -23,7 +25,7 @@ func NewContentTokenSigner(keyID credential.ContentKeyID, pem []byte, resource s
 	}
 }
 
-func (signer ContentTokenSigner) signer() credential.ContentTokenSigner {
+func (signer ContentTokenSigner) signer() credential_infra.ContentTokenSigner {
 	return signer
 }
 

@@ -1,10 +1,11 @@
 package ticket
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
@@ -16,11 +17,11 @@ var (
 )
 
 type Validate struct {
-	logger  ticket.ValidateLogger
-	tickets ticket.TicketRepository
+	logger  infra.ValidateLogger
+	tickets infra.TicketRepository
 }
 
-func NewValidate(logger ticket.ValidateLogger, tickets ticket.TicketRepository) Validate {
+func NewValidate(logger infra.ValidateLogger, tickets infra.TicketRepository) Validate {
 	return Validate{
 		logger:  logger,
 		tickets: tickets,

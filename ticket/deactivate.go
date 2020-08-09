@@ -1,18 +1,19 @@
 package ticket
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type Deactivate struct {
-	logger  ticket.DeactivateLogger
-	tickets ticket.TicketRepository
+	logger  infra.DeactivateLogger
+	tickets infra.TicketRepository
 }
 
-func NewDeactivate(logger ticket.DeactivateLogger, tickets ticket.TicketRepository) Deactivate {
+func NewDeactivate(logger infra.DeactivateLogger, tickets infra.TicketRepository) Deactivate {
 	return Deactivate{
 		logger:  logger,
 		tickets: tickets,

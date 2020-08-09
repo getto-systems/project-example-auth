@@ -1,6 +1,8 @@
 package credential
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -15,11 +17,11 @@ var (
 )
 
 type ParseTicket struct {
-	logger credential.ParseTicketLogger
-	parser credential.TicketParser
+	logger infra.ParseTicketLogger
+	parser infra.TicketParser
 }
 
-func NewParseTicket(logger credential.ParseTicketLogger, parser credential.TicketParser) ParseTicket {
+func NewParseTicket(logger infra.ParseTicketLogger, parser infra.TicketParser) ParseTicket {
 	return ParseTicket{
 		logger: logger,
 		parser: parser,

@@ -1,6 +1,8 @@
 package password_reset
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,11 +15,11 @@ var (
 )
 
 type CloseSession struct {
-	logger   password_reset.CloseSessionLogger
-	sessions password_reset.SessionRepository
+	logger   infra.CloseSessionLogger
+	sessions infra.SessionRepository
 }
 
-func NewCloseSession(logger password_reset.CloseSessionLogger, sessions password_reset.SessionRepository) CloseSession {
+func NewCloseSession(logger infra.CloseSessionLogger, sessions infra.SessionRepository) CloseSession {
 	return CloseSession{
 		logger:   logger,
 		sessions: sessions,

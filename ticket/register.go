@@ -1,6 +1,9 @@
 package ticket
 
 import (
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
@@ -9,12 +12,12 @@ import (
 )
 
 type Register struct {
-	logger  ticket.RegisterLogger
-	gen     credential.TicketNonceGenerator
-	tickets ticket.TicketRepository
+	logger  infra.RegisterLogger
+	gen     credential_infra.TicketNonceGenerator
+	tickets infra.TicketRepository
 }
 
-func NewRegister(logger ticket.RegisterLogger, gen credential.TicketNonceGenerator, tickets ticket.TicketRepository) Register {
+func NewRegister(logger infra.RegisterLogger, gen credential_infra.TicketNonceGenerator, tickets infra.TicketRepository) Register {
 	return Register{
 		logger:  logger,
 		gen:     gen,

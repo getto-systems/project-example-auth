@@ -3,7 +3,7 @@ package log
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
+	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
 )
 
 type Logger struct {
@@ -16,6 +16,6 @@ func NewLogger(logger log.Logger) Logger {
 	}
 }
 
-func (logger Logger) log() ticket.Logger {
+func (logger Logger) log() ticket_infra.Logger {
 	return logger
 }

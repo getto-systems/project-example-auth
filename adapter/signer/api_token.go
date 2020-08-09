@@ -5,6 +5,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -20,7 +22,7 @@ func NewApiTokenSigner(jwt JWTSigner) ApiTokenSigner {
 	}
 }
 
-func (signer ApiTokenSigner) signer() credential.ApiTokenSigner {
+func (signer ApiTokenSigner) signer() credential_infra.ApiTokenSigner {
 	return signer
 }
 

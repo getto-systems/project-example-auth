@@ -1,6 +1,8 @@
 package password_reset
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -16,12 +18,12 @@ var (
 )
 
 type Validate struct {
-	logger   password_reset.ValidateLogger
+	logger   infra.ValidateLogger
 	exp      ticket.Expiration
-	sessions password_reset.SessionRepository
+	sessions infra.SessionRepository
 }
 
-func NewValidate(logger password_reset.ValidateLogger, exp ticket.Expiration, sessions password_reset.SessionRepository) Validate {
+func NewValidate(logger infra.ValidateLogger, exp ticket.Expiration, sessions infra.SessionRepository) Validate {
 	return Validate{
 		logger:   logger,
 		exp:      exp,

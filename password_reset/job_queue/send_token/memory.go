@@ -3,6 +3,8 @@ package send_token
 import (
 	"errors"
 
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 )
@@ -24,7 +26,7 @@ func NewMemoryQueue() *MemoryQueue {
 	return &MemoryQueue{}
 }
 
-func (queue *MemoryQueue) queue() password_reset.SendTokenJobQueue {
+func (queue *MemoryQueue) queue() password_reset_infra.SendTokenJobQueue {
 	return queue
 }
 

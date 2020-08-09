@@ -1,11 +1,14 @@
 package client
 
 import (
-	credential_data "github.com/getto-systems/project-example-id/data/credential"
-	password_data "github.com/getto-systems/project-example-id/data/password"
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+	user_infra "github.com/getto-systems/project-example-id/infra/user"
+
 	password_reset_data "github.com/getto-systems/project-example-id/data/password_reset"
 	ticket_data "github.com/getto-systems/project-example-id/data/ticket"
-	user_data "github.com/getto-systems/project-example-id/data/user"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
@@ -74,11 +77,11 @@ func NewBackend(
 }
 
 func NewTicketAction(
-	logger ticket_data.Logger,
+	logger ticket_infra.Logger,
 
-	gen credential_data.TicketNonceGenerator,
+	gen credential_infra.TicketNonceGenerator,
 
-	tickets ticket_data.TicketRepository,
+	tickets ticket_infra.TicketRepository,
 ) TicketAction {
 	return TicketAction{
 		register:   ticket.NewRegister(logger, gen, tickets),
@@ -89,13 +92,13 @@ func NewTicketAction(
 }
 
 func NewCredentialAction(
-	logger credential_data.Logger,
+	logger credential_infra.Logger,
 
-	ticketSign credential_data.TicketSign,
-	apiTokenSinger credential_data.ApiTokenSigner,
-	contentTokenSigner credential_data.ContentTokenSigner,
+	ticketSign credential_infra.TicketSign,
+	apiTokenSinger credential_infra.ApiTokenSigner,
+	contentTokenSigner credential_infra.ContentTokenSigner,
 
-	apiUsers credential_data.ApiUserRepository,
+	apiUsers credential_infra.ApiUserRepository,
 ) CredentialAction {
 	return CredentialAction{
 		parseTicket:       credential.NewParseTicket(logger, ticketSign),
@@ -106,9 +109,9 @@ func NewCredentialAction(
 }
 
 func NewUserAction(
-	logger user_data.Logger,
+	logger user_infra.Logger,
 
-	users user_data.UserRepository,
+	users user_infra.UserRepository,
 ) UserAction {
 	return UserAction{
 		getLogin: user.NewGetLogin(logger, users),
@@ -117,12 +120,12 @@ func NewUserAction(
 }
 
 func NewPasswordAction(
-	logger password_data.Logger,
+	logger password_infra.Logger,
 
 	exp ticket_data.Expiration,
-	enc password_data.PasswordEncrypter,
+	enc password_infra.PasswordEncrypter,
 
-	passwords password_data.PasswordRepository,
+	passwords password_infra.PasswordRepository,
 ) PasswordAction {
 	return PasswordAction{
 		validate: password.NewValidate(logger, exp, enc, passwords),
@@ -131,18 +134,18 @@ func NewPasswordAction(
 }
 
 func NewPasswordResetAction(
-	logger password_reset_data.Logger,
+	logger password_reset_infra.Logger,
 
 	ticketExp ticket_data.Expiration,
 	exp password_reset_data.Expiration,
-	gen password_reset_data.SessionGenerator,
+	gen password_reset_infra.SessionGenerator,
 
-	sessions password_reset_data.SessionRepository,
-	destinations password_reset_data.DestinationRepository,
+	sessions password_reset_infra.SessionRepository,
+	destinations password_reset_infra.DestinationRepository,
 
-	tokenQueue password_reset_data.SendTokenJobQueue,
+	tokenQueue password_reset_infra.SendTokenJobQueue,
 
-	tokenSender password_reset_data.TokenSender,
+	tokenSender password_reset_infra.TokenSender,
 ) PasswordResetAction {
 	return PasswordResetAction{
 		createSession:    password_reset.NewCreateSession(logger, exp, gen, sessions, destinations),

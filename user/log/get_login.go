@@ -5,11 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	user_infra "github.com/getto-systems/project-example-id/infra/user"
+
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) getLogin() user.GetLoginLogger {
+func (log Logger) getLogin() user_infra.GetLoginLogger {
 	return log
 }
 

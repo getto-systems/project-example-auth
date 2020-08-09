@@ -1,10 +1,11 @@
 package ticket
 
 import (
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
+
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -14,11 +15,11 @@ var (
 )
 
 type Extend struct {
-	logger  ticket.ExtendLogger
-	tickets ticket.TicketRepository
+	logger  infra.ExtendLogger
+	tickets infra.TicketRepository
 }
 
-func NewExtend(logger ticket.ExtendLogger, tickets ticket.TicketRepository) Extend {
+func NewExtend(logger infra.ExtendLogger, tickets infra.TicketRepository) Extend {
 	return Extend{
 		logger:  logger,
 		tickets: tickets,

@@ -19,13 +19,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/client"
 
-	"github.com/getto-systems/project-example-id/data/credential"
-	"github.com/getto-systems/project-example-id/data/password"
-	"github.com/getto-systems/project-example-id/data/password_reset"
-	"github.com/getto-systems/project-example-id/data/ticket"
-	"github.com/getto-systems/project-example-id/data/time"
-	"github.com/getto-systems/project-example-id/data/user"
-
 	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
 	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
 
@@ -43,6 +36,18 @@ import (
 	password_reset_repository_destination "github.com/getto-systems/project-example-id/password_reset/repository/destination"
 	password_reset_repository_session "github.com/getto-systems/project-example-id/password_reset/repository/session"
 	password_reset_sender "github.com/getto-systems/project-example-id/password_reset/sender"
+
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	user_infra "github.com/getto-systems/project-example-id/infra/user"
+
+	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/data/user"
 )
 
 const (
@@ -243,7 +248,7 @@ func (infra infra) newPasswordResetAction() client.PasswordResetAction {
 	)
 }
 
-func initUserRepository(users user.UserRepository) {
+func initUserRepository(users user_infra.UserRepository) {
 	login := user.NewLogin(user.LoginID(os.Getenv("ADMIN_LOGIN_ID")))
 
 	err := users.RegisterUser(adminUser(), login)
@@ -251,13 +256,13 @@ func initUserRepository(users user.UserRepository) {
 		log.Fatalf("failed to register admin user: %s", err)
 	}
 }
-func initApiUserRepository(apiUsers credential.ApiUserRepository) {
+func initApiUserRepository(apiUsers credential_infra.ApiUserRepository) {
 	err := apiUsers.RegisterApiRoles(adminUser(), credential.ApiRoles([]string{"admin"}))
 	if err != nil {
 		log.Fatalf("failed to register admin user api roles: %s", err)
 	}
 }
-func initPasswordRepository(passwords password.PasswordRepository, gen password.PasswordGenerator) {
+func initPasswordRepository(passwords password_infra.PasswordRepository, gen password_infra.PasswordGenerator) {
 	raw := password.RawPassword(os.Getenv("ADMIN_PASSWORD"))
 
 	hashed, err := gen.GeneratePassword(raw)
@@ -267,7 +272,7 @@ func initPasswordRepository(passwords password.PasswordRepository, gen password.
 
 	passwords.ChangePassword(adminUser(), hashed)
 }
-func initPasswordResetDestinationRepository(destinations password_reset.DestinationRepository) {
+func initPasswordResetDestinationRepository(destinations password_reset_infra.DestinationRepository) {
 	err := destinations.RegisterDestination(adminUser(), password_reset.NewLogDestination())
 	if err != nil {
 		log.Fatalf("failed to register admin user destination: %s", err)

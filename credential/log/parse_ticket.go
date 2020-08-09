@@ -5,12 +5,14 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
+	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) parseTicket() credential.ParseTicketLogger {
+func (log Logger) parseTicket() credential_infra.ParseTicketLogger {
 	return log
 }
 
