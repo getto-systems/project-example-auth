@@ -1,7 +1,7 @@
 package signer
 
 import (
-	gotime "time"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 
@@ -31,7 +31,7 @@ func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, exp
 	token, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"aud": roles,
-		"exp": gotime.Time(expires).Unix(),
+		"exp": time.Time(expires).Unix(),
 	})
 	if err != nil {
 		return
