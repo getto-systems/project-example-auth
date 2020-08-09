@@ -72,7 +72,7 @@ type (
 	}
 
 	ticketTestInfra struct {
-		gen credential_infra.TicketNonceGenerator
+		gen ticket_infra.TicketNonceGenerator
 
 		tickets ticket_infra.TicketRepository
 	}
@@ -319,7 +319,7 @@ func (ticketTestSign) Parse(signature credential.TicketSignature) (_ user.User, 
 	return user.NewUser(user.UserID(data.UserID)), credential.TicketNonce(data.Nonce), nil
 }
 
-func (ticketTestNonceGenerator) GenerateNonce() (_ credential.TicketNonce, err error) {
+func (ticketTestNonceGenerator) GenerateTicketNonce() (_ credential.TicketNonce, err error) {
 	return "ticket-nonce", nil
 }
 
