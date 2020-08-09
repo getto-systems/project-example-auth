@@ -1,9 +1,9 @@
-package log
+package password_log
 
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/password"
+	"github.com/getto-systems/project-example-id/password/infra"
 )
 
 type Logger struct {

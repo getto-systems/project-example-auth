@@ -5,9 +5,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	infra "github.com/getto-systems/project-example-id/infra/password"
+	"github.com/getto-systems/project-example-id/password/infra"
 
-	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/password"
 )
 
 var (

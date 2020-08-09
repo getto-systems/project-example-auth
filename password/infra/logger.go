@@ -1,4 +1,4 @@
-package password
+package infra
 
 import (
 	"github.com/getto-systems/project-example-id/data/request"
