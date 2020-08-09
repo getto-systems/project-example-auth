@@ -4,9 +4,9 @@ import (
 	"github.com/getto-systems/project-example-id/client"
 
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 type PasswordReset struct {

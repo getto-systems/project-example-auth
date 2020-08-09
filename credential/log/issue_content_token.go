@@ -9,7 +9,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
-	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 func (log Logger) issue_content_token() infra.IssueContentTokenLogger {

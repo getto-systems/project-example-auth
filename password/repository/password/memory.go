@@ -3,8 +3,8 @@ package password_repository_password
 import (
 	"github.com/getto-systems/project-example-id/password/infra"
 
-	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 type (

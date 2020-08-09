@@ -7,7 +7,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"
-	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 const (

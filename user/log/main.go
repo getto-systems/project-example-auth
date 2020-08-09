@@ -1,9 +1,9 @@
-package log
+package user_log
 
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/user"
+	"github.com/getto-systems/project-example-id/user/infra"
 )
 
 type Logger struct {
