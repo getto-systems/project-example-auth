@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/errors"
+	"github.com/getto-systems/project-example-id/misc/errors"
+
 	"github.com/getto-systems/project-example-id/request"
 )
 

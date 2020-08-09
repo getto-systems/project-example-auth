@@ -3,8 +3,9 @@ package client
 import (
 	goerrors "errors"
 
+	"github.com/getto-systems/project-example-id/misc/errors"
+
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/errors"
 )
 
 type (

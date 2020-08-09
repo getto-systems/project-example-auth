@@ -1,13 +1,12 @@
 package ticket_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/errors"
 	"github.com/getto-systems/project-example-id/misc/expiration"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
-
-	"github.com/getto-systems/project-example-id/errors"
 )
 
 var (
