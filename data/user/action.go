@@ -5,11 +5,8 @@ import (
 )
 
 type (
-	GetLogin interface {
-		Get(request request.Request, user User) (Login, error)
-	}
-
-	GetUser interface {
-		Get(request request.Request, login Login) (User, error)
+	Action interface {
+		GetLogin(request request.Request, user User) (Login, error)
+		GetUser(request request.Request, login Login) (User, error)
 	}
 )

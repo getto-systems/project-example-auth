@@ -40,6 +40,8 @@ import (
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
+
+	user_core "github.com/getto-systems/project-example-id/user"
 )
 
 type (
@@ -211,7 +213,7 @@ func (backend *testInfra) newBackend() Backend {
 
 			backend.credential.apiUsers,
 		),
-		NewUserAction(
+		user_core.NewAction(
 			user_log.NewLogger(backend.logger),
 
 			backend.user.users,

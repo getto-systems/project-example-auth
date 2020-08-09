@@ -32,7 +32,7 @@ func (client PasswordLogin) login(handler PasswordLoginHandler) (_ credential.Cr
 		return
 	}
 
-	user, err := client.user.getUser.Get(request, login)
+	user, err := client.user.GetUser(request, login)
 	if err != nil {
 		return
 	}
