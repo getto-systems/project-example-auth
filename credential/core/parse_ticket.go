@@ -16,19 +16,19 @@ var (
 )
 
 func (action action) ParseTicket(request request.Request, ticket credential.Ticket) (_ user.User, err error) {
-	action.logger.TryToParseTicket(request, ticket.Nonce())
+	action.logger.TryToParseTicket(request)
 
 	user, nonce, err := action.ticketParser.Parse(ticket.Signature())
 	if err != nil {
-		action.logger.FailedToParseTicket(request, ticket.Nonce(), err)
+		action.logger.FailedToParseTicket(request, err)
 		return
 	}
 	if nonce != ticket.Nonce() {
 		err = errValidateMatchFailedNonce
-		action.logger.FailedToParseTicketBecauseNonceMatchFailed(request, ticket.Nonce(), err)
+		action.logger.FailedToParseTicketBecauseNonceMatchFailed(request, err)
 		return
 	}
 
-	action.logger.ParseTicket(request, ticket.Nonce(), user)
+	action.logger.ParseTicket(request, user)
 	return user, nil
 }

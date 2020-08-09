@@ -7,7 +7,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -16,25 +15,21 @@ func (log Logger) deactivate() infra.DeactivateLogger {
 	return log
 }
 
-func (log Logger) TryToDeactivate(request request.Request, user user.User, nonce credential.TicketNonce) {
-	log.logger.Debug(deactivateEntry("TryToDeactivate", request, user, nonce, nil))
+func (log Logger) TryToDeactivate(request request.Request, user user.User) {
+	log.logger.Debug(deactivateEntry("TryToDeactivate", request, user, nil))
 }
-func (log Logger) FailedToDeactivate(request request.Request, user user.User, nonce credential.TicketNonce, err error) {
-	log.logger.Error(deactivateEntry("FailedToDeactivate", request, user, nonce, err))
+func (log Logger) FailedToDeactivate(request request.Request, user user.User, err error) {
+	log.logger.Error(deactivateEntry("FailedToDeactivate", request, user, err))
 }
-func (log Logger) Deactivate(request request.Request, user user.User, nonce credential.TicketNonce) {
-	log.logger.Info(deactivateEntry("Deactivate", request, user, nonce, nil))
+func (log Logger) Deactivate(request request.Request, user user.User) {
+	log.logger.Info(deactivateEntry("Deactivate", request, user, nil))
 }
 
-func deactivateEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, err error) log.Entry {
+func deactivateEntry(event string, request request.Request, user user.User, err error) log.Entry {
 	return log.Entry{
 		Message: fmt.Sprintf("Ticket/Deactivate/%s", event),
 		Request: request,
 		User:    &user,
-
-		Credential: &log.CredentialEntry{
-			TicketNonce: &nonce,
-		},
 
 		Error: err,
 	}

@@ -9,7 +9,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -19,16 +18,16 @@ func (log Logger) register() infra.RegisterLogger {
 }
 
 func (log Logger) TryToRegister(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit) {
-	log.logger.Debug(registerEntry("TryToRegister", request, user, expires, limit, nil, nil))
+	log.logger.Debug(registerEntry("TryToRegister", request, user, expires, limit, nil))
 }
 func (log Logger) FailedToRegister(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, err error) {
-	log.logger.Error(registerEntry("FailedToRegister", request, user, expires, limit, nil, err))
+	log.logger.Error(registerEntry("FailedToRegister", request, user, expires, limit, err))
 }
-func (log Logger) Register(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, nonce credential.TicketNonce) {
-	log.logger.Info(registerEntry("Register", request, user, expires, limit, &nonce, nil))
+func (log Logger) Register(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit) {
+	log.logger.Info(registerEntry("Register", request, user, expires, limit, nil))
 }
 
-func registerEntry(event string, request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, nonce *credential.TicketNonce, err error) log.Entry {
+func registerEntry(event string, request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, err error) log.Entry {
 	return log.Entry{
 		Message: fmt.Sprintf("Ticket/Register/%s", event),
 		Request: request,
@@ -37,7 +36,6 @@ func registerEntry(event string, request request.Request, user user.User, expire
 		Credential: &log.CredentialEntry{
 			Expires:     &expires,
 			ExtendLimit: &limit,
-			TicketNonce: nonce,
 		},
 
 		Error: err,

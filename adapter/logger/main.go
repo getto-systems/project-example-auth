@@ -79,7 +79,6 @@ type (
 	}
 
 	CredentialEntry struct {
-		TicketNonce *TicketNonceLog           `json:"nonce,omitempty"`
 		ApiRoles    *ApiRolesLog              `json:"roles,omitempty"`
 		Expires     *CredentialExpiresLog     `json:"expires,omitempty"`
 		ExtendLimit *CredentialExtendLimitLog `json:"limit,omitempty"`
@@ -107,9 +106,6 @@ type (
 		LoginID string `json:"login_id"`
 	}
 
-	TicketNonceLog struct {
-		Nonce string `json:"nonce"`
-	}
 	ApiRolesLog struct {
 		ApiRoles []string `json:"api_roles"`
 	}
@@ -197,9 +193,6 @@ func loginLog(login *user.Login) *LoginLog {
 }
 
 func credentialLog(log *log.CredentialEntry) (entry *CredentialEntry) {
-	if log.TicketNonce != nil {
-		entry.TicketNonce = ticketNonceLog(log.TicketNonce)
-	}
 	if log.ApiRoles != nil {
 		entry.ApiRoles = apiRolesLog(log.ApiRoles)
 	}
@@ -211,11 +204,6 @@ func credentialLog(log *log.CredentialEntry) (entry *CredentialEntry) {
 		entry.ExtendLimit = credentialExtendLimitLog(log.ExtendLimit)
 	}
 	return
-}
-func ticketNonceLog(nonce *credential.TicketNonce) *TicketNonceLog {
-	return &TicketNonceLog{
-		Nonce: string(*nonce),
-	}
 }
 func apiRolesLog(roles *credential.ApiRoles) *ApiRolesLog {
 	log := ApiRolesLog{}

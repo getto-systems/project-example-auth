@@ -18,16 +18,16 @@ type (
 	}
 
 	ParseTicketLogger interface {
-		TryToParseTicket(request.Request, credential.TicketNonce)
-		FailedToParseTicket(request.Request, credential.TicketNonce, error)
-		FailedToParseTicketBecauseNonceMatchFailed(request.Request, credential.TicketNonce, error)
-		ParseTicket(request.Request, credential.TicketNonce, user.User)
+		TryToParseTicket(request.Request)
+		FailedToParseTicket(request.Request, error)
+		FailedToParseTicketBecauseNonceMatchFailed(request.Request, error)
+		ParseTicket(request.Request, user.User)
 	}
 
 	IssueTicketLogger interface {
-		TryToIssueTicket(request.Request, user.User, credential.TicketNonce, expiration.Expires)
-		FailedToIssueTicket(request.Request, user.User, credential.TicketNonce, expiration.Expires, error)
-		IssueTicket(request.Request, user.User, credential.TicketNonce, expiration.Expires)
+		TryToIssueTicket(request.Request, user.User, expiration.Expires)
+		FailedToIssueTicket(request.Request, user.User, expiration.Expires, error)
+		IssueTicket(request.Request, user.User, expiration.Expires)
 	}
 
 	IssueApiTokenLogger interface {

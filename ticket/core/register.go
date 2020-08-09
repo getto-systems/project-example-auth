@@ -21,6 +21,6 @@ func (action action) Register(request request.Request, user user.User, second ex
 		return
 	}
 
-	action.logger.Register(request, user, expires, limit, nonce)
+	action.logger.Register(request, user, expires, limit)
 	return nonce, expires, nil
 }
