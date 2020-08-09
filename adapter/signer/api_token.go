@@ -5,9 +5,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	infra "github.com/getto-systems/project-example-id/infra/credential"
+	"github.com/getto-systems/project-example-id/credential/infra"
 
-	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
