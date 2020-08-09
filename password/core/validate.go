@@ -1,16 +1,16 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 var (
-	errValidateNotFoundPassword = data.NewError("Password.Validate", "NotFound.Password")
-	errValidateMatchFailed      = data.NewError("Password.Validate", "MatchFailed")
+	errValidateNotFoundPassword = errors.NewError("Password.Validate", "NotFound.Password")
+	errValidateMatchFailed      = errors.NewError("Password.Validate", "MatchFailed")
 )
 
 func (action action) Validate(request request.Request, user user.User, raw password.RawPassword) (_ ticket.Expiration, err error) {

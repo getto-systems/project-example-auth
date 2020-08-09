@@ -1,18 +1,18 @@
 package password_reset_core
 
 import (
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 var (
-	errValidateNotFoundSession  = data.NewError("PasswordReset.Validate", "NotFound.Session")
-	errValidateMatchFailedLogin = data.NewError("PasswordReset.Validate", "MatchFailed.Login")
-	errValidateAlreadyExpired   = data.NewError("PasswordReset.Validate", "AlreadyExpired")
-	errValidateAlreadyClosed    = data.NewError("PasswordReset.Validate", "AlreadyClosed")
+	errValidateNotFoundSession  = errors.NewError("PasswordReset.Validate", "NotFound.Session")
+	errValidateMatchFailedLogin = errors.NewError("PasswordReset.Validate", "MatchFailed.Login")
+	errValidateAlreadyExpired   = errors.NewError("PasswordReset.Validate", "AlreadyExpired")
+	errValidateAlreadyClosed    = errors.NewError("PasswordReset.Validate", "AlreadyClosed")
 )
 
 func (action action) Validate(request request.Request, login user.Login, token password_reset.Token) (_ user.User, _ password_reset.Session, _ ticket.Expiration, err error) {

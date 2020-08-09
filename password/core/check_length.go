@@ -1,7 +1,7 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/password"
 )
 
@@ -10,8 +10,8 @@ const (
 )
 
 var (
-	errCheckLengthEmpty   = data.NewError("Password.Check", "Length.Empty")
-	errCheckLengthTooLong = data.NewError("Password.Check", "Length.TooLong")
+	errCheckLengthEmpty   = errors.NewError("Password.Check", "Length.Empty")
+	errCheckLengthTooLong = errors.NewError("Password.Check", "Length.TooLong")
 )
 
 func checkLength(raw password.RawPassword) (err error) {

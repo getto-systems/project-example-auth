@@ -2,18 +2,18 @@ package http_handler
 
 import (
 	"encoding/json"
-	"errors"
+	goerrors "errors"
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
+	"github.com/getto-systems/project-example-id/errors"
 )
 
 var (
-	errEmptyBody       = errors.New("empty body")
-	errBodyParseFailed = errors.New("body parse failed")
+	errEmptyBody       = goerrors.New("empty body")
+	errBodyParseFailed = goerrors.New("body parse failed")
 )
 
 type (
@@ -54,11 +54,11 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 }
 
 func (handler Handler) errorResponse(err error) {
-	if errors.Is(err, data.ErrPasswordCheck) {
+	if goerrors.Is(err, errors.ErrPasswordCheck) {
 		handler.badRequest(err)
 		return
 	}
-	if errors.Is(err, data.ErrTicketValidate) {
+	if goerrors.Is(err, errors.ErrTicketValidate) {
 		handler.unauthorized(err)
 		return
 	}

@@ -1,13 +1,13 @@
 package user_core
 
 import (
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 var (
-	errGetUserNotFoundUser = data.NewError("User.GetUser", "NotFound.User")
+	errGetUserNotFoundUser = errors.NewError("User.GetUser", "NotFound.User")
 )
 
 func (action action) GetUser(request request.Request, login user.Login) (_ user.User, err error) {
