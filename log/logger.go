@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -22,8 +22,8 @@ type Entry struct {
 	User  *user.User
 	Login *user.Login
 
-	TicketNonce *api_token.TicketNonce
-	ApiRoles    *api_token.ApiRoles
+	TicketNonce *credential.TicketNonce
+	ApiRoles    *credential.ApiRoles
 
 	Expires     *time.Expires
 	ExtendLimit *time.ExtendLimit

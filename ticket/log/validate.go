@@ -5,7 +5,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -15,26 +15,26 @@ func (log Logger) validate() ticket.ValidateLogger {
 	return log
 }
 
-func (log Logger) TryToValidate(request request.Request, nonce api_token.TicketNonce) {
+func (log Logger) TryToValidate(request request.Request, nonce credential.TicketNonce) {
 	log.logger.Debug(validateEntry("TryToValidate", request, nil, nonce, nil))
 }
-func (log Logger) FailedToValidate(request request.Request, nonce api_token.TicketNonce, err error) {
+func (log Logger) FailedToValidate(request request.Request, nonce credential.TicketNonce, err error) {
 	log.logger.Error(validateEntry("FailedToValidate", request, nil, nonce, err))
 }
-func (log Logger) FailedToValidateBecauseTicketNotFound(request request.Request, nonce api_token.TicketNonce, err error) {
+func (log Logger) FailedToValidateBecauseTicketNotFound(request request.Request, nonce credential.TicketNonce, err error) {
 	log.logger.Audit(validateEntry("FailedToValidateBecauseTicketNotFound", request, nil, nonce, err))
 }
-func (log Logger) FailedToValidateBecauseMatchFailed(request request.Request, nonce api_token.TicketNonce, err error) {
+func (log Logger) FailedToValidateBecauseMatchFailed(request request.Request, nonce credential.TicketNonce, err error) {
 	log.logger.Audit(validateEntry("FailedToValidateBecauseMatchFailed", request, nil, nonce, err))
 }
-func (log Logger) FailedToValidateBecauseExpired(request request.Request, nonce api_token.TicketNonce, err error) {
+func (log Logger) FailedToValidateBecauseExpired(request request.Request, nonce credential.TicketNonce, err error) {
 	log.logger.Info(validateEntry("FailedToValidateBecauseExpired", request, nil, nonce, err))
 }
-func (log Logger) AuthByTicket(request request.Request, user user.User, nonce api_token.TicketNonce) {
+func (log Logger) AuthByTicket(request request.Request, user user.User, nonce credential.TicketNonce) {
 	log.logger.Info(validateEntry("AuthByTicket", request, &user, nonce, nil))
 }
 
-func validateEntry(event string, request request.Request, user *user.User, nonce api_token.TicketNonce, err error) log.Entry {
+func validateEntry(event string, request request.Request, user *user.User, nonce credential.TicketNonce, err error) log.Entry {
 	return log.Entry{
 		Message:     fmt.Sprintf("Ticket/Validate/%s", event),
 		Request:     request,

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 )
 
 type (
@@ -14,8 +14,8 @@ type (
 	}
 
 	CredentialHandler interface {
-		GetTicket() (api_token.Ticket, error)
-		SetCredential(data.Credential)
+		GetTicket() (credential.Ticket, error)
+		SetCredential(credential.Credential)
 		ClearCredential()
 	}
 )
@@ -27,7 +27,7 @@ func NewClient(backend Backend, handler CredentialHandler) Client {
 	}
 }
 
-func (client Client) handleCredential(credential data.Credential, err error) {
+func (client Client) handleCredential(credential credential.Credential, err error) {
 	if err != nil {
 		client.handleCredentialError(err)
 	} else {
@@ -42,6 +42,6 @@ func (client Client) handleCredentialError(err error) {
 func (client Client) clearCredential() {
 	client.handler.ClearCredential()
 }
-func (client Client) getTicket() (api_token.Ticket, error) {
+func (client Client) getTicket() (credential.Ticket, error) {
 	return client.handler.GetTicket()
 }

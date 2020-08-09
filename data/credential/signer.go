@@ -1,4 +1,4 @@
-package api_token
+package credential
 
 import (
 	"github.com/getto-systems/project-example-id/data/time"

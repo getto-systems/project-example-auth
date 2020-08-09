@@ -1,7 +1,7 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -16,29 +16,29 @@ type (
 	}
 
 	ValidateLogger interface {
-		TryToValidate(request.Request, api_token.TicketNonce)
-		FailedToValidate(request.Request, api_token.TicketNonce, error)
-		FailedToValidateBecauseExpired(request.Request, api_token.TicketNonce, error)
-		FailedToValidateBecauseTicketNotFound(request.Request, api_token.TicketNonce, error)
-		FailedToValidateBecauseMatchFailed(request.Request, api_token.TicketNonce, error)
-		AuthByTicket(request.Request, user.User, api_token.TicketNonce)
+		TryToValidate(request.Request, credential.TicketNonce)
+		FailedToValidate(request.Request, credential.TicketNonce, error)
+		FailedToValidateBecauseExpired(request.Request, credential.TicketNonce, error)
+		FailedToValidateBecauseTicketNotFound(request.Request, credential.TicketNonce, error)
+		FailedToValidateBecauseMatchFailed(request.Request, credential.TicketNonce, error)
+		AuthByTicket(request.Request, user.User, credential.TicketNonce)
 	}
 
 	DeactivateLogger interface {
-		TryToDeactivate(request.Request, user.User, api_token.TicketNonce)
-		FailedToDeactivate(request.Request, user.User, api_token.TicketNonce, error)
-		Deactivate(request.Request, user.User, api_token.TicketNonce)
+		TryToDeactivate(request.Request, user.User, credential.TicketNonce)
+		FailedToDeactivate(request.Request, user.User, credential.TicketNonce, error)
+		Deactivate(request.Request, user.User, credential.TicketNonce)
 	}
 
 	IssueLogger interface {
 		TryToIssue(request.Request, user.User, time.Expires, time.ExtendLimit)
 		FailedToIssue(request.Request, user.User, time.Expires, time.ExtendLimit, error)
-		Issue(request.Request, user.User, time.Expires, time.ExtendLimit, api_token.TicketNonce)
+		Issue(request.Request, user.User, time.Expires, time.ExtendLimit, credential.TicketNonce)
 	}
 
 	ExtendLogger interface {
-		TryToExtend(request.Request, user.User, api_token.TicketNonce)
-		FailedToExtend(request.Request, user.User, api_token.TicketNonce, error)
-		Extend(request.Request, user.User, api_token.TicketNonce, time.Expires, time.ExtendLimit)
+		TryToExtend(request.Request, user.User, credential.TicketNonce)
+		FailedToExtend(request.Request, user.User, credential.TicketNonce, error)
+		Extend(request.Request, user.User, credential.TicketNonce, time.Expires, time.ExtendLimit)
 	}
 )

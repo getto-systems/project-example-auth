@@ -9,8 +9,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -21,8 +20,8 @@ import (
 	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
 	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
 
-	api_token_log "github.com/getto-systems/project-example-id/api_token/log"
-	api_token_repository_api_user "github.com/getto-systems/project-example-id/api_token/repository/api_user"
+	credential_log "github.com/getto-systems/project-example-id/credential/log"
+	credential_repository_api_user "github.com/getto-systems/project-example-id/credential/repository/api_user"
 
 	user_log "github.com/getto-systems/project-example-id/user/log"
 	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
@@ -45,8 +44,8 @@ type (
 		exp testExpiration
 
 		nowSecond  time.Second
-		credential *data.Credential
-		nonce      *api_token.TicketNonce
+		credential *credential.Credential
+		nonce      *credential.TicketNonce
 
 		ticket        ticketTestInfra
 		apiToken      apiTokenTestInfra
@@ -61,13 +60,13 @@ type (
 	}
 
 	ticketTestInfra struct {
-		sign api_token.TicketSign
-		gen  api_token.TicketNonceGenerator
+		sign credential.TicketSign
+		gen  credential.TicketNonceGenerator
 
 		tickets ticket.TicketRepository
 	}
 	apiTokenTestInfra struct {
-		apiUsers api_token.ApiUserRepository
+		apiUsers credential.ApiUserRepository
 	}
 	userTestInfra struct {
 		users user.UserRepository
@@ -124,7 +123,7 @@ type (
 
 	testFormatter struct {
 		context    testContext
-		credential *data.Credential
+		credential *credential.Credential
 
 		logger  *testLogger
 		message *testMessage
@@ -158,7 +157,7 @@ func newTestInfra() *testInfra {
 			tickets: ticket_repository_ticket.NewMemoryStore(),
 		},
 		apiToken: apiTokenTestInfra{
-			apiUsers: api_token_repository_api_user.NewMemoryStore(),
+			apiUsers: credential_repository_api_user.NewMemoryStore(),
 		},
 		user: userTestInfra{
 			users: user_repository_user.NewMemoryStore(),
@@ -193,7 +192,7 @@ func (backend *testInfra) newBackend() Backend {
 			backend.ticket.tickets,
 		),
 		NewApiTokenAction(
-			api_token_log.NewLogger(backend.logger),
+			credential_log.NewLogger(backend.logger),
 
 			apiTokenTestApiSigner{},
 			apiTokenTestContentSigner{},
@@ -283,7 +282,7 @@ type ticketTestSignToken struct {
 	Expires int64  `json:"expires"`
 }
 
-func (ticketTestSign) Sign(user user.User, nonce api_token.TicketNonce, expires time.Expires) (_ api_token.TicketSignature, err error) {
+func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.TicketSignature, err error) {
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
@@ -293,9 +292,9 @@ func (ticketTestSign) Sign(user user.User, nonce api_token.TicketNonce, expires 
 		return
 	}
 
-	return api_token.TicketSignature(data), nil
+	return credential.TicketSignature(data), nil
 }
-func (ticketTestSign) Parse(signature api_token.TicketSignature) (_ user.User, _ api_token.TicketNonce, err error) {
+func (ticketTestSign) Parse(signature credential.TicketSignature) (_ user.User, _ credential.TicketNonce, err error) {
 	var data ticketTestSignToken
 
 	err = json.Unmarshal(signature, &data)
@@ -303,22 +302,22 @@ func (ticketTestSign) Parse(signature api_token.TicketSignature) (_ user.User, _
 		return
 	}
 
-	return user.NewUser(user.UserID(data.UserID)), api_token.TicketNonce(data.Nonce), nil
+	return user.NewUser(user.UserID(data.UserID)), credential.TicketNonce(data.Nonce), nil
 }
 
-func (ticketTestNonceGenerator) GenerateNonce() (_ api_token.TicketNonce, err error) {
+func (ticketTestNonceGenerator) GenerateNonce() (_ credential.TicketNonce, err error) {
 	return "ticket-nonce", nil
 }
 
-func (apiTokenTestApiSigner) Sign(user user.User, roles api_token.ApiRoles, expires time.Expires) (_ api_token.ApiToken, err error) {
-	return api_token.NewApiToken(roles, []byte("api-token")), nil
+func (apiTokenTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires time.Expires) (_ credential.ApiToken, err error) {
+	return credential.NewApiToken(roles, []byte("api-token")), nil
 }
 
-func (apiTokenTestContentSigner) Sign(expires time.Expires) (_ api_token.ContentToken, err error) {
-	return api_token.NewContentToken(
-		api_token.ContentKeyID("content-key"),
-		api_token.ContentPolicy([]byte("content-policy")),
-		api_token.ContentSignature([]byte("content-signature")),
+func (apiTokenTestContentSigner) Sign(expires time.Expires) (_ credential.ContentToken, err error) {
+	return credential.NewContentToken(
+		credential.ContentKeyID("content-key"),
+		credential.ContentPolicy([]byte("content-policy")),
+		credential.ContentSignature([]byte("content-signature")),
 	), nil
 }
 
@@ -340,7 +339,7 @@ func (gen *passwordResetTestSessionGenerator) another() {
 func (backend *testInfra) credentialHandler() CredentialHandler {
 	return backend
 }
-func (backend *testInfra) GetTicket() (_ api_token.Ticket, err error) {
+func (backend *testInfra) GetTicket() (_ credential.Ticket, err error) {
 	if backend.credential == nil {
 		err = errors.New("credential not set")
 		return
@@ -350,25 +349,25 @@ func (backend *testInfra) GetTicket() (_ api_token.Ticket, err error) {
 		return backend.credential.Ticket(), nil
 	}
 
-	return api_token.NewTicket(backend.credential.Ticket().Signature(), *backend.nonce), nil
+	return credential.NewTicket(backend.credential.Ticket().Signature(), *backend.nonce), nil
 }
-func (backend *testInfra) SetCredential(credential data.Credential) {
+func (backend *testInfra) SetCredential(credential credential.Credential) {
 	backend.credential = &credential
 }
 func (backend *testInfra) ClearCredential() {
 	backend.credential = nil
 }
 
-func (backend *testInfra) setNonce(nonce api_token.TicketNonce) {
+func (backend *testInfra) setNonce(nonce credential.TicketNonce) {
 	backend.nonce = &nonce
 }
-func (backend *testInfra) setCredentialNonce(nonce api_token.TicketNonce) {
+func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 	if backend.credential != nil {
 		user, _, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Signature())
 		signature, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
 
-		credential := data.NewCredential(
-			api_token.NewTicket(signature, nonce),
+		credential := credential.NewCredential(
+			credential.NewTicket(signature, nonce),
 			backend.credential.ApiToken(),
 			backend.credential.ContentToken(),
 			backend.credential.Expires(),
@@ -381,8 +380,8 @@ func (backend *testInfra) setCredentialUser(user user.User) {
 		_, nonce, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Signature())
 		signature, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
 
-		credential := data.NewCredential(
-			api_token.NewTicket(signature, nonce),
+		credential := credential.NewCredential(
+			credential.NewTicket(signature, nonce),
 			backend.credential.ApiToken(),
 			backend.credential.ContentToken(),
 			backend.credential.Expires(),
@@ -391,7 +390,7 @@ func (backend *testInfra) setCredentialUser(user user.User) {
 	}
 }
 
-func (backend *testInfra) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles api_token.ApiRoles) {
+func (backend *testInfra) registerUserData(userID user.UserID, loginID user.LoginID, rawPassword password.RawPassword, apiRoles credential.ApiRoles) {
 	testUser := user.NewUser(userID)
 
 	err := backend.user.users.RegisterUser(testUser, user.NewLogin(loginID))

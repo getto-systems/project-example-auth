@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 )
 
@@ -26,7 +26,7 @@ func (client Renew) Renew(handler RenewHandler) {
 	client.handleCredential(credential, err)
 	handler.RenewResponse(err)
 }
-func (client Renew) renew(handler RenewHandler) (_ data.Credential, err error) {
+func (client Renew) renew(handler RenewHandler) (_ credential.Credential, err error) {
 	ticket, err := client.getTicket()
 	if err != nil {
 		return

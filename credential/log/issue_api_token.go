@@ -5,13 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) issue_api_token() api_token.IssueApiTokenLogger {
+func (log Logger) issue_credential() credential.IssueApiTokenLogger {
 	return log
 }
 
@@ -21,11 +21,11 @@ func (log Logger) TryToIssueApiToken(request request.Request, user user.User, ex
 func (log Logger) FailedToIssueApiToken(request request.Request, user user.User, expires time.Expires, err error) {
 	log.logger.Error(issueApiTokenEntry("FailedToIssue", request, user, expires, nil, err))
 }
-func (log Logger) IssueApiToken(request request.Request, user user.User, roles api_token.ApiRoles, expires time.Expires) {
+func (log Logger) IssueApiToken(request request.Request, user user.User, roles credential.ApiRoles, expires time.Expires) {
 	log.logger.Info(issueApiTokenEntry("Issue", request, user, expires, &roles, nil))
 }
 
-func issueApiTokenEntry(event string, request request.Request, user user.User, expires time.Expires, roles *api_token.ApiRoles, err error) log.Entry {
+func issueApiTokenEntry(event string, request request.Request, user user.User, expires time.Expires, roles *credential.ApiRoles, err error) log.Entry {
 	return log.Entry{
 		Message:  fmt.Sprintf("ApiToken/IssueApiToken/%s", event),
 		Request:  request,
