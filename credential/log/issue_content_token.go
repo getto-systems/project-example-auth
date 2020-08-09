@@ -27,7 +27,7 @@ func (log Logger) IssueContentToken(request request.Request, user user.User, exp
 
 func issueContentTokenEntry(event string, request request.Request, user user.User, expires time.Expires, err error) log.Entry {
 	return log.Entry{
-		Message: fmt.Sprintf("ApiToken/IssueContentToken/%s", event),
+		Message: fmt.Sprintf("Credential/IssueContentToken/%s", event),
 		Request: request,
 		User:    &user,
 		Expires: &expires,

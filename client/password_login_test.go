@@ -116,12 +116,14 @@ func ExamplePasswordLogin_log() {
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
 	// log: "Password/Validate/AuthByPassword", audit
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "Ticket/Register/TryToRegister", debug
+	// log: "Ticket/Register/Register", info
+	// log: "Credential/IssueTicket/TryToIssueTicket", debug
+	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueApiToken/TryToIssue", debug
+	// log: "Credential/IssueApiToken/Issue", info
+	// log: "Credential/IssueContentToken/TryToIssue", debug
+	// log: "Credential/IssueContentToken/Issue", info
 	//
 }
 
@@ -156,14 +158,18 @@ func ExampleRenew_log() {
 	//
 	// Renew
 	// err: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Extend/TryToExtend", debug
 	// log: "Ticket/Extend/Extend", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "Credential/IssueTicket/TryToIssueTicket", debug
+	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueApiToken/TryToIssue", debug
+	// log: "Credential/IssueApiToken/Issue", info
+	// log: "Credential/IssueContentToken/TryToIssue", debug
+	// log: "Credential/IssueContentToken/Issue", info
 	//
 }
 
@@ -198,6 +204,8 @@ func ExampleLogout_log() {
 	//
 	// Logout
 	// err: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Deactivate/TryToDeactivate", debug
@@ -364,12 +372,14 @@ func ExamplePasswordLogin_successWithLongPassword() {
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
 	// log: "Password/Validate/AuthByPassword", audit
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "Ticket/Register/TryToRegister", debug
+	// log: "Ticket/Register/Register", info
+	// log: "Credential/IssueTicket/TryToIssueTicket", debug
+	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueApiToken/TryToIssue", debug
+	// log: "Credential/IssueApiToken/Issue", info
+	// log: "Credential/IssueContentToken/TryToIssue", debug
+	// log: "Credential/IssueContentToken/Issue", info
 	//
 }
 
@@ -447,6 +457,8 @@ func ExampleRenew_failedBecauseAlreadyExpired() {
 	// request: "2020-01-01T00:06:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -472,7 +484,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	})
 
 	// 認証情報を取っておく
-	credential := h.credential
+	credential := h.session.credential
 
 	// Renew する前にログアウトしてしまう
 	h.newRequest("Logout", time.Minute(1), logoutHandler, func() {
@@ -482,7 +494,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	})
 
 	// 取っておいた認証情報でログインを試みる
-	h.credential = credential
+	h.session.credential = credential
 
 	// ログアウト済み
 	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
@@ -505,6 +517,8 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -548,8 +562,8 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/MatchFailed.Nonce"
 	// credential: nil
-	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/FailedToValidateBecauseMatchFailed", audit
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/FailedToParseTicketBecauseNonceMatchFailed", audit
 	//
 }
 
@@ -592,6 +606,8 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/NotFound.Ticket"
 	// credential: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseTicketNotFound", audit
 	//
@@ -635,8 +651,10 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/MatchFailed.User"
 	// credential: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
-	// log: "Ticket/Validate/FailedToValidateBecauseMatchFailed", audit
+	// log: "Ticket/Validate/FailedToValidateBecauseUserMatchFailed", audit
 	//
 }
 
@@ -675,6 +693,8 @@ func ExampleLogout_failedBecauseAlreadyExpired() {
 	// request: "2020-01-01T00:10:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//

@@ -9,18 +9,24 @@ import (
 
 type (
 	Logger interface {
+		RegisterLogger
 		ValidateLogger
 		DeactivateLogger
-		IssueLogger
 		ExtendLogger
 	}
 
+	RegisterLogger interface {
+		TryToRegister(request.Request, user.User, time.Expires, time.ExtendLimit)
+		FailedToRegister(request.Request, user.User, time.Expires, time.ExtendLimit, error)
+		Register(request.Request, user.User, time.Expires, time.ExtendLimit, credential.TicketNonce)
+	}
+
 	ValidateLogger interface {
-		TryToValidate(request.Request, credential.TicketNonce)
-		FailedToValidate(request.Request, credential.TicketNonce, error)
-		FailedToValidateBecauseExpired(request.Request, credential.TicketNonce, error)
-		FailedToValidateBecauseTicketNotFound(request.Request, credential.TicketNonce, error)
-		FailedToValidateBecauseMatchFailed(request.Request, credential.TicketNonce, error)
+		TryToValidate(request.Request, user.User, credential.TicketNonce)
+		FailedToValidate(request.Request, user.User, credential.TicketNonce, error)
+		FailedToValidateBecauseExpired(request.Request, user.User, credential.TicketNonce, error)
+		FailedToValidateBecauseTicketNotFound(request.Request, user.User, credential.TicketNonce, error)
+		FailedToValidateBecauseUserMatchFailed(request.Request, user.User, credential.TicketNonce, error)
 		AuthByTicket(request.Request, user.User, credential.TicketNonce)
 	}
 
@@ -28,12 +34,6 @@ type (
 		TryToDeactivate(request.Request, user.User, credential.TicketNonce)
 		FailedToDeactivate(request.Request, user.User, credential.TicketNonce, error)
 		Deactivate(request.Request, user.User, credential.TicketNonce)
-	}
-
-	IssueLogger interface {
-		TryToIssue(request.Request, user.User, time.Expires, time.ExtendLimit)
-		FailedToIssue(request.Request, user.User, time.Expires, time.ExtendLimit, error)
-		Issue(request.Request, user.User, time.Expires, time.ExtendLimit, credential.TicketNonce)
 	}
 
 	ExtendLogger interface {

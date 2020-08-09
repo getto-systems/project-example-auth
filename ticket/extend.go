@@ -15,44 +15,35 @@ var (
 
 type Extend struct {
 	logger  ticket.ExtendLogger
-	signer  credential.TicketSigner
 	tickets ticket.TicketRepository
 }
 
-func NewExtend(logger ticket.ExtendLogger, signer credential.TicketSigner, tickets ticket.TicketRepository) Extend {
+func NewExtend(logger ticket.ExtendLogger, tickets ticket.TicketRepository) Extend {
 	return Extend{
 		logger:  logger,
-		signer:  signer,
 		tickets: tickets,
 	}
 }
 
-func (action Extend) Extend(request request.Request, user user.User, oldTicket credential.Ticket) (_ credential.Ticket, _ time.Expires, err error) {
-	// user が正しいことは確認済みでなければならない
-	action.logger.TryToExtend(request, user, oldTicket.Nonce())
+// user が正しいことは確認済みでなければならない
+func (action Extend) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ time.Expires, err error) {
+	action.logger.TryToExtend(request, user, ticket.Nonce())
 
-	expireSecond, limit, found, err := action.tickets.FindExpireSecondAndExtendLimit(oldTicket.Nonce())
+	expireSecond, limit, found, err := action.tickets.FindExpireSecondAndExtendLimit(ticket.Nonce())
 	if err != nil {
-		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), err)
+		action.logger.FailedToExtend(request, user, ticket.Nonce(), err)
 		return
 	}
 	if !found {
-		// この時点で ticket が存在しないのはプログラムがおかしいのでエラーログ
+		// ticket は validated のはず。ticket が存在しないのはプログラムがおかしいのでエラーログ
 		err = errExtendNotFoundNonce
-		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), err)
+		action.logger.FailedToExtend(request, user, ticket.Nonce(), err)
 		return
 	}
 
 	expires := request.RequestedAt().Expires(expireSecond).Limit(limit)
+	action.tickets.UpdateExpires(ticket.Nonce(), expires)
 
-	token, err := action.signer.Sign(user, oldTicket.Nonce(), expires)
-	if err != nil {
-		action.logger.FailedToExtend(request, user, oldTicket.Nonce(), err)
-		return
-	}
-
-	newTicket := credential.NewTicket(token, oldTicket.Nonce())
-
-	action.logger.Extend(request, user, newTicket.Nonce(), expires, limit)
-	return newTicket, expires, nil
+	action.logger.Extend(request, user, ticket.Nonce(), expires, limit)
+	return expires, nil
 }

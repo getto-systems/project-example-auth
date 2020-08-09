@@ -160,7 +160,7 @@ func newBackend() client.Backend {
 
 	return client.NewBackend(
 		infra.newTicketAction(),
-		infra.newApiTokenAction(),
+		infra.newCredentialAction(),
 		infra.newUserAction(),
 		infra.newPasswordAction(),
 		infra.newPasswordResetAction(),
@@ -177,24 +177,24 @@ func (infra infra) newTicketAction() client.TicketAction {
 	return client.NewTicketAction(
 		ticket_log.NewLogger(infra.logger),
 
-		newTicketSigner(),
 		nonce_generator.NewNonceGenerator(),
 
 		ticket_repository_ticket.NewMemoryStore(),
 	)
 }
-func (infra infra) newApiTokenAction() client.ApiTokenAction {
-	api_users := credential_repository_api_user.NewMemoryStore()
+func (infra infra) newCredentialAction() client.CredentialAction {
+	apiUsers := credential_repository_api_user.NewMemoryStore()
 
-	initApiUserRepository(api_users)
+	initApiUserRepository(apiUsers)
 
-	return client.NewApiTokenAction(
+	return client.NewCredentialAction(
 		credential_log.NewLogger(infra.logger),
 
+		newTicketSigner(),
 		newApiTokenSigner(),
 		newContentTokenSigner(),
 
-		api_users,
+		apiUsers,
 	)
 }
 func (infra infra) newUserAction() client.UserAction {
@@ -251,8 +251,8 @@ func initUserRepository(users user.UserRepository) {
 		log.Fatalf("failed to register admin user: %s", err)
 	}
 }
-func initApiUserRepository(api_users credential.ApiUserRepository) {
-	err := api_users.RegisterApiRoles(adminUser(), credential.ApiRoles([]string{"admin"}))
+func initApiUserRepository(apiUsers credential.ApiUserRepository) {
+	err := apiUsers.RegisterApiRoles(adminUser(), credential.ApiRoles([]string{"admin"}))
 	if err != nil {
 		log.Fatalf("failed to register admin user api roles: %s", err)
 	}

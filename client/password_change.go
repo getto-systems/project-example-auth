@@ -39,7 +39,12 @@ func (client PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Log
 		return
 	}
 
-	user, err := client.ticket.validate.Validate(request, ticket)
+	user, err := client.credential.parseTicket.Parse(request, ticket)
+	if err != nil {
+		return
+	}
+
+	err = client.ticket.validate.Validate(request, user, ticket)
 	if err != nil {
 		return
 	}
@@ -68,7 +73,12 @@ func (client PasswordChange) change(handler PasswordChangeHandler) (err error) {
 		return
 	}
 
-	user, err := client.ticket.validate.Validate(request, ticket)
+	user, err := client.credential.parseTicket.Parse(request, ticket)
+	if err != nil {
+		return
+	}
+
+	err = client.ticket.validate.Validate(request, user, ticket)
 	if err != nil {
 		return
 	}
