@@ -76,7 +76,7 @@ type (
 		exp    expiration
 	}
 	expiration struct {
-		password      ticket.Expiration
+		password      credential.Expiration
 		passwordReset password_reset.Expiration
 	}
 )
@@ -292,7 +292,7 @@ func newAppLogger() logger.Logger {
 func newExpiration() expiration {
 	// パスワードで認証した場合、有効期限 5分、最大延長 14日
 	return expiration{
-		password: ticket.NewExpiration(ticket.ExpirationParam{
+		password: credential.NewExpiration(credential.ExpirationParam{
 			Expires:     time.Minute(5),
 			ExtendLimit: time.Day(14),
 		}),

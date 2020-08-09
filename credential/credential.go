@@ -1,19 +1,15 @@
 package credential
 
-import (
-	"github.com/getto-systems/project-example-id/data/time"
-)
-
 type (
 	Credential struct {
 		ticket       Ticket
 		apiToken     ApiToken
 		contentToken ContentToken
-		expires      time.Expires
+		expires      Expires
 	}
 )
 
-func NewCredential(ticket Ticket, apiToken ApiToken, contentToken ContentToken, expires time.Expires) Credential {
+func NewCredential(ticket Ticket, apiToken ApiToken, contentToken ContentToken, expires Expires) Credential {
 	return Credential{
 		ticket:       ticket,
 		apiToken:     apiToken,
@@ -30,6 +26,6 @@ func (credential Credential) ApiToken() ApiToken {
 func (credential Credential) ContentToken() ContentToken {
 	return credential.contentToken
 }
-func (credential Credential) Expires() time.Expires {
+func (credential Credential) Expires() Expires {
 	return credential.expires
 }

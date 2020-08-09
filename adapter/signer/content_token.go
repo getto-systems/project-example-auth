@@ -8,7 +8,6 @@ import (
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 )
 
 type ContentTokenSigner struct {
@@ -29,7 +28,7 @@ func (signer ContentTokenSigner) signer() infra.ContentTokenSigner {
 	return signer
 }
 
-func (signer ContentTokenSigner) Sign(expires time.Expires) (_ credential.ContentToken, err error) {
+func (signer ContentTokenSigner) Sign(expires credential.Expires) (_ credential.ContentToken, err error) {
 	signed, err := signer.privateKey.Sign(signer.resource, gotime.Time(expires))
 	if err != nil {
 		return

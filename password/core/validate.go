@@ -1,10 +1,10 @@
 package password_core
 
 import (
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -13,7 +13,7 @@ var (
 	errValidateMatchFailed      = errors.NewError("Password.Validate", "MatchFailed")
 )
 
-func (action action) Validate(request request.Request, user user.User, raw password.RawPassword) (_ ticket.Expiration, err error) {
+func (action action) Validate(request request.Request, user user.User, raw password.RawPassword) (_ credential.Expiration, err error) {
 	action.logger.TryToValidate(request, user)
 
 	err = checkLength(raw)

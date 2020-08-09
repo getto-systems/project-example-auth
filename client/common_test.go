@@ -34,7 +34,6 @@ import (
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 
 	"github.com/getto-systems/project-example-id/credential/core"
@@ -61,7 +60,7 @@ type (
 	}
 
 	testExpiration struct {
-		password      ticket.Expiration
+		password      credential.Expiration
 		passwordReset password_reset.Expiration
 	}
 
@@ -157,7 +156,7 @@ func newTestInfra() *testInfra {
 		},
 
 		exp: testExpiration{
-			password: ticket.NewExpiration(ticket.ExpirationParam{
+			password: credential.NewExpiration(credential.ExpirationParam{
 				Expires:     time.Minute(5),
 				ExtendLimit: time.Minute(8),
 			}),
@@ -296,7 +295,7 @@ type ticketTestSignToken struct {
 	Expires int64  `json:"expires"`
 }
 
-func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.TicketSignature, err error) {
+func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires credential.Expires) (_ credential.TicketSignature, err error) {
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
@@ -323,11 +322,11 @@ func (ticketTestNonceGenerator) GenerateTicketNonce() (_ credential.TicketNonce,
 	return "ticket-nonce", nil
 }
 
-func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires time.Expires) (_ credential.ApiToken, err error) {
+func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires credential.Expires) (_ credential.ApiToken, err error) {
 	return credential.NewApiToken(roles, []byte("api-token")), nil
 }
 
-func (credentialTestContentSigner) Sign(expires time.Expires) (_ credential.ContentToken, err error) {
+func (credentialTestContentSigner) Sign(expires credential.Expires) (_ credential.ContentToken, err error) {
 	return credential.NewContentToken(
 		credential.ContentKeyID("content-key"),
 		credential.ContentPolicy([]byte("content-policy")),
@@ -497,7 +496,7 @@ func (f testFormatter) printError() {
 	}
 }
 func (f testFormatter) printRequest() {
-	fmt.Printf("request: \"%s\"\n", formatTime(f.context.request.RequestedAt().Time()))
+	fmt.Printf("request: \"%s\"\n", formatTime(gotime.Time(f.context.request.RequestedAt())))
 }
 func (f testFormatter) printCredential() {
 	if f.credential == nil {
@@ -505,7 +504,7 @@ func (f testFormatter) printCredential() {
 	} else {
 		fmt.Printf(
 			"credential: expires: \"%s\", roles: %s\n",
-			formatTime(f.credential.Expires().Time()),
+			formatTime(gotime.Time(f.credential.Expires())),
 			f.credential.ApiToken().ApiRoles(),
 		)
 	}
@@ -521,14 +520,14 @@ func (f testFormatter) printResetDestination(dest password_reset.Destination) {
 }
 func (f testFormatter) printResetStatus(status password_reset.Status) {
 	if status.Waiting() {
-		fmt.Printf("status: {waiting: {since: \"%s\"}}\n", formatTime(status.WaitingSince()))
+		fmt.Printf("status: {waiting: {since: \"%s\"}}\n", formatTime(gotime.Time(status.WaitingSince())))
 	} else if status.Sending() {
-		fmt.Printf("status: {sending: {since: \"%s\"}}\n", formatTime(status.SendingSince()))
+		fmt.Printf("status: {sending: {since: \"%s\"}}\n", formatTime(gotime.Time(status.SendingSince())))
 	} else if status.Complete() {
-		fmt.Printf("status: {complete: {at: \"%s\"}}\n", formatTime(status.CompleteAt()))
+		fmt.Printf("status: {complete: {at: \"%s\"}}\n", formatTime(gotime.Time(status.CompleteAt())))
 	} else if status.Failed() {
 		at, reason := status.FailedAtAndReason()
-		fmt.Printf("status: {failed: {at: \"%s\", reason: \"%s\"}}\n", formatTime(at), reason)
+		fmt.Printf("status: {failed: {at: \"%s\", reason: \"%s\"}}\n", formatTime(gotime.Time(at)), reason)
 	} else {
 		fmt.Println("status: {EMPTY}")
 	}
@@ -548,6 +547,6 @@ func (f testFormatter) printMessage() {
 	}
 }
 
-func formatTime(t time.Time) string {
+func formatTime(t gotime.Time) string {
 	return gotime.Time(t).Format(gotime.RFC3339)
 }

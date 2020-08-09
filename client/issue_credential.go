@@ -2,12 +2,11 @@ package client
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
-func (h Backend) issueCredential(request request.Request, user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.Credential, err error) {
+func (h Backend) issueCredential(request request.Request, user user.User, nonce credential.TicketNonce, expires credential.Expires) (_ credential.Credential, err error) {
 	ticket, err := h.credential.IssueTicket(request, user, nonce, expires)
 	if err != nil {
 		return
