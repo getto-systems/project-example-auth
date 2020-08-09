@@ -3,7 +3,7 @@ package password_reset_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/log"
+	"github.com/getto-systems/project-example-id/gateway/log"
 
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/misc/expiration"
 
-	"github.com/getto-systems/project-example-id/log"
+	"github.com/getto-systems/project-example-id/gateway/log"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password_reset"
