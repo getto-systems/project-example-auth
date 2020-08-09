@@ -37,7 +37,7 @@ func (client PasswordLogin) login(handler PasswordLoginHandler) (_ credential.Cr
 		return
 	}
 
-	exp, err := client.password.validate.Validate(request, user, raw)
+	exp, err := client.password.Validate(request, user, raw)
 	if err != nil {
 		return
 	}

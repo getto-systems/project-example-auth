@@ -2,7 +2,6 @@ package client
 
 import (
 	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
 	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
 	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 
 	credential_core "github.com/getto-systems/project-example-id/credential"
-	password_core "github.com/getto-systems/project-example-id/password"
 	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 )
@@ -23,7 +21,7 @@ type (
 		ticket        TicketAction
 		credential    CredentialAction
 		user          user.Action
-		password      PasswordAction
+		password      password.Action
 		passwordReset PasswordResetAction
 	}
 
@@ -41,11 +39,6 @@ type (
 		issueContentToken credential.IssueContentToken
 	}
 
-	PasswordAction struct {
-		validate password.Validate
-		change   password.Change
-	}
-
 	PasswordResetAction struct {
 		createSession    password_reset.CreateSession
 		pushSendTokenJob password_reset.PushSendTokenJob
@@ -60,7 +53,7 @@ func NewBackend(
 	ticket TicketAction,
 	credential CredentialAction,
 	user user.Action,
-	password PasswordAction,
+	password password.Action,
 	passwordReset PasswordResetAction,
 ) Backend {
 	return Backend{
@@ -101,20 +94,6 @@ func NewCredentialAction(
 		issueTicket:       credential_core.NewIssueTicket(logger, ticketSign),
 		issueApiToken:     credential_core.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
 		issueContentToken: credential_core.NewIssueContentToken(logger, contentTokenSigner),
-	}
-}
-
-func NewPasswordAction(
-	logger password_infra.Logger,
-
-	exp ticket.Expiration,
-	enc password_infra.PasswordEncrypter,
-
-	passwords password_infra.PasswordRepository,
-) PasswordAction {
-	return PasswordAction{
-		validate: password_core.NewValidate(logger, exp, enc, passwords),
-		change:   password_core.NewChange(logger, enc, passwords),
 	}
 }
 

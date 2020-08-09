@@ -1,8 +1,6 @@
 package password
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -15,23 +13,7 @@ var (
 	errValidateMatchFailed      = data.NewError("Password.Validate", "MatchFailed")
 )
 
-type Validate struct {
-	logger    infra.ValidateLogger
-	exp       ticket.Expiration
-	matcher   infra.PasswordMatcher
-	passwords infra.PasswordRepository
-}
-
-func NewValidate(logger infra.ValidateLogger, exp ticket.Expiration, matcher infra.PasswordMatcher, passwords infra.PasswordRepository) Validate {
-	return Validate{
-		logger:    logger,
-		exp:       exp,
-		matcher:   matcher,
-		passwords: passwords,
-	}
-}
-
-func (action Validate) Validate(request request.Request, user user.User, raw password.RawPassword) (_ ticket.Expiration, err error) {
+func (action action) Validate(request request.Request, user user.User, raw password.RawPassword) (_ ticket.Expiration, err error) {
 	action.logger.TryToValidate(request, user)
 
 	err = checkLength(raw)
