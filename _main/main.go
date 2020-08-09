@@ -9,6 +9,8 @@ import (
 
 	"github.com/rs/cors"
 
+	"github.com/getto-systems/project-example-id"
+
 	"github.com/getto-systems/project-example-id/_adapter/http_handler"
 	"github.com/getto-systems/project-example-id/_adapter/logger"
 	"github.com/getto-systems/project-example-id/_adapter/message"
@@ -18,8 +20,6 @@ import (
 	"github.com/getto-systems/project-example-id/_adapter/signer"
 
 	"github.com/getto-systems/project-example-id/_misc/expiration"
-
-	"github.com/getto-systems/project-example-id/_usecase"
 
 	"github.com/getto-systems/project-example-id/credential/log"
 	"github.com/getto-systems/project-example-id/credential/repository/api_user"

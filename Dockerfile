@@ -5,7 +5,7 @@ RUN : && \
   CGO_ENABLED=0 \
   GOOS=linux \
   GOARCH=amd64 \
-  go build -a -o app . && \
+  go build -a -o app $(head -1 go.mod | cut -d' ' -f2)/_main && \
   :
 
 FROM scratch

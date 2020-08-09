@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/_usecase"
+	"github.com/getto-systems/project-example-id"
 
 	"github.com/getto-systems/project-example-id/request"
 )
