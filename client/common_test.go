@@ -43,6 +43,7 @@ import (
 
 	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_core "github.com/getto-systems/project-example-id/password"
+	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
@@ -229,7 +230,7 @@ func (backend *testInfra) newBackend() Backend {
 
 			backend.password.passwords,
 		),
-		NewPasswordResetAction(
+		password_reset_core.NewAction(
 			password_reset_log.NewLogger(backend.logger),
 
 			backend.exp.password,

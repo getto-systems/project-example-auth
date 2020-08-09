@@ -1,34 +1,14 @@
 package password_reset
 
-import (
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
-)
-
-type SendToken struct {
-	logger   infra.SendTokenLogger
-	sessions infra.SessionRepository
-	queue    infra.SendTokenJobQueue
-	sender   infra.TokenSender
-}
-
-func NewSendToken(logger infra.SendTokenLogger, sessions infra.SessionRepository, queue infra.SendTokenJobQueue, sender infra.TokenSender) SendToken {
-	return SendToken{
-		logger:   logger,
-		sessions: sessions,
-		queue:    queue,
-		sender:   sender,
-	}
-}
-
-func (action SendToken) Send() (err error) {
-	request, session, dest, token, err := action.queue.FetchSendTokenJob()
+func (action action) SendToken() (err error) {
+	request, session, dest, token, err := action.tokenQueue.FetchSendTokenJob()
 	if err != nil {
 		return
 	}
 
 	action.logger.TryToSendToken(request, session, dest)
 
-	err = action.sender.SendToken(dest, token)
+	err = action.tokenSender.SendToken(dest, token)
 	if err != nil {
 		action.logger.FailedToSendToken(request, session, dest, err)
 
