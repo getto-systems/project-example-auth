@@ -1,10 +1,10 @@
 package client
 
 import (
-	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/password"
 )
 
 func ExamplePasswordChange_getLogin_change() {

@@ -34,19 +34,19 @@ import (
 	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
 
 	credential_infra "github.com/getto-systems/project-example-id/credential/infra"
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
 	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
 	user_infra "github.com/getto-systems/project-example-id/infra/user"
+	password_infra "github.com/getto-systems/project-example-id/password/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/password"
 
 	"github.com/getto-systems/project-example-id/credential/core"
-	password_core "github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/password/core"
 	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
