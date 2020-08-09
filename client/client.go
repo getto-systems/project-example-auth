@@ -1,9 +1,7 @@
 package client
 
 import (
-	goerrors "errors"
-
-	"github.com/getto-systems/project-example-id/misc/errors"
+	"errors"
 
 	"github.com/getto-systems/project-example-id/credential"
 )
@@ -36,7 +34,7 @@ func (client Client) handleCredential(credential credential.Credential, err erro
 	}
 }
 func (client Client) handleCredentialError(err error) {
-	if goerrors.Is(err, errors.ErrTicketValidate) {
+	if errors.Is(err, ErrTicketValidate) {
 		client.clearCredential()
 	}
 }
