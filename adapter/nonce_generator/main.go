@@ -3,7 +3,7 @@ package nonce_generator
 import (
 	"github.com/google/uuid"
 
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	infra "github.com/getto-systems/project-example-id/infra/credential"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 )
@@ -15,7 +15,7 @@ func NewNonceGenerator() NonceGenerator {
 	return NonceGenerator{}
 }
 
-func (gen NonceGenerator) gen() credential_infra.TicketNonceGenerator {
+func (gen NonceGenerator) gen() infra.TicketNonceGenerator {
 	return gen
 }
 

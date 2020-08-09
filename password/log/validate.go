@@ -5,13 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	infra "github.com/getto-systems/project-example-id/infra/password"
 
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) validate() password_infra.ValidateLogger {
+func (log Logger) validate() infra.ValidateLogger {
 	return log
 }
 

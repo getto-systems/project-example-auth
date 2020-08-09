@@ -3,7 +3,7 @@ package session
 import (
 	"errors"
 
-	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
 
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -37,7 +37,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (store *MemoryStore) db() password_reset_infra.SessionRepository {
+func (store *MemoryStore) db() infra.SessionRepository {
 	return store
 }
 
@@ -73,7 +73,7 @@ func (store *MemoryStore) CheckClosedSessionExists(token password_reset.Token) (
 	return true, nil
 }
 
-func (store *MemoryStore) CreateSession(gen password_reset_infra.SessionGenerator, data password_reset.SessionData, dest password_reset.Destination) (_ password_reset.Session, _ password_reset.Token, err error) {
+func (store *MemoryStore) CreateSession(gen infra.SessionGenerator, data password_reset.SessionData, dest password_reset.Destination) (_ password_reset.Session, _ password_reset.Token, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		id, token, genErr := gen.GenerateSession()
 		if genErr != nil {

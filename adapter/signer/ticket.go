@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	infra "github.com/getto-systems/project-example-id/infra/credential"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -23,7 +23,7 @@ func NewTicketSigner(jwt JWTSigner) TicketSigner {
 	}
 }
 
-func (signer TicketSigner) sign() credential_infra.TicketSign {
+func (signer TicketSigner) sign() infra.TicketSign {
 	return signer
 }
 

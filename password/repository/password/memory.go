@@ -1,7 +1,7 @@
 package password
 
 import (
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	infra "github.com/getto-systems/project-example-id/infra/password"
 
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -19,7 +19,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (store *MemoryStore) repo() password_infra.PasswordRepository {
+func (store *MemoryStore) repo() infra.PasswordRepository {
 	return store
 }
 

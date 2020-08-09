@@ -5,7 +5,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	infra "github.com/getto-systems/project-example-id/infra/credential"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,7 +13,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) issue_credential() credential_infra.IssueApiTokenLogger {
+func (log Logger) issue_credential() infra.IssueApiTokenLogger {
 	return log
 }
 
