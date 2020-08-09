@@ -1,6 +1,13 @@
 package api_token
 
 type (
+	TicketSignature []byte
+	TicketNonce     string
+	Ticket          struct {
+		signature TicketSignature
+		nonce     TicketNonce
+	}
+
 	ApiRoles     []string
 	ApiSignature []byte
 	ApiToken     struct {
@@ -17,6 +24,19 @@ type (
 		signature ContentSignature
 	}
 )
+
+func NewTicket(signature TicketSignature, nonce TicketNonce) Ticket {
+	return Ticket{
+		signature: signature,
+		nonce:     nonce,
+	}
+}
+func (ticket Ticket) Signature() TicketSignature {
+	return ticket.signature
+}
+func (ticket Ticket) Nonce() TicketNonce {
+	return ticket.nonce
+}
 
 func EmptyApiRoles() ApiRoles {
 	return []string{}

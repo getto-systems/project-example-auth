@@ -13,7 +13,6 @@ import (
 	"github.com/getto-systems/project-example-id/data/api_token"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -69,8 +68,8 @@ type Entry struct {
 	User  *UserLog  `json:"user,omitempty"`
 	Login *LoginLog `json:"login,omitempty"`
 
-	Nonce    *NonceLog    `json:"ticket,omitempty"`
-	ApiRoles *ApiRolesLog `json:"api_roles,omitempty"`
+	TicketNonce *TicketNonceLog `json:"ticket,omitempty"`
+	ApiRoles    *ApiRolesLog    `json:"api_roles,omitempty"`
 
 	Expires     *ExpiresLog     `json:"expires,omitempty"`
 	ExtendLimit *ExtendLimitLog `json:"extend_limit,omitempty"`
@@ -97,7 +96,7 @@ type LoginLog struct {
 	LoginID string `json:"login_id"`
 }
 
-type NonceLog struct {
+type TicketNonceLog struct {
 	Nonce string `json:"nonce"`
 }
 type ApiRolesLog struct {
@@ -138,8 +137,8 @@ func format(log log.Entry) Entry {
 		entry.Login = loginLog(log.Login)
 	}
 
-	if log.Nonce != nil {
-		entry.Nonce = ticketLog(log.Nonce)
+	if log.TicketNonce != nil {
+		entry.TicketNonce = ticketNonceLog(log.TicketNonce)
 	}
 	if log.ApiRoles != nil {
 		entry.ApiRoles = apiRolesLog(log.ApiRoles)
@@ -198,8 +197,8 @@ func loginLog(login *user.Login) *LoginLog {
 	}
 }
 
-func ticketLog(nonce *ticket.Nonce) *NonceLog {
-	return &NonceLog{
+func ticketNonceLog(nonce *api_token.TicketNonce) *TicketNonceLog {
+	return &TicketNonceLog{
 		Nonce: string(*nonce),
 	}
 }

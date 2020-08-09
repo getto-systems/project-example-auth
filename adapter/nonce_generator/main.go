@@ -3,7 +3,7 @@ package nonce_generator
 import (
 	"github.com/google/uuid"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/api_token"
 )
 
 type NonceGenerator struct {
@@ -13,15 +13,15 @@ func NewNonceGenerator() NonceGenerator {
 	return NonceGenerator{}
 }
 
-func (gen NonceGenerator) gen() ticket.NonceGenerator {
+func (gen NonceGenerator) gen() api_token.TicketNonceGenerator {
 	return gen
 }
 
-func (NonceGenerator) GenerateNonce() (_ ticket.Nonce, err error) {
+func (NonceGenerator) GenerateNonce() (_ api_token.TicketNonce, err error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return
 	}
 
-	return ticket.Nonce(id.String()), nil
+	return api_token.TicketNonce(id.String()), nil
 }

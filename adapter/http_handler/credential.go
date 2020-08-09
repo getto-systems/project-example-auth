@@ -11,7 +11,6 @@ import (
 
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/api_token"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 )
 
@@ -61,7 +60,7 @@ func (handler CredentialHandler) handler() client.CredentialHandler {
 	return handler
 }
 
-func (handler CredentialHandler) GetTicket() (_ ticket.Ticket, err error) {
+func (handler CredentialHandler) GetTicket() (_ api_token.Ticket, err error) {
 	cookie, err := handler.httpRequest.Cookie(COOKIE_TICKET)
 	if err != nil {
 		err = errTicketTokenNotFound
@@ -70,7 +69,7 @@ func (handler CredentialHandler) GetTicket() (_ ticket.Ticket, err error) {
 
 	nonce := handler.httpRequest.Header.Get(HEADER_NONCE)
 
-	return ticket.NewTicket(ticket.Token(cookie.Value), ticket.Nonce(nonce)), nil
+	return api_token.NewTicket(api_token.TicketSignature(cookie.Value), api_token.TicketNonce(nonce)), nil
 }
 
 func (handler CredentialHandler) SetCredential(credential data.Credential) {
@@ -84,10 +83,10 @@ func (handler CredentialHandler) ClearCredential() {
 	handler.clearContentToken()
 }
 
-func (handler CredentialHandler) setTicket(ticket ticket.Ticket, expires time.Expires) {
+func (handler CredentialHandler) setTicket(ticket api_token.Ticket, expires time.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    COOKIE_TICKET,
-		Value:   string(ticket.Token()),
+		Value:   string(ticket.Signature()),
 		Expires: gotime.Time(expires),
 
 		Domain: string(handler.cookie.domain),

@@ -23,7 +23,7 @@ func (h Backend) issueCredential(request request.Request, user user.User, exp ti
 	return data.NewCredential(newTicket, apiToken, contentToken, expires), nil
 }
 
-func (h Backend) issueCredentialByTicket(request request.Request, user user.User, ticket ticket.Ticket, expires time.Expires) (_ data.Credential, err error) {
+func (h Backend) issueCredentialByTicket(request request.Request, user user.User, ticket api_token.Ticket, expires time.Expires) (_ data.Credential, err error) {
 	apiToken, contentToken, err := h.issueApiToken(request, user, expires)
 	if err != nil {
 		return

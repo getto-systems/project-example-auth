@@ -1,6 +1,7 @@
 package ticket
 
 import (
+	"github.com/getto-systems/project-example-id/data/api_token"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -9,21 +10,21 @@ import (
 
 type Issue struct {
 	logger  ticket.IssueLogger
-	gen     ticket.NonceGenerator
-	signer  ticket.TicketSigner
+	signer  api_token.TicketSigner
+	gen     api_token.TicketNonceGenerator
 	tickets ticket.TicketRepository
 }
 
-func NewIssue(logger ticket.IssueLogger, signer ticket.TicketSigner, gen ticket.NonceGenerator, tickets ticket.TicketRepository) Issue {
+func NewIssue(logger ticket.IssueLogger, signer api_token.TicketSigner, gen api_token.TicketNonceGenerator, tickets ticket.TicketRepository) Issue {
 	return Issue{
 		logger:  logger,
-		gen:     gen,
 		signer:  signer,
+		gen:     gen,
 		tickets: tickets,
 	}
 }
 
-func (action Issue) Issue(request request.Request, user user.User, exp ticket.Expiration) (_ ticket.Ticket, _ time.Expires, err error) {
+func (action Issue) Issue(request request.Request, user user.User, exp ticket.Expiration) (_ api_token.Ticket, _ time.Expires, err error) {
 	expires := exp.Expires(request)
 	limit := exp.ExtendLimit(request)
 
@@ -41,7 +42,7 @@ func (action Issue) Issue(request request.Request, user user.User, exp ticket.Ex
 		return
 	}
 
-	ticket := ticket.NewTicket(token, nonce)
+	ticket := api_token.NewTicket(token, nonce)
 
 	action.logger.Issue(request, user, expires, limit, ticket.Nonce())
 	return ticket, expires, nil

@@ -74,8 +74,8 @@ func NewBackend(
 func NewTicketAction(
 	logger ticket_data.Logger,
 
-	sign ticket_data.TicketSign,
-	gen ticket_data.NonceGenerator,
+	sign api_token_data.TicketSign,
+	gen api_token_data.TicketNonceGenerator,
 
 	tickets ticket_data.TicketRepository,
 ) TicketAction {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/api_token"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -21,12 +21,12 @@ func NewTicketSigner(jwt JWTSigner) TicketSigner {
 	}
 }
 
-func (signer TicketSigner) sign() ticket.TicketSign {
+func (signer TicketSigner) sign() api_token.TicketSign {
 	return signer
 }
 
-func (signer TicketSigner) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, err error) {
-	claims, err := signer.jwt.Parse(string(token))
+func (signer TicketSigner) Parse(signature api_token.TicketSignature) (_ user.User, _ api_token.TicketNonce, err error) {
+	claims, err := signer.jwt.Parse(string(signature))
 	if err != nil {
 		return
 	}
@@ -36,13 +36,13 @@ func (signer TicketSigner) Parse(token ticket.Token) (_ user.User, _ ticket.Nonc
 
 	return user, nonce, nil
 }
-func parseNonce(raw interface{}) (_ ticket.Nonce) {
+func parseNonce(raw interface{}) (_ api_token.TicketNonce) {
 	nonce, ok := raw.(string)
 	if !ok {
 		return
 	}
 
-	return ticket.Nonce(nonce)
+	return api_token.TicketNonce(nonce)
 }
 func parseUser(raw interface{}) (_ user.User) {
 	userID, ok := raw.(string)
@@ -53,8 +53,8 @@ func parseUser(raw interface{}) (_ user.User) {
 	return user.NewUser(user.UserID(userID))
 }
 
-func (signer TicketSigner) Sign(user user.User, nonce ticket.Nonce, expires time.Expires) (_ ticket.Token, err error) {
-	token, err := signer.jwt.Sign(jwt.MapClaims{
+func (signer TicketSigner) Sign(user user.User, nonce api_token.TicketNonce, expires time.Expires) (_ api_token.TicketSignature, err error) {
+	signature, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"exp": strconv.Itoa(int(gotime.Time(expires).Unix())),
 		"jti": nonce,
@@ -63,5 +63,5 @@ func (signer TicketSigner) Sign(user user.User, nonce ticket.Nonce, expires time
 		return
 	}
 
-	return ticket.Token(token), nil
+	return api_token.TicketSignature(signature), nil
 }

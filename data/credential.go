@@ -2,20 +2,19 @@ package data
 
 import (
 	"github.com/getto-systems/project-example-id/data/api_token"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 )
 
 type (
 	Credential struct {
-		ticket       ticket.Ticket
+		ticket       api_token.Ticket
 		apiToken     api_token.ApiToken
 		contentToken api_token.ContentToken
 		expires      time.Expires
 	}
 )
 
-func NewCredential(ticket ticket.Ticket, apiToken api_token.ApiToken, contentToken api_token.ContentToken, expires time.Expires) Credential {
+func NewCredential(ticket api_token.Ticket, apiToken api_token.ApiToken, contentToken api_token.ContentToken, expires time.Expires) Credential {
 	return Credential{
 		ticket:       ticket,
 		apiToken:     apiToken,
@@ -23,7 +22,7 @@ func NewCredential(ticket ticket.Ticket, apiToken api_token.ApiToken, contentTok
 		expires:      expires,
 	}
 }
-func (credential Credential) Ticket() ticket.Ticket {
+func (credential Credential) Ticket() api_token.Ticket {
 	return credential.ticket
 }
 func (credential Credential) ApiToken() api_token.ApiToken {

@@ -3,6 +3,7 @@ package ticket
 import (
 	"errors"
 
+	"github.com/getto-systems/project-example-id/data/api_token"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -14,7 +15,7 @@ const (
 
 type (
 	MemoryStore struct {
-		ticket map[ticket.Nonce]memoryTicketData
+		ticket map[api_token.TicketNonce]memoryTicketData
 	}
 
 	memoryTicketData struct {
@@ -27,7 +28,7 @@ type (
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		ticket: make(map[ticket.Nonce]memoryTicketData),
+		ticket: make(map[api_token.TicketNonce]memoryTicketData),
 	}
 }
 
@@ -35,7 +36,7 @@ func (store *MemoryStore) repo() ticket.TicketRepository {
 	return store
 }
 
-func (store *MemoryStore) FindUserAndExpires(nonce ticket.Nonce) (_ user.User, _ time.Expires, found bool, err error) {
+func (store *MemoryStore) FindUserAndExpires(nonce api_token.TicketNonce) (_ user.User, _ time.Expires, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
@@ -43,7 +44,7 @@ func (store *MemoryStore) FindUserAndExpires(nonce ticket.Nonce) (_ user.User, _
 	return data.user, data.expires, true, nil
 }
 
-func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce ticket.Nonce) (_ time.Second, _ time.ExtendLimit, found bool, err error) {
+func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce api_token.TicketNonce) (_ time.Second, _ time.ExtendLimit, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
@@ -51,7 +52,7 @@ func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce ticket.Nonce) (_ 
 	return data.expireSecond, data.limit, true, nil
 }
 
-func (store *MemoryStore) FindUser(nonce ticket.Nonce) (_ user.User, found bool, err error) {
+func (store *MemoryStore) FindUser(nonce api_token.TicketNonce) (_ user.User, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
@@ -59,7 +60,7 @@ func (store *MemoryStore) FindUser(nonce ticket.Nonce) (_ user.User, found bool,
 	return data.user, true, nil
 }
 
-func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce ticket.Nonce) (err error) {
+func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce api_token.TicketNonce) (err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		// 見つからない場合は何もせず、特にエラーにもしない
@@ -73,7 +74,7 @@ func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce ticket.Nonce) (e
 	return nil
 }
 
-func (store *MemoryStore) RegisterTicket(gen ticket.NonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ ticket.Nonce, err error) {
+func (store *MemoryStore) RegisterTicket(gen api_token.TicketNonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ api_token.TicketNonce, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		nonce, genErr := gen.GenerateNonce()
 		if genErr != nil {
