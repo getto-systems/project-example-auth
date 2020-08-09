@@ -31,7 +31,6 @@ type (
 	}
 
 	CredentialEntry struct {
-		TicketNonce *credential.TicketNonce
 		ApiRoles    *credential.ApiRoles
 		Expires     *expiration.Expires
 		ExtendLimit *expiration.ExtendLimit

@@ -9,14 +9,14 @@ import (
 )
 
 func (action action) IssueTicket(request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.Ticket, err error) {
-	action.logger.TryToIssueTicket(request, user, nonce, expires)
+	action.logger.TryToIssueTicket(request, user, expires)
 
 	signature, err := action.ticketSigner.Sign(user, nonce, expires)
 	if err != nil {
-		action.logger.FailedToIssueTicket(request, user, nonce, expires, err)
+		action.logger.FailedToIssueTicket(request, user, expires, err)
 		return
 	}
 
-	action.logger.IssueTicket(request, user, nonce, expires)
+	action.logger.IssueTicket(request, user, expires)
 	return credential.NewTicket(signature, nonce), nil
 }
