@@ -5,7 +5,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,7 +13,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) extend() ticket_infra.ExtendLogger {
+func (log Logger) extend() infra.ExtendLogger {
 	return log
 }
 

@@ -3,7 +3,7 @@ package log
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	infra "github.com/getto-systems/project-example-id/infra/password"
 )
 
 type Logger struct {
@@ -16,6 +16,6 @@ func NewLogger(logger log.Logger) Logger {
 	}
 }
 
-func (log Logger) handler() password_infra.Logger {
+func (log Logger) handler() infra.Logger {
 	return log
 }

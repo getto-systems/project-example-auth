@@ -1,7 +1,7 @@
 package user
 
 import (
-	user_infra "github.com/getto-systems/project-example-id/infra/user"
+	infra "github.com/getto-systems/project-example-id/infra/user"
 
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -20,7 +20,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (store *MemoryStore) repo() user_infra.UserRepository {
+func (store *MemoryStore) repo() infra.UserRepository {
 	return store
 }
 

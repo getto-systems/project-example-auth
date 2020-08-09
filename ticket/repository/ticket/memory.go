@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
-	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
+	infra "github.com/getto-systems/project-example-id/infra/ticket"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -34,7 +34,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (store *MemoryStore) repo() ticket_infra.TicketRepository {
+func (store *MemoryStore) repo() infra.TicketRepository {
 	return store
 }
 

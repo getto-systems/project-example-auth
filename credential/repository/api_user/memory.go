@@ -1,7 +1,7 @@
 package api_user
 
 import (
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
+	infra "github.com/getto-systems/project-example-id/infra/credential"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func (store *MemoryStore) repo() credential_infra.ApiUserRepository {
+func (store *MemoryStore) repo() infra.ApiUserRepository {
 	return store
 }
 

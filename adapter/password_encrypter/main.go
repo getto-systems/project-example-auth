@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	password_infra "github.com/getto-systems/project-example-id/infra/password"
+	infra "github.com/getto-systems/project-example-id/infra/password"
 
 	"github.com/getto-systems/project-example-id/data/password"
 )
@@ -25,7 +25,7 @@ func NewEncrypter(cost int) Encrypter {
 	}
 }
 
-func (enc Encrypter) enc() password_infra.PasswordEncrypter {
+func (enc Encrypter) enc() infra.PasswordEncrypter {
 	return enc
 }
 

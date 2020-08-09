@@ -5,7 +5,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	infra "github.com/getto-systems/project-example-id/infra/password_reset"
 
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -13,7 +13,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) createSession() password_reset_infra.CreateSessionLogger {
+func (log Logger) createSession() infra.CreateSessionLogger {
 	return log
 }
 
