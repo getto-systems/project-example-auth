@@ -1,9 +1,10 @@
 package password_reset_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password_reset"
 )
 
@@ -11,9 +12,10 @@ type (
 	action struct {
 		logger infra.Logger
 
-		credentialExp credential.Expiration
-		exp           password_reset.Expiration
-		gen           infra.SessionGenerator
+		credentialExtendSecond expiration.ExtendSecond
+
+		exp              password_reset.Expiration
+		sessionGenerator infra.SessionGenerator
 
 		sessions     infra.SessionRepository
 		destinations infra.DestinationRepository
@@ -27,9 +29,10 @@ type (
 func NewAction(
 	logger infra.Logger,
 
-	credentialExp credential.Expiration,
+	credentialExtendSecond expiration.ExtendSecond,
+
 	exp password_reset.Expiration,
-	gen infra.SessionGenerator,
+	sessionGenerator infra.SessionGenerator,
 
 	sessions infra.SessionRepository,
 	destinations infra.DestinationRepository,
@@ -41,9 +44,10 @@ func NewAction(
 	return action{
 		logger: logger,
 
-		credentialExp: credentialExp,
-		exp:           exp,
-		gen:           gen,
+		credentialExtendSecond: credentialExtendSecond,
+
+		exp:              exp,
+		sessionGenerator: sessionGenerator,
 
 		sessions:     sessions,
 		destinations: destinations,

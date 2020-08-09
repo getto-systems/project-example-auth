@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	golog "log"
 	"os"
-	gotime "time"
+	"time"
 
 	"github.com/getto-systems/applog-go/v2"
+
+	"github.com/getto-systems/project-example-id/misc/expiration"
 
 	"github.com/getto-systems/project-example-id/log"
 
@@ -128,7 +130,7 @@ type ResetSessionExpiresLog struct {
 
 func format(log log.Entry) Entry {
 	entry := Entry{
-		Time:    gotime.Now().UTC().String(),
+		Time:    time.Now().UTC().String(),
 		Message: log.Message,
 	}
 
@@ -186,7 +188,7 @@ func jsonMessage(level string, log Entry) string {
 
 func requestLog(request request.Request) RequestLog {
 	return RequestLog{
-		RequestedAt: gotime.Time(request.RequestedAt()).String(),
+		RequestedAt: time.Time(request.RequestedAt()).String(),
 		Route: RouteLog{
 			RemoteAddr: string(request.Route().RemoteAddr()),
 		},
@@ -218,14 +220,14 @@ func apiRolesLog(roles *credential.ApiRoles) *ApiRolesLog {
 	return &log
 }
 
-func credentialExpiresLog(expires *credential.Expires) *CredentialExpiresLog {
+func credentialExpiresLog(expires *expiration.Expires) *CredentialExpiresLog {
 	return &CredentialExpiresLog{
-		Expires: gotime.Time(*expires).String(),
+		Expires: time.Time(*expires).String(),
 	}
 }
-func credentialExtendLimitLog(limit *credential.ExtendLimit) *CredentialExtendLimitLog {
+func credentialExtendLimitLog(limit *expiration.ExtendLimit) *CredentialExtendLimitLog {
 	return &CredentialExtendLimitLog{
-		ExtendLimit: gotime.Time(*limit).String(),
+		ExtendLimit: time.Time(*limit).String(),
 	}
 }
 
@@ -244,6 +246,6 @@ func resetDestinationLog(dest *password_reset.Destination) *ResetDestinationLog 
 }
 func resetSessionExpiresLog(expires *password_reset.Expires) *ResetSessionExpiresLog {
 	return &ResetSessionExpiresLog{
-		Expires: gotime.Time(*expires).String(),
+		Expires: time.Time(*expires).String(),
 	}
 }

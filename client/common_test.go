@@ -7,6 +7,8 @@ import (
 	golog "log"
 	gotime "time"
 
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/log"
 
 	"github.com/getto-systems/project-example-id/credential/log"
@@ -48,7 +50,7 @@ type (
 		logger  *testLogger
 		message *testMessage
 
-		exp testExpiration
+		extend testExtendSecond
 
 		session testSession
 
@@ -59,8 +61,8 @@ type (
 		passwordReset passwordResetTestInfra
 	}
 
-	testExpiration struct {
-		password      credential.Expiration
+	testExtendSecond struct {
+		password      expiration.ExtendSecond
 		passwordReset password_reset.Expiration
 	}
 
@@ -71,7 +73,7 @@ type (
 	}
 
 	ticketTestInfra struct {
-		gen ticket_infra.TicketNonceGenerator
+		nonceGenerator ticket_infra.TicketNonceGenerator
 
 		tickets ticket_infra.TicketRepository
 	}
@@ -88,7 +90,7 @@ type (
 		passwords password_infra.PasswordRepository
 	}
 	passwordResetTestInfra struct {
-		gen *passwordResetTestSessionGenerator
+		sessionGenerator *passwordResetTestSessionGenerator
 
 		sessions     password_reset_infra.SessionRepository
 		destinations password_reset_infra.DestinationRepository
@@ -155,16 +157,13 @@ func newTestInfra() *testInfra {
 			nowSecond: time.Second(0),
 		},
 
-		exp: testExpiration{
-			password: credential.NewExpiration(credential.ExpirationParam{
-				Expires:     time.Minute(5),
-				ExtendLimit: time.Minute(8),
-			}),
+		extend: testExtendSecond{
+			password:      expiration.ExtendMinute(8),
 			passwordReset: password_reset.NewExpiration(time.Minute(30)),
 		},
 
 		ticket: ticketTestInfra{
-			gen: ticketTestNonceGenerator{},
+			nonceGenerator: ticketTestNonceGenerator{},
 
 			tickets: ticket_repository_ticket.NewMemoryStore(),
 		},
@@ -181,7 +180,7 @@ func newTestInfra() *testInfra {
 			passwords: password_repository_password.NewMemoryStore(),
 		},
 		passwordReset: passwordResetTestInfra{
-			gen: &passwordResetTestSessionGenerator{
+			sessionGenerator: &passwordResetTestSessionGenerator{
 				id:    "reset-session-id",
 				token: "reset-token",
 			},
@@ -199,7 +198,8 @@ func (backend *testInfra) newBackend() Backend {
 		ticket_core.NewAction(
 			ticket_log.NewLogger(backend.logger),
 
-			backend.ticket.gen,
+			expiration.ExpireMinute(5),
+			backend.ticket.nonceGenerator,
 
 			backend.ticket.tickets,
 		),
@@ -220,7 +220,7 @@ func (backend *testInfra) newBackend() Backend {
 		password_core.NewAction(
 			password_log.NewLogger(backend.logger),
 
-			backend.exp.password,
+			backend.extend.password,
 			backend.password.enc,
 
 			backend.password.passwords,
@@ -228,9 +228,9 @@ func (backend *testInfra) newBackend() Backend {
 		password_reset_core.NewAction(
 			password_reset_log.NewLogger(backend.logger),
 
-			backend.exp.password,
-			backend.exp.passwordReset,
-			backend.passwordReset.gen,
+			backend.extend.password,
+			backend.extend.passwordReset,
+			backend.passwordReset.sessionGenerator,
 
 			backend.passwordReset.sessions,
 			backend.passwordReset.destinations,
@@ -295,7 +295,7 @@ type ticketTestSignToken struct {
 	Expires int64  `json:"expires"`
 }
 
-func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires credential.Expires) (_ credential.TicketSignature, err error) {
+func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.TicketSignature, err error) {
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
@@ -322,11 +322,11 @@ func (ticketTestNonceGenerator) GenerateTicketNonce() (_ credential.TicketNonce,
 	return "ticket-nonce", nil
 }
 
-func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires credential.Expires) (_ credential.ApiToken, err error) {
+func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires expiration.Expires) (_ credential.ApiToken, err error) {
 	return credential.NewApiToken(roles, []byte("api-token")), nil
 }
 
-func (credentialTestContentSigner) Sign(expires credential.Expires) (_ credential.ContentToken, err error) {
+func (credentialTestContentSigner) Sign(expires expiration.Expires) (_ credential.ContentToken, err error) {
 	return credential.NewContentToken(
 		credential.ContentKeyID("content-key"),
 		credential.ContentPolicy([]byte("content-policy")),
@@ -341,12 +341,12 @@ func (passwordTestEncrypter) MatchPassword(hashed password.HashedPassword, raw p
 	return string(hashed) == string(raw), nil
 }
 
-func (gen *passwordResetTestSessionGenerator) GenerateSession() (password_reset.SessionID, password_reset.Token, error) {
-	return gen.id, gen.token, nil
+func (generator *passwordResetTestSessionGenerator) GenerateSession() (password_reset.SessionID, password_reset.Token, error) {
+	return generator.id, generator.token, nil
 }
-func (gen *passwordResetTestSessionGenerator) another() {
-	gen.id = "another-reset-session-id"
-	gen.token = "another-reset-token"
+func (generator *passwordResetTestSessionGenerator) another() {
+	generator.id = "another-reset-session-id"
+	generator.token = "another-reset-token"
 }
 
 func (backend *testInfra) credentialHandler() CredentialHandler {

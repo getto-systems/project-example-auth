@@ -1,10 +1,13 @@
 package ticket_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
+
+	"github.com/getto-systems/project-example-id/errors"
 )
 
 var (
@@ -12,10 +15,10 @@ var (
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ credential.Expires, err error) {
+func (action action) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ expiration.Expires, err error) {
 	action.logger.TryToExtend(request, user, ticket.Nonce())
 
-	expireSecond, limit, found, err := action.tickets.FindExpireSecondAndExtendLimit(ticket.Nonce())
+	limit, found, err := action.tickets.FindExtendLimit(ticket.Nonce())
 	if err != nil {
 		action.logger.FailedToExtend(request, user, ticket.Nonce(), err)
 		return
@@ -27,7 +30,7 @@ func (action action) Extend(request request.Request, user user.User, ticket cred
 		return
 	}
 
-	expires := credential.NewExpires(request.RequestedAt(), expireSecond).Limit(limit)
+	expires := request.Extend(limit, action.expireSecond)
 	action.tickets.UpdateExpires(ticket.Nonce(), expires)
 
 	action.logger.Extend(request, user, ticket.Nonce(), expires, limit)

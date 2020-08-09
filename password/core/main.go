@@ -1,9 +1,10 @@
 package password_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/password/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 )
 
@@ -11,10 +12,10 @@ type (
 	action struct {
 		logger infra.Logger
 
-		exp credential.Expiration
+		extendSecond expiration.ExtendSecond
 
-		gen     infra.PasswordGenerator
-		matcher infra.PasswordMatcher
+		generator infra.PasswordGenerator
+		matcher   infra.PasswordMatcher
 
 		passwords infra.PasswordRepository
 	}
@@ -23,18 +24,18 @@ type (
 func NewAction(
 	logger infra.Logger,
 
-	exp credential.Expiration,
-	enc infra.PasswordEncrypter,
+	extendSecond expiration.ExtendSecond,
+	encrypter infra.PasswordEncrypter,
 
 	passwords infra.PasswordRepository,
 ) password.Action {
 	return action{
 		logger: logger,
 
-		exp: exp,
+		extendSecond: extendSecond,
 
-		gen:     enc,
-		matcher: enc,
+		generator: encrypter,
+		matcher:   encrypter,
 
 		passwords: passwords,
 	}

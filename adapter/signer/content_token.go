@@ -5,6 +5,8 @@ import (
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -28,7 +30,7 @@ func (signer ContentTokenSigner) signer() infra.ContentTokenSigner {
 	return signer
 }
 
-func (signer ContentTokenSigner) Sign(expires credential.Expires) (_ credential.ContentToken, err error) {
+func (signer ContentTokenSigner) Sign(expires expiration.Expires) (_ credential.ContentToken, err error) {
 	signed, err := signer.privateKey.Sign(signer.resource, gotime.Time(expires))
 	if err != nil {
 		return

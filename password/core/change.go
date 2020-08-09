@@ -15,7 +15,7 @@ func (action action) Change(request request.Request, user user.User, raw passwor
 		return
 	}
 
-	hashed, err := action.gen.GeneratePassword(raw)
+	hashed, err := action.generator.GeneratePassword(raw)
 	if err != nil {
 		action.logger.FailedToChange(request, user, err)
 		return
