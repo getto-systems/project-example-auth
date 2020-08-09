@@ -205,13 +205,11 @@ func credentialLog(log *log.CredentialEntry) (entry *CredentialEntry) {
 	}
 	return
 }
-func apiRolesLog(roles *credential.ApiRoles) *ApiRolesLog {
-	log := ApiRolesLog{}
+func apiRolesLog(roles *credential.ApiRoles) (log *ApiRolesLog) {
 	for _, role := range *roles {
 		log.ApiRoles = append(log.ApiRoles, string(role))
 	}
-
-	return &log
+	return
 }
 func credentialExpiresLog(expires *expiration.Expires) *CredentialExpiresLog {
 	return &CredentialExpiresLog{
