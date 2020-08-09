@@ -2,10 +2,10 @@ package client
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (

@@ -1,4 +1,4 @@
-package password_reset
+package password_reset_core
 
 func (action action) SendToken() (err error) {
 	request, session, dest, token, err := action.tokenQueue.FetchSendTokenJob()

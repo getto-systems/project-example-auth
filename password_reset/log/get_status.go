@@ -1,14 +1,14 @@
-package log
+package password_reset_log
 
 import (
 	"fmt"
 
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 func (log Logger) getStatus() infra.GetStatusLogger {

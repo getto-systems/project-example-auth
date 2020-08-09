@@ -1,9 +1,9 @@
-package log
+package password_reset_log
 
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	"github.com/getto-systems/project-example-id/password_reset/infra"
 )
 
 type Logger struct {
