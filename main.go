@@ -1,6 +1,8 @@
 package _usecase
 
 import (
+	"errors"
+
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
@@ -15,6 +17,17 @@ type (
 		user          user.Action
 		password      password.Action
 		passwordReset password_reset.Action
+	}
+
+	Usecase struct {
+		Backend
+		handler CredentialHandler
+	}
+
+	CredentialHandler interface {
+		GetTicket() (credential.Ticket, error)
+		SetCredential(credential.Credential)
+		ClearCredential()
 	}
 )
 
@@ -32,4 +45,30 @@ func NewBackend(
 		password:      password,
 		passwordReset: passwordReset,
 	}
+}
+
+func NewUsecase(backend Backend, handler CredentialHandler) Usecase {
+	return Usecase{
+		Backend: backend,
+		handler: handler,
+	}
+}
+
+func (u Usecase) handleCredential(credential credential.Credential, err error) {
+	if err != nil {
+		u.handleCredentialError(err)
+	} else {
+		u.handler.SetCredential(credential)
+	}
+}
+func (u Usecase) handleCredentialError(err error) {
+	if errors.Is(err, ErrTicketValidate) {
+		u.clearCredential()
+	}
+}
+func (u Usecase) clearCredential() {
+	u.handler.ClearCredential()
+}
+func (u Usecase) getTicket() (credential.Ticket, error) {
+	return u.handler.GetTicket()
 }
