@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/errors"
+	"github.com/getto-systems/project-example-id/request"
 )
 
 var (
