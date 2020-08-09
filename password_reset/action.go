@@ -1,18 +1,19 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 type (
 	Action interface {
-		CreateSession(request request.Request, user user.User, login user.Login) (Session, Destination, Token, error)
-		PushSendTokenJob(request request.Request, session Session, dest Destination, token Token) error
+		CreateSession(request.Request, user.User, user.Login) (Session, Destination, Token, error)
+		PushSendTokenJob(request.Request, Session, Destination, Token) error
 		SendToken() error
-		GetStatus(request request.Request, login user.Login, session Session) (Destination, Status, error)
-		Validate(request request.Request, login user.Login, token Token) (user.User, Session, credential.Expiration, error)
-		CloseSession(request request.Request, session Session) error
+		GetStatus(request.Request, user.Login, Session) (Destination, Status, error)
+		Validate(request.Request, user.Login, Token) (user.User, Session, expiration.ExtendSecond, error)
+		CloseSession(request.Request, Session) error
 	}
 )

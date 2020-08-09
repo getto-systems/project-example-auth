@@ -6,7 +6,7 @@ import (
 
 type (
 	Action interface {
-		GetLogin(request request.Request, user User) (Login, error)
-		GetUser(request request.Request, login Login) (User, error)
+		GetLogin(request.Request, User) (Login, error)
+		GetUser(request.Request, Login) (User, error)
 	}
 )

@@ -1,12 +1,14 @@
 package credential_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
-func (action action) IssueContentToken(request request.Request, user user.User, expires credential.Expires) (_ credential.ContentToken, err error) {
+func (action action) IssueContentToken(request request.Request, user user.User, expires expiration.Expires) (_ credential.ContentToken, err error) {
 	action.logger.TryToIssueContentToken(request, user, expires)
 
 	token, err := action.contentTokenSigner.Sign(expires)

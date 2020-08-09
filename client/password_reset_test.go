@@ -269,8 +269,8 @@ func ExamplePasswordReset_resetLog() {
 	// log: "PasswordReset/CloseSession/CloseSession", info
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssueTicket", debug
-	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueTicket/TryToIssue", debug
+	// log: "Credential/IssueTicket/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -604,7 +604,7 @@ func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
 	})
 
 	// 並行してリセット
-	h.passwordReset.gen.another()
+	h.passwordReset.sessionGenerator.another()
 	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
 	}, func(f testFormatter) {
@@ -782,8 +782,8 @@ func ExamplePasswordReset_resetSuccessWithTimeLimit() {
 	// log: "PasswordReset/CloseSession/CloseSession", info
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssueTicket", debug
-	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueTicket/TryToIssue", debug
+	// log: "Credential/IssueTicket/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -864,7 +864,7 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	})
 
 	// 並行してリセット
-	h.passwordReset.gen.another()
+	h.passwordReset.sessionGenerator.another()
 	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
 	}, func(f testFormatter) {

@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	gotime "time"
+	"time"
+
+	"github.com/getto-systems/project-example-id/misc/expiration"
 
 	"github.com/getto-systems/project-example-id/client"
 
@@ -81,11 +83,11 @@ func (handler CredentialHandler) ClearCredential() {
 	handler.clearContentToken()
 }
 
-func (handler CredentialHandler) setTicket(ticket credential.Ticket, expires credential.Expires) {
+func (handler CredentialHandler) setTicket(ticket credential.Ticket, expires expiration.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    COOKIE_TICKET,
 		Value:   string(ticket.Signature()),
-		Expires: gotime.Time(expires),
+		Expires: time.Time(expires),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -126,11 +128,11 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 	}
 }
 
-func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken, expires credential.Expires) {
+func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken, expires expiration.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Key-Pair-Id",
 		Value:   string(contentToken.KeyID()),
-		Expires: gotime.Time(expires),
+		Expires: time.Time(expires),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -142,7 +144,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Policy",
 		Value:   string(contentToken.Policy()),
-		Expires: gotime.Time(expires),
+		Expires: time.Time(expires),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -154,7 +156,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Signature",
 		Value:   string(contentToken.Signature()),
-		Expires: gotime.Time(expires),
+		Expires: time.Time(expires),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",

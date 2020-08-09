@@ -1,6 +1,8 @@
 package log
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
@@ -24,8 +26,8 @@ type Entry struct {
 	TicketNonce *credential.TicketNonce
 	ApiRoles    *credential.ApiRoles
 
-	CredentialExpires     *credential.Expires
-	CredentialExtendLimit *credential.ExtendLimit
+	CredentialExpires     *expiration.Expires
+	CredentialExtendLimit *expiration.ExtendLimit
 
 	ResetSession        *password_reset.Session
 	ResetStatus         *password_reset.Status

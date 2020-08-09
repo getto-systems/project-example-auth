@@ -28,7 +28,7 @@ func (action action) CreateSession(request request.Request, user user.User, logi
 	}
 
 	session, token, err := action.sessions.CreateSession(
-		action.gen,
+		action.sessionGenerator,
 		password_reset.NewSessionData(user, login, request.RequestedAt(), expires),
 		dest,
 	)

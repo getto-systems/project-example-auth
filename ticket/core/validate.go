@@ -33,7 +33,7 @@ func (action action) Validate(request request.Request, user user.User, ticket cr
 		action.logger.FailedToValidateBecauseUserMatchFailed(request, user, ticket.Nonce(), err)
 		return
 	}
-	if expires.Expired(request.RequestedAt()) {
+	if request.Expired(expires) {
 		err = errValidateAlreadyExpired
 		action.logger.FailedToValidateBecauseExpired(request, user, ticket.Nonce(), err)
 		return

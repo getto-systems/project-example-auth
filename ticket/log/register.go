@@ -3,6 +3,8 @@ package ticket_log
 import (
 	"fmt"
 
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/log"
 
 	"github.com/getto-systems/project-example-id/ticket/infra"
@@ -16,17 +18,17 @@ func (log Logger) register() infra.RegisterLogger {
 	return log
 }
 
-func (log Logger) TryToRegister(request request.Request, user user.User, expires credential.Expires, limit credential.ExtendLimit) {
+func (log Logger) TryToRegister(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit) {
 	log.logger.Debug(registerEntry("TryToRegister", request, user, expires, limit, nil, nil))
 }
-func (log Logger) FailedToRegister(request request.Request, user user.User, expires credential.Expires, limit credential.ExtendLimit, err error) {
+func (log Logger) FailedToRegister(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, err error) {
 	log.logger.Error(registerEntry("FailedToRegister", request, user, expires, limit, nil, err))
 }
-func (log Logger) Register(request request.Request, user user.User, expires credential.Expires, limit credential.ExtendLimit, nonce credential.TicketNonce) {
+func (log Logger) Register(request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, nonce credential.TicketNonce) {
 	log.logger.Info(registerEntry("Register", request, user, expires, limit, &nonce, nil))
 }
 
-func registerEntry(event string, request request.Request, user user.User, expires credential.Expires, limit credential.ExtendLimit, nonce *credential.TicketNonce, err error) log.Entry {
+func registerEntry(event string, request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, nonce *credential.TicketNonce, err error) log.Entry {
 	return log.Entry{
 		Message:               fmt.Sprintf("Ticket/Register/%s", event),
 		Request:               request,

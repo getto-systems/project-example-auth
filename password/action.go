@@ -1,14 +1,15 @@
 package password
 
 import (
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 type (
 	Action interface {
-		Validate(request request.Request, user user.User, raw RawPassword) (credential.Expiration, error)
-		Change(request request.Request, user user.User, raw RawPassword) error
+		Validate(request.Request, user.User, RawPassword) (expiration.ExtendSecond, error)
+		Change(request.Request, user.User, RawPassword) error
 	}
 )

@@ -118,8 +118,8 @@ func ExamplePasswordLogin_log() {
 	// log: "Password/Validate/AuthByPassword", audit
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssueTicket", debug
-	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueTicket/TryToIssue", debug
+	// log: "Credential/IssueTicket/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -164,8 +164,8 @@ func ExampleRenew_log() {
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Extend/TryToExtend", debug
 	// log: "Ticket/Extend/Extend", info
-	// log: "Credential/IssueTicket/TryToIssueTicket", debug
-	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueTicket/TryToIssue", debug
+	// log: "Credential/IssueTicket/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -374,8 +374,8 @@ func ExamplePasswordLogin_successWithLongPassword() {
 	// log: "Password/Validate/AuthByPassword", audit
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssueTicket", debug
-	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueTicket/TryToIssue", debug
+	// log: "Credential/IssueTicket/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug

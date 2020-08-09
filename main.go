@@ -17,6 +17,8 @@ import (
 	"github.com/getto-systems/project-example-id/adapter/reset_session_generator"
 	"github.com/getto-systems/project-example-id/adapter/signer"
 
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/client"
 
 	"github.com/getto-systems/project-example-id/credential/log"
@@ -73,10 +75,10 @@ type (
 
 	infra struct {
 		logger logger.Logger
-		exp    expiration
+		extend extendSecond
 	}
-	expiration struct {
-		password      credential.Expiration
+	extendSecond struct {
+		password      expiration.ExtendSecond
 		passwordReset password_reset.Expiration
 	}
 )
@@ -177,13 +179,14 @@ func newBackend() client.Backend {
 func newInfra() infra {
 	return infra{
 		logger: newAppLogger(),
-		exp:    newExpiration(),
+		extend: newExtend(),
 	}
 }
 func (infra infra) newTicketAction() ticket.Action {
 	return ticket_core.NewAction(
 		ticket_log.NewLogger(infra.logger),
 
+		expiration.ExpireMinute(5),
 		nonce_generator.NewNonceGenerator(),
 
 		ticket_repository_ticket.NewMemoryStore(),
@@ -216,16 +219,16 @@ func (infra infra) newUserAction() user.Action {
 	)
 }
 func (infra infra) newPasswordAction() password.Action {
-	enc := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
+	encrypter := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
-	initPasswordRepository(passwords, enc)
+	initPasswordRepository(passwords, encrypter)
 
 	return password_core.NewAction(
 		password_log.NewLogger(infra.logger),
 
-		infra.exp.password,
-		enc,
+		infra.extend.password,
+		encrypter,
 
 		passwords,
 	)
@@ -238,8 +241,8 @@ func (infra infra) newPasswordResetAction() password_reset.Action {
 	return password_reset_core.NewAction(
 		password_reset_log.NewLogger(infra.logger),
 
-		infra.exp.password,
-		infra.exp.passwordReset,
+		infra.extend.password,
+		infra.extend.passwordReset,
 		reset_session_generator.NewGenerator(),
 
 		password_reset_repository_session.NewMemoryStore(),
@@ -289,13 +292,10 @@ func newAppLogger() logger.Logger {
 	return logger.NewLogger(os.Getenv("LOG_LEVEL"))
 }
 
-func newExpiration() expiration {
+func newExtend() extendSecond {
 	// パスワードで認証した場合、有効期限 5分、最大延長 14日
-	return expiration{
-		password: credential.NewExpiration(credential.ExpirationParam{
-			Expires:     time.Minute(5),
-			ExtendLimit: time.Day(14),
-		}),
+	return extendSecond{
+		password:      expiration.ExtendDay(14),
 		passwordReset: password_reset.NewExpiration(time.Minute(30)),
 	}
 }

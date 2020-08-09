@@ -1,12 +1,14 @@
 package credential_core
 
 import (
+	"github.com/getto-systems/project-example-id/misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
-func (action action) IssueApiToken(request request.Request, user user.User, expires credential.Expires) (_ credential.ApiToken, err error) {
+func (action action) IssueApiToken(request request.Request, user user.User, expires expiration.Expires) (_ credential.ApiToken, err error) {
 	action.logger.TryToIssueApiToken(request, user, expires)
 
 	roles, found, err := action.apiUsers.FindApiRoles(user)
