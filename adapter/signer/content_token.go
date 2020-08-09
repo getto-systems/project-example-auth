@@ -1,7 +1,7 @@
 package signer
 
 import (
-	gotime "time"
+	"time"
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
@@ -31,7 +31,7 @@ func (signer ContentTokenSigner) signer() infra.ContentTokenSigner {
 }
 
 func (signer ContentTokenSigner) Sign(expires expiration.Expires) (_ credential.ContentToken, err error) {
-	signed, err := signer.privateKey.Sign(signer.resource, gotime.Time(expires))
+	signed, err := signer.privateKey.Sign(signer.resource, time.Time(expires))
 	if err != nil {
 		return
 	}
