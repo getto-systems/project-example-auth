@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -21,11 +21,11 @@ func NewTicketSigner(jwt JWTSigner) TicketSigner {
 	}
 }
 
-func (signer TicketSigner) sign() api_token.TicketSign {
+func (signer TicketSigner) sign() credential.TicketSign {
 	return signer
 }
 
-func (signer TicketSigner) Parse(signature api_token.TicketSignature) (_ user.User, _ api_token.TicketNonce, err error) {
+func (signer TicketSigner) Parse(signature credential.TicketSignature) (_ user.User, _ credential.TicketNonce, err error) {
 	claims, err := signer.jwt.Parse(string(signature))
 	if err != nil {
 		return
@@ -36,13 +36,13 @@ func (signer TicketSigner) Parse(signature api_token.TicketSignature) (_ user.Us
 
 	return user, nonce, nil
 }
-func parseNonce(raw interface{}) (_ api_token.TicketNonce) {
+func parseNonce(raw interface{}) (_ credential.TicketNonce) {
 	nonce, ok := raw.(string)
 	if !ok {
 		return
 	}
 
-	return api_token.TicketNonce(nonce)
+	return credential.TicketNonce(nonce)
 }
 func parseUser(raw interface{}) (_ user.User) {
 	userID, ok := raw.(string)
@@ -53,7 +53,7 @@ func parseUser(raw interface{}) (_ user.User) {
 	return user.NewUser(user.UserID(userID))
 }
 
-func (signer TicketSigner) Sign(user user.User, nonce api_token.TicketNonce, expires time.Expires) (_ api_token.TicketSignature, err error) {
+func (signer TicketSigner) Sign(user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.TicketSignature, err error) {
 	signature, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"exp": strconv.Itoa(int(gotime.Time(expires).Unix())),
@@ -63,5 +63,5 @@ func (signer TicketSigner) Sign(user user.User, nonce api_token.TicketNonce, exp
 		return
 	}
 
-	return api_token.TicketSignature(signature), nil
+	return credential.TicketSignature(signature), nil
 }

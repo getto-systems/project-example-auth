@@ -2,7 +2,7 @@ package ticket
 
 import (
 	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -17,11 +17,11 @@ var (
 
 type Validate struct {
 	logger  ticket.ValidateLogger
-	parser  api_token.TicketParser
+	parser  credential.TicketParser
 	tickets ticket.TicketRepository
 }
 
-func NewValidate(logger ticket.ValidateLogger, parser api_token.TicketParser, tickets ticket.TicketRepository) Validate {
+func NewValidate(logger ticket.ValidateLogger, parser credential.TicketParser, tickets ticket.TicketRepository) Validate {
 	return Validate{
 		logger:  logger,
 		parser:  parser,
@@ -29,7 +29,7 @@ func NewValidate(logger ticket.ValidateLogger, parser api_token.TicketParser, ti
 	}
 }
 
-func (action Validate) Validate(request request.Request, ticket api_token.Ticket) (_ user.User, err error) {
+func (action Validate) Validate(request request.Request, ticket credential.Ticket) (_ user.User, err error) {
 	action.logger.TryToValidate(request, ticket.Nonce())
 
 	ticketUser, nonce, err := action.parser.Parse(ticket.Signature())

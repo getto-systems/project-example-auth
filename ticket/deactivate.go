@@ -1,7 +1,7 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -19,7 +19,7 @@ func NewDeactivate(logger ticket.DeactivateLogger, tickets ticket.TicketReposito
 	}
 }
 
-func (action Deactivate) Deactivate(request request.Request, user user.User, ticket api_token.Ticket) (err error) {
+func (action Deactivate) Deactivate(request request.Request, user user.User, ticket credential.Ticket) (err error) {
 	// user が正しいことは確認済みでなければならない
 	action.logger.TryToDeactivate(request, user, ticket.Nonce())
 

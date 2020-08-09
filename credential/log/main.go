@@ -3,7 +3,7 @@ package log
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 )
 
 type Logger struct {
@@ -16,6 +16,6 @@ func NewLogger(logger log.Logger) Logger {
 	}
 }
 
-func (logger Logger) log() api_token.Logger {
+func (logger Logger) log() credential.Logger {
 	return logger
 }

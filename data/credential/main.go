@@ -1,4 +1,4 @@
-package api_token
+package credential
 
 type (
 	TicketSignature []byte

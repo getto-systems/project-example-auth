@@ -1,13 +1,13 @@
 package client
 
 import (
-	api_token_data "github.com/getto-systems/project-example-id/data/api_token"
+	credential_data "github.com/getto-systems/project-example-id/data/credential"
 	password_data "github.com/getto-systems/project-example-id/data/password"
 	password_reset_data "github.com/getto-systems/project-example-id/data/password_reset"
 	ticket_data "github.com/getto-systems/project-example-id/data/ticket"
 	user_data "github.com/getto-systems/project-example-id/data/user"
 
-	"github.com/getto-systems/project-example-id/api_token"
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/ticket"
@@ -31,8 +31,8 @@ type (
 	}
 
 	ApiTokenAction struct {
-		issueApiToken     api_token.IssueApiToken
-		issueContentToken api_token.IssueContentToken
+		issueApiToken     credential.IssueApiToken
+		issueContentToken credential.IssueContentToken
 	}
 
 	UserAction struct {
@@ -74,8 +74,8 @@ func NewBackend(
 func NewTicketAction(
 	logger ticket_data.Logger,
 
-	sign api_token_data.TicketSign,
-	gen api_token_data.TicketNonceGenerator,
+	sign credential_data.TicketSign,
+	gen credential_data.TicketNonceGenerator,
 
 	tickets ticket_data.TicketRepository,
 ) TicketAction {
@@ -88,16 +88,16 @@ func NewTicketAction(
 }
 
 func NewApiTokenAction(
-	logger api_token_data.Logger,
+	logger credential_data.Logger,
 
-	apiTokenSinger api_token_data.ApiTokenSigner,
-	contentTokenSigner api_token_data.ContentTokenSigner,
+	apiTokenSinger credential_data.ApiTokenSigner,
+	contentTokenSigner credential_data.ContentTokenSigner,
 
-	apiUsers api_token_data.ApiUserRepository,
+	apiUsers credential_data.ApiUserRepository,
 ) ApiTokenAction {
 	return ApiTokenAction{
-		issueApiToken:     api_token.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
-		issueContentToken: api_token.NewIssueContentToken(logger, contentTokenSigner),
+		issueApiToken:     credential.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
+		issueContentToken: credential.NewIssueContentToken(logger, contentTokenSigner),
 	}
 }
 

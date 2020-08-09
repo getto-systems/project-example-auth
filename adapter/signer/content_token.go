@@ -5,17 +5,17 @@ import (
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 )
 
 type ContentTokenSigner struct {
-	keyID      api_token.ContentKeyID
+	keyID      credential.ContentKeyID
 	privateKey aws_cloudfront_token.KeyPairPrivateKey
 	resource   string
 }
 
-func NewContentTokenSigner(keyID api_token.ContentKeyID, pem []byte, resource string) ContentTokenSigner {
+func NewContentTokenSigner(keyID credential.ContentKeyID, pem []byte, resource string) ContentTokenSigner {
 	return ContentTokenSigner{
 		keyID:      keyID,
 		privateKey: pem,
@@ -23,19 +23,19 @@ func NewContentTokenSigner(keyID api_token.ContentKeyID, pem []byte, resource st
 	}
 }
 
-func (signer ContentTokenSigner) signer() api_token.ContentTokenSigner {
+func (signer ContentTokenSigner) signer() credential.ContentTokenSigner {
 	return signer
 }
 
-func (signer ContentTokenSigner) Sign(expires time.Expires) (_ api_token.ContentToken, err error) {
+func (signer ContentTokenSigner) Sign(expires time.Expires) (_ credential.ContentToken, err error) {
 	signed, err := signer.privateKey.Sign(signer.resource, gotime.Time(expires))
 	if err != nil {
 		return
 	}
 
-	return api_token.NewContentToken(
+	return credential.NewContentToken(
 		signer.keyID,
-		api_token.ContentPolicy(signed.Policy),
-		api_token.ContentSignature(signed.Signature),
+		credential.ContentPolicy(signed.Policy),
+		credential.ContentSignature(signed.Signature),
 	), nil
 }

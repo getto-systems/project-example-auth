@@ -1,19 +1,19 @@
-package api_token
+package credential
 
 import (
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
 type IssueApiToken struct {
-	logger   api_token.IssueApiTokenLogger
-	signer   api_token.ApiTokenSigner
-	apiUsers api_token.ApiUserRepository
+	logger   credential.IssueApiTokenLogger
+	signer   credential.ApiTokenSigner
+	apiUsers credential.ApiUserRepository
 }
 
-func NewIssueApiToken(logger api_token.IssueApiTokenLogger, signer api_token.ApiTokenSigner, apiUsers api_token.ApiUserRepository) IssueApiToken {
+func NewIssueApiToken(logger credential.IssueApiTokenLogger, signer credential.ApiTokenSigner, apiUsers credential.ApiUserRepository) IssueApiToken {
 	return IssueApiToken{
 		logger:   logger,
 		signer:   signer,
@@ -21,7 +21,7 @@ func NewIssueApiToken(logger api_token.IssueApiTokenLogger, signer api_token.Api
 	}
 }
 
-func (action IssueApiToken) Issue(request request.Request, user user.User, expires time.Expires) (_ api_token.ApiToken, err error) {
+func (action IssueApiToken) Issue(request request.Request, user user.User, expires time.Expires) (_ credential.ApiToken, err error) {
 	action.logger.TryToIssueApiToken(request, user, expires)
 
 	roles, found, err := action.apiUsers.FindApiRoles(user)
@@ -31,7 +31,7 @@ func (action IssueApiToken) Issue(request request.Request, user user.User, expir
 	}
 	if !found {
 		// 見つからない場合は「権限なし」でトークンを発行
-		roles = api_token.EmptyApiRoles()
+		roles = credential.EmptyApiRoles()
 	}
 
 	token, err := action.signer.Sign(user, roles, expires)

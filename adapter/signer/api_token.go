@@ -5,7 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -20,11 +20,11 @@ func NewApiTokenSigner(jwt JWTSigner) ApiTokenSigner {
 	}
 }
 
-func (signer ApiTokenSigner) signer() api_token.ApiTokenSigner {
+func (signer ApiTokenSigner) signer() credential.ApiTokenSigner {
 	return signer
 }
 
-func (signer ApiTokenSigner) Sign(user user.User, roles api_token.ApiRoles, expires time.Expires) (_ api_token.ApiToken, err error) {
+func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, expires time.Expires) (_ credential.ApiToken, err error) {
 	token, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"aud": roles,
@@ -34,5 +34,5 @@ func (signer ApiTokenSigner) Sign(user user.User, roles api_token.ApiRoles, expi
 		return
 	}
 
-	return api_token.NewApiToken(roles, api_token.ApiSignature(token)), nil
+	return credential.NewApiToken(roles, credential.ApiSignature(token)), nil
 }

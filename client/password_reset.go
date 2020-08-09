@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/getto-systems/project-example-id/data"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -88,7 +88,7 @@ func (client PasswordReset) Reset(handler PasswordResetHandler) {
 	client.handleCredential(credential, err)
 	handler.ResetResponse(err)
 }
-func (client PasswordReset) reset(handler PasswordResetHandler) (_ data.Credential, err error) {
+func (client PasswordReset) reset(handler PasswordResetHandler) (_ credential.Credential, err error) {
 	request, login, token, newPassword, err := handler.ResetRequest()
 	if err != nil {
 		return

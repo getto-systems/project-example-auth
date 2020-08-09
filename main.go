@@ -19,7 +19,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/client"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/ticket"
@@ -29,8 +29,8 @@ import (
 	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
 	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
 
-	api_token_log "github.com/getto-systems/project-example-id/api_token/log"
-	api_token_repository_api_user "github.com/getto-systems/project-example-id/api_token/repository/api_user"
+	credential_log "github.com/getto-systems/project-example-id/credential/log"
+	credential_repository_api_user "github.com/getto-systems/project-example-id/credential/repository/api_user"
 
 	user_log "github.com/getto-systems/project-example-id/user/log"
 	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
@@ -184,12 +184,12 @@ func (infra infra) newTicketAction() client.TicketAction {
 	)
 }
 func (infra infra) newApiTokenAction() client.ApiTokenAction {
-	api_users := api_token_repository_api_user.NewMemoryStore()
+	api_users := credential_repository_api_user.NewMemoryStore()
 
 	initApiUserRepository(api_users)
 
 	return client.NewApiTokenAction(
-		api_token_log.NewLogger(infra.logger),
+		credential_log.NewLogger(infra.logger),
 
 		newApiTokenSigner(),
 		newContentTokenSigner(),
@@ -251,8 +251,8 @@ func initUserRepository(users user.UserRepository) {
 		log.Fatalf("failed to register admin user: %s", err)
 	}
 }
-func initApiUserRepository(api_users api_token.ApiUserRepository) {
-	err := api_users.RegisterApiRoles(adminUser(), api_token.ApiRoles([]string{"admin"}))
+func initApiUserRepository(api_users credential.ApiUserRepository) {
+	err := api_users.RegisterApiRoles(adminUser(), credential.ApiRoles([]string{"admin"}))
 	if err != nil {
 		log.Fatalf("failed to register admin user api roles: %s", err)
 	}
@@ -338,7 +338,7 @@ func newContentTokenSigner() signer.ContentTokenSigner {
 	}
 
 	return signer.NewContentTokenSigner(
-		api_token.ContentKeyID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
+		credential.ContentKeyID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
 		pem,
 		os.Getenv("AWS_CLOUDFRONT_SECURE_URL"),
 	)

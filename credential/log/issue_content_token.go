@@ -5,13 +5,13 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (log Logger) issue_content_token() api_token.IssueContentTokenLogger {
+func (log Logger) issue_content_token() credential.IssueContentTokenLogger {
 	return log
 }
 

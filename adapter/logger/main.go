@@ -10,7 +10,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/log"
 
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
@@ -197,12 +197,12 @@ func loginLog(login *user.Login) *LoginLog {
 	}
 }
 
-func ticketNonceLog(nonce *api_token.TicketNonce) *TicketNonceLog {
+func ticketNonceLog(nonce *credential.TicketNonce) *TicketNonceLog {
 	return &TicketNonceLog{
 		Nonce: string(*nonce),
 	}
 }
-func apiRolesLog(roles *api_token.ApiRoles) *ApiRolesLog {
+func apiRolesLog(roles *credential.ApiRoles) *ApiRolesLog {
 	log := ApiRolesLog{}
 	for _, role := range *roles {
 		log.ApiRoles = append(log.ApiRoles, string(role))

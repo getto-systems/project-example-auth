@@ -1,15 +1,14 @@
 package client
 
 import (
-	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/data/api_token"
+	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-func (h Backend) issueCredential(request request.Request, user user.User, exp ticket.Expiration) (_ data.Credential, err error) {
+func (h Backend) issueCredential(request request.Request, user user.User, exp ticket.Expiration) (_ credential.Credential, err error) {
 	newTicket, expires, err := h.ticket.issue.Issue(request, user, exp)
 	if err != nil {
 		return
@@ -20,19 +19,19 @@ func (h Backend) issueCredential(request request.Request, user user.User, exp ti
 		return
 	}
 
-	return data.NewCredential(newTicket, apiToken, contentToken, expires), nil
+	return credential.NewCredential(newTicket, apiToken, contentToken, expires), nil
 }
 
-func (h Backend) issueCredentialByTicket(request request.Request, user user.User, ticket api_token.Ticket, expires time.Expires) (_ data.Credential, err error) {
+func (h Backend) issueCredentialByTicket(request request.Request, user user.User, ticket credential.Ticket, expires time.Expires) (_ credential.Credential, err error) {
 	apiToken, contentToken, err := h.issueApiToken(request, user, expires)
 	if err != nil {
 		return
 	}
 
-	return data.NewCredential(ticket, apiToken, contentToken, expires), nil
+	return credential.NewCredential(ticket, apiToken, contentToken, expires), nil
 }
 
-func (h Backend) issueApiToken(request request.Request, user user.User, expires time.Expires) (_ api_token.ApiToken, _ api_token.ContentToken, err error) {
+func (h Backend) issueApiToken(request request.Request, user user.User, expires time.Expires) (_ credential.ApiToken, _ credential.ContentToken, err error) {
 	apiToken, err := h.apiToken.issueApiToken.Issue(request, user, expires)
 	if err != nil {
 		return
