@@ -21,15 +21,15 @@ import (
 
 	"github.com/getto-systems/project-example-id/credential/log"
 	"github.com/getto-systems/project-example-id/credential/repository/api_user"
-	password_log "github.com/getto-systems/project-example-id/password/log"
-	password_repository_password "github.com/getto-systems/project-example-id/password/repository/password"
-	password_reset_job_queue_send_token "github.com/getto-systems/project-example-id/password_reset/job_queue/send_token"
-	password_reset_log "github.com/getto-systems/project-example-id/password_reset/log"
-	password_reset_repository_destination "github.com/getto-systems/project-example-id/password_reset/repository/destination"
-	password_reset_repository_session "github.com/getto-systems/project-example-id/password_reset/repository/session"
-	password_reset_sender "github.com/getto-systems/project-example-id/password_reset/sender"
-	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
-	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
+	"github.com/getto-systems/project-example-id/password/log"
+	"github.com/getto-systems/project-example-id/password/repository/password"
+	"github.com/getto-systems/project-example-id/password_reset/job_queue/send_token"
+	"github.com/getto-systems/project-example-id/password_reset/log"
+	"github.com/getto-systems/project-example-id/password_reset/repository/destination"
+	"github.com/getto-systems/project-example-id/password_reset/repository/session"
+	"github.com/getto-systems/project-example-id/password_reset/sender"
+	"github.com/getto-systems/project-example-id/ticket/log"
+	"github.com/getto-systems/project-example-id/ticket/repository/ticket"
 	user_log "github.com/getto-systems/project-example-id/user/log"
 	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
 
@@ -245,7 +245,7 @@ func (infra infra) newPasswordResetAction() password_reset.Action {
 		password_reset_repository_session.NewMemoryStore(),
 		destinations,
 
-		password_reset_job_queue_send_token.NewMemoryQueue(),
+		password_reset_job_queue_sendToken.NewMemoryQueue(),
 		password_reset_sender.NewTokenSender(message.NewLogMessage()),
 	)
 }
