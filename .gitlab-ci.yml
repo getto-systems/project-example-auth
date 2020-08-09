@@ -21,7 +21,7 @@ test:
   image: golang:1.14.4-buster
 
   script:
-    - "go build $(head -1 go.mod | cut -d' ' -f2)/_main"
+    - "go build -o app $(head -1 go.mod | cut -d' ' -f2)/_main"
     - go test .
 
 bump_version:
