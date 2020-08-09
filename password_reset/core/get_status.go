@@ -1,15 +1,15 @@
 package password_reset_core
 
 import (
-	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 var (
-	errGetStatusNotFoundSession  = data.NewError("PasswordReset.GetStatus", "NotFound.Session")
-	errGetStatusMatchFailedLogin = data.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
+	errGetStatusNotFoundSession  = errors.NewError("PasswordReset.GetStatus", "NotFound.Session")
+	errGetStatusMatchFailedLogin = errors.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
 )
 
 func (action action) GetStatus(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Destination, _ password_reset.Status, err error) {
