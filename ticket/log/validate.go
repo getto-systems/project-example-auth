@@ -37,10 +37,14 @@ func (log Logger) AuthByTicket(request request.Request, user user.User, nonce cr
 
 func validateEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, err error) log.Entry {
 	return log.Entry{
-		Message:     fmt.Sprintf("Ticket/Validate/%s", event),
-		Request:     request,
-		User:        &user,
-		TicketNonce: &nonce,
-		Error:       err,
+		Message: fmt.Sprintf("Ticket/Validate/%s", event),
+		Request: request,
+		User:    &user,
+
+		Credential: &log.CredentialEntry{
+			TicketNonce: &nonce,
+		},
+
+		Error: err,
 	}
 }

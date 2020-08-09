@@ -31,10 +31,14 @@ func (log Logger) ParseTicket(request request.Request, nonce credential.TicketNo
 
 func parseTicketEntry(event string, request request.Request, nonce credential.TicketNonce, user *user.User, err error) log.Entry {
 	return log.Entry{
-		Message:     fmt.Sprintf("Credential/ParseTicket/%s", event),
-		Request:     request,
-		User:        user,
-		TicketNonce: &nonce,
-		Error:       err,
+		Message: fmt.Sprintf("Credential/ParseTicket/%s", event),
+		Request: request,
+		User:    user,
+
+		Credential: &log.CredentialEntry{
+			TicketNonce: &nonce,
+		},
+
+		Error: err,
 	}
 }
