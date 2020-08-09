@@ -3,7 +3,7 @@ package user_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/gateway/log"
+	"github.com/getto-systems/project-example-id/_gateway/log"
 
 	"github.com/getto-systems/project-example-id/user/infra"
 

@@ -3,7 +3,7 @@ package ticket_repository_ticket
 import (
 	"errors"
 
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 
 	"github.com/getto-systems/project-example-id/ticket/infra"
 

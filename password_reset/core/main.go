@@ -1,7 +1,7 @@
 package password_reset_core
 
 import (
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 

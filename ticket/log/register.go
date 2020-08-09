@@ -3,9 +3,9 @@ package ticket_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 
-	"github.com/getto-systems/project-example-id/gateway/log"
+	"github.com/getto-systems/project-example-id/_gateway/log"
 
 	"github.com/getto-systems/project-example-id/ticket/infra"
 

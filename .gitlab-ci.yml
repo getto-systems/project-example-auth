@@ -22,7 +22,7 @@ test:
 
   script:
     - go build main.go
-    - go test github.com/getto-systems/project-example-id/client
+    - go test github.com/getto-systems/project-example-id/_usecase
 
 bump_version:
   stage: bump_version
