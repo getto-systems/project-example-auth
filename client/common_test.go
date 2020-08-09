@@ -46,7 +46,7 @@ type (
 
 		nowSecond  time.Second
 		credential *data.Credential
-		nonce      *ticket.Nonce
+		nonce      *api_token.TicketNonce
 
 		ticket        ticketTestInfra
 		apiToken      apiTokenTestInfra
@@ -61,8 +61,8 @@ type (
 	}
 
 	ticketTestInfra struct {
-		sign ticket.TicketSign
-		gen  ticket.NonceGenerator
+		sign api_token.TicketSign
+		gen  api_token.TicketNonceGenerator
 
 		tickets ticket.TicketRepository
 	}
@@ -283,7 +283,7 @@ type ticketTestSignToken struct {
 	Expires int64  `json:"expires"`
 }
 
-func (ticketTestSign) Sign(user user.User, nonce ticket.Nonce, expires time.Expires) (_ ticket.Token, err error) {
+func (ticketTestSign) Sign(user user.User, nonce api_token.TicketNonce, expires time.Expires) (_ api_token.TicketSignature, err error) {
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
@@ -293,20 +293,20 @@ func (ticketTestSign) Sign(user user.User, nonce ticket.Nonce, expires time.Expi
 		return
 	}
 
-	return ticket.Token(data), nil
+	return api_token.TicketSignature(data), nil
 }
-func (ticketTestSign) Parse(token ticket.Token) (_ user.User, _ ticket.Nonce, err error) {
+func (ticketTestSign) Parse(signature api_token.TicketSignature) (_ user.User, _ api_token.TicketNonce, err error) {
 	var data ticketTestSignToken
 
-	err = json.Unmarshal(token, &data)
+	err = json.Unmarshal(signature, &data)
 	if err != nil {
 		return
 	}
 
-	return user.NewUser(user.UserID(data.UserID)), ticket.Nonce(data.Nonce), nil
+	return user.NewUser(user.UserID(data.UserID)), api_token.TicketNonce(data.Nonce), nil
 }
 
-func (ticketTestNonceGenerator) GenerateNonce() (_ ticket.Nonce, err error) {
+func (ticketTestNonceGenerator) GenerateNonce() (_ api_token.TicketNonce, err error) {
 	return "ticket-nonce", nil
 }
 
@@ -340,7 +340,7 @@ func (gen *passwordResetTestSessionGenerator) another() {
 func (backend *testInfra) credentialHandler() CredentialHandler {
 	return backend
 }
-func (backend *testInfra) GetTicket() (_ ticket.Ticket, err error) {
+func (backend *testInfra) GetTicket() (_ api_token.Ticket, err error) {
 	if backend.credential == nil {
 		err = errors.New("credential not set")
 		return
@@ -350,7 +350,7 @@ func (backend *testInfra) GetTicket() (_ ticket.Ticket, err error) {
 		return backend.credential.Ticket(), nil
 	}
 
-	return ticket.NewTicket(backend.credential.Ticket().Token(), *backend.nonce), nil
+	return api_token.NewTicket(backend.credential.Ticket().Signature(), *backend.nonce), nil
 }
 func (backend *testInfra) SetCredential(credential data.Credential) {
 	backend.credential = &credential
@@ -359,16 +359,16 @@ func (backend *testInfra) ClearCredential() {
 	backend.credential = nil
 }
 
-func (backend *testInfra) setNonce(nonce ticket.Nonce) {
+func (backend *testInfra) setNonce(nonce api_token.TicketNonce) {
 	backend.nonce = &nonce
 }
-func (backend *testInfra) setCredentialNonce(nonce ticket.Nonce) {
+func (backend *testInfra) setCredentialNonce(nonce api_token.TicketNonce) {
 	if backend.credential != nil {
-		user, _, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
-		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
+		user, _, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Signature())
+		signature, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
 
 		credential := data.NewCredential(
-			ticket.NewTicket(token, nonce),
+			api_token.NewTicket(signature, nonce),
 			backend.credential.ApiToken(),
 			backend.credential.ContentToken(),
 			backend.credential.Expires(),
@@ -378,11 +378,11 @@ func (backend *testInfra) setCredentialNonce(nonce ticket.Nonce) {
 }
 func (backend *testInfra) setCredentialUser(user user.User) {
 	if backend.credential != nil {
-		_, nonce, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Token())
-		token, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
+		_, nonce, _ := backend.ticket.sign.Parse(backend.credential.Ticket().Signature())
+		signature, _ := backend.ticket.sign.Sign(user, nonce, backend.credential.Expires())
 
 		credential := data.NewCredential(
-			ticket.NewTicket(token, nonce),
+			api_token.NewTicket(signature, nonce),
 			backend.credential.ApiToken(),
 			backend.credential.ContentToken(),
 			backend.credential.Expires(),

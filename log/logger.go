@@ -4,7 +4,6 @@ import (
 	"github.com/getto-systems/project-example-id/data/api_token"
 	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
@@ -23,8 +22,8 @@ type Entry struct {
 	User  *user.User
 	Login *user.Login
 
-	Nonce    *ticket.Nonce
-	ApiRoles *api_token.ApiRoles
+	TicketNonce *api_token.TicketNonce
+	ApiRoles    *api_token.ApiRoles
 
 	Expires     *time.Expires
 	ExtendLimit *time.ExtendLimit

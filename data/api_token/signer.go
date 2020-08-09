@@ -6,6 +6,17 @@ import (
 )
 
 type (
+	TicketSigner interface {
+		Sign(user.User, TicketNonce, time.Expires) (TicketSignature, error)
+	}
+	TicketParser interface {
+		Parse(TicketSignature) (user.User, TicketNonce, error)
+	}
+	TicketSign interface {
+		TicketSigner
+		TicketParser
+	}
+
 	ApiTokenSigner interface {
 		Sign(user.User, ApiRoles, time.Expires) (ApiToken, error)
 	}
