@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/getto-systems/project-example-id/message"
+	"github.com/getto-systems/project-example-id/gateway/message"
 )
 
 type (
