@@ -8,17 +8,17 @@ import (
 )
 
 func (h Backend) issueCredential(request request.Request, user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.Credential, err error) {
-	ticket, err := h.credential.issueTicket.Issue(request, user, nonce, expires)
+	ticket, err := h.credential.IssueTicket(request, user, nonce, expires)
 	if err != nil {
 		return
 	}
 
-	apiToken, err := h.credential.issueApiToken.Issue(request, user, expires)
+	apiToken, err := h.credential.IssueApiToken(request, user, expires)
 	if err != nil {
 		return
 	}
 
-	contentToken, err := h.credential.issueContentToken.Issue(request, user, expires)
+	contentToken, err := h.credential.IssueContentToken(request, user, expires)
 	if err != nil {
 		return
 	}

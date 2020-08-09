@@ -41,6 +41,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 
+	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_core "github.com/getto-systems/project-example-id/password"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
@@ -206,7 +207,7 @@ func (backend *testInfra) newBackend() Backend {
 
 			backend.ticket.tickets,
 		),
-		NewCredentialAction(
+		credential_core.NewAction(
 			credential_log.NewLogger(backend.logger),
 
 			backend.credential.ticketSign,

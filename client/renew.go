@@ -37,7 +37,7 @@ func (client Renew) renew(handler RenewHandler) (_ credential.Credential, err er
 		return
 	}
 
-	user, err := client.credential.parseTicket.Parse(request, ticket)
+	user, err := client.credential.ParseTicket(request, ticket)
 	if err != nil {
 		return
 	}

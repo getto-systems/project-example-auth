@@ -1,8 +1,6 @@
 package credential
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/credential"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -16,22 +14,10 @@ var (
 	errValidateAlreadyExpired   = data.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
-type ParseTicket struct {
-	logger infra.ParseTicketLogger
-	parser infra.TicketParser
-}
-
-func NewParseTicket(logger infra.ParseTicketLogger, parser infra.TicketParser) ParseTicket {
-	return ParseTicket{
-		logger: logger,
-		parser: parser,
-	}
-}
-
-func (action ParseTicket) Parse(request request.Request, ticket credential.Ticket) (_ user.User, err error) {
+func (action action) ParseTicket(request request.Request, ticket credential.Ticket) (_ user.User, err error) {
 	action.logger.TryToParseTicket(request, ticket.Nonce())
 
-	user, nonce, err := action.parser.Parse(ticket.Signature())
+	user, nonce, err := action.ticketParser.Parse(ticket.Signature())
 	if err != nil {
 		action.logger.FailedToParseTicket(request, ticket.Nonce(), err)
 		return

@@ -34,7 +34,7 @@ func (client Logout) logout(handler LogoutHandler) (err error) {
 		return
 	}
 
-	user, err := client.credential.parseTicket.Parse(request, ticket)
+	user, err := client.credential.ParseTicket(request, ticket)
 	if err != nil {
 		return
 	}
