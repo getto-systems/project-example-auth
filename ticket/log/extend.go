@@ -30,12 +30,16 @@ func (log Logger) Extend(request request.Request, user user.User, nonce credenti
 
 func extendEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, expires *expiration.Expires, limit *expiration.ExtendLimit, err error) log.Entry {
 	return log.Entry{
-		Message:               fmt.Sprintf("Ticket/Extend/%s", event),
-		Request:               request,
-		User:                  &user,
-		TicketNonce:           &nonce,
-		CredentialExpires:     expires,
-		CredentialExtendLimit: limit,
-		Error:                 err,
+		Message: fmt.Sprintf("Ticket/Extend/%s", event),
+		Request: request,
+		User:    &user,
+
+		Credential: &log.CredentialEntry{
+			TicketNonce: &nonce,
+			Expires:     expires,
+			ExtendLimit: limit,
+		},
+
+		Error: err,
 	}
 }

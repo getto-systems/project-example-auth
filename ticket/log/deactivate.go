@@ -28,10 +28,14 @@ func (log Logger) Deactivate(request request.Request, user user.User, nonce cred
 
 func deactivateEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, err error) log.Entry {
 	return log.Entry{
-		Message:     fmt.Sprintf("Ticket/Deactivate/%s", event),
-		Request:     request,
-		User:        &user,
-		TicketNonce: &nonce,
-		Error:       err,
+		Message: fmt.Sprintf("Ticket/Deactivate/%s", event),
+		Request: request,
+		User:    &user,
+
+		Credential: &log.CredentialEntry{
+			TicketNonce: &nonce,
+		},
+
+		Error: err,
 	}
 }

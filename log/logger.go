@@ -9,30 +9,38 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-type Logger interface {
-	Audit(Entry)
-	Error(Entry)
-	Info(Entry)
-	Debug(Entry)
-}
+type (
+	Logger interface {
+		Audit(Entry)
+		Error(Entry)
+		Info(Entry)
+		Debug(Entry)
+	}
 
-type Entry struct {
-	Message string
-	Request request.Request
+	Entry struct {
+		Message string
+		Request request.Request
 
-	User  *user.User
-	Login *user.Login
+		User  *user.User
+		Login *user.Login
 
-	TicketNonce *credential.TicketNonce
-	ApiRoles    *credential.ApiRoles
+		Credential *CredentialEntry
 
-	CredentialExpires     *expiration.Expires
-	CredentialExtendLimit *expiration.ExtendLimit
+		ResetSession        *password_reset.Session
+		ResetStatus         *password_reset.Status
+		ResetDestination    *password_reset.Destination
+		ResetSessionExpires *expiration.Expires
 
-	ResetSession        *password_reset.Session
-	ResetStatus         *password_reset.Status
-	ResetDestination    *password_reset.Destination
-	ResetSessionExpires *expiration.Expires
+		Error error
+	}
 
-	Error error
-}
+	CredentialEntry struct {
+		TicketNonce *credential.TicketNonce
+		ApiRoles    *credential.ApiRoles
+		Expires     *expiration.Expires
+		ExtendLimit *expiration.ExtendLimit
+	}
+
+	PasswordResetEntry struct {
+	}
+)

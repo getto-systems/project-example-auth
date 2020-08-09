@@ -30,11 +30,15 @@ func (log Logger) IssueTicket(request request.Request, user user.User, nonce cre
 
 func issueTicketEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires, err error) log.Entry {
 	return log.Entry{
-		Message:           fmt.Sprintf("Credential/IssueTicket/%s", event),
-		Request:           request,
-		User:              &user,
-		CredentialExpires: &expires,
-		TicketNonce:       &nonce,
-		Error:             err,
+		Message: fmt.Sprintf("Credential/IssueTicket/%s", event),
+		Request: request,
+		User:    &user,
+
+		Credential: &log.CredentialEntry{
+			Expires:     &expires,
+			TicketNonce: &nonce,
+		},
+
+		Error: err,
 	}
 }

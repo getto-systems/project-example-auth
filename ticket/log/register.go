@@ -30,12 +30,16 @@ func (log Logger) Register(request request.Request, user user.User, expires expi
 
 func registerEntry(event string, request request.Request, user user.User, expires expiration.Expires, limit expiration.ExtendLimit, nonce *credential.TicketNonce, err error) log.Entry {
 	return log.Entry{
-		Message:               fmt.Sprintf("Ticket/Register/%s", event),
-		Request:               request,
-		User:                  &user,
-		CredentialExpires:     &expires,
-		CredentialExtendLimit: &limit,
-		TicketNonce:           nonce,
-		Error:                 err,
+		Message: fmt.Sprintf("Ticket/Register/%s", event),
+		Request: request,
+		User:    &user,
+
+		Credential: &log.CredentialEntry{
+			Expires:     &expires,
+			ExtendLimit: &limit,
+			TicketNonce: nonce,
+		},
+
+		Error: err,
 	}
 }

@@ -18,9 +18,11 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-type Logger struct {
-	logger applog.Logger
-}
+type (
+	Logger struct {
+		logger applog.Logger
+	}
+)
 
 func NewLogger(level string) Logger {
 	return Logger{
@@ -60,73 +62,78 @@ func (logger Logger) Debug(entry log.Entry) {
 	logger.logger.Debug(jsonMessage("DEBUG", format(entry)))
 }
 
-type Entry struct {
-	Time    string     `json:"time"`
-	Level   string     `json:"level"`
-	Message string     `json:"message"`
-	Request RequestLog `json:"request"`
+type (
+	Entry struct {
+		Time    string     `json:"time"`
+		Level   string     `json:"level"`
+		Message string     `json:"message"`
+		Request RequestLog `json:"request"`
 
-	User  *UserLog  `json:"user,omitempty"`
-	Login *LoginLog `json:"login,omitempty"`
+		User  *UserLog  `json:"user,omitempty"`
+		Login *LoginLog `json:"login,omitempty"`
 
-	TicketNonce *TicketNonceLog `json:"ticket,omitempty"`
-	ApiRoles    *ApiRolesLog    `json:"api_roles,omitempty"`
+		Credential *CredentialEntry `json:"credential,omitempty"`
 
-	CredentialExpires     *CredentialExpiresLog     `json:"credential_expires,omitempty"`
-	CredentialExtendLimit *CredentialExtendLimitLog `json:"credential_extend_limit,omitempty"`
+		ResetSession        *ResetSessionLog        `json:"reset_session,omitempty"`
+		ResetStatus         *ResetStatusLog         `json:"reset_status,omitempty"`
+		ResetDestination    *ResetDestinationLog    `json:"reset_destination,omitempty"`
+		ResetSessionExpires *ResetSessionExpiresLog `json:"reset_session_expires,omitempty"`
 
-	ResetSession        *ResetSessionLog        `json:"reset_session,omitempty"`
-	ResetStatus         *ResetStatusLog         `json:"reset_status,omitempty"`
-	ResetDestination    *ResetDestinationLog    `json:"reset_destination,omitempty"`
-	ResetSessionExpires *ResetSessionExpiresLog `json:"reset_session_expires,omitempty"`
+		Error string `json:"error,omitempty"`
+	}
 
-	Error string `json:"error,omitempty"`
-}
+	CredentialEntry struct {
+		TicketNonce *TicketNonceLog           `json:"ticket_nonce,omitempty"`
+		ApiRoles    *ApiRolesLog              `json:"api_roles,omitempty"`
+		Expires     *CredentialExpiresLog     `json:"expires,omitempty"`
+		ExtendLimit *CredentialExtendLimitLog `json:"extend_limit,omitempty"`
+	}
 
-type RequestLog struct {
-	RequestedAt string   `json:"requested_at"`
-	Route       RouteLog `json:"route"`
-}
-type RouteLog struct {
-	RemoteAddr string `json:"remote_addr"`
-}
+	RequestLog struct {
+		RequestedAt string   `json:"requested_at"`
+		Route       RouteLog `json:"route"`
+	}
+	RouteLog struct {
+		RemoteAddr string `json:"remote_addr"`
+	}
 
-type UserLog struct {
-	UserID string `json:"user_id"`
-}
-type LoginLog struct {
-	LoginID string `json:"login_id"`
-}
+	UserLog struct {
+		UserID string `json:"user_id"`
+	}
+	LoginLog struct {
+		LoginID string `json:"login_id"`
+	}
 
-type TicketNonceLog struct {
-	Nonce string `json:"nonce"`
-}
-type ApiRolesLog struct {
-	ApiRoles []string `json:"api_roles"`
-}
+	TicketNonceLog struct {
+		Nonce string `json:"nonce"`
+	}
+	ApiRolesLog struct {
+		ApiRoles []string `json:"api_roles"`
+	}
 
-type CredentialExpiresLog struct {
-	Expires string `json:"expires"`
-}
-type CredentialExtendLimitLog struct {
-	ExtendLimit string `json:"extend_limit"`
-}
+	CredentialExpiresLog struct {
+		Expires string `json:"expires"`
+	}
+	CredentialExtendLimitLog struct {
+		ExtendLimit string `json:"extend_limit"`
+	}
 
-type ResetSessionLog struct {
-	SessionID string `json:"session_id"`
-}
+	ResetSessionLog struct {
+		SessionID string `json:"session_id"`
+	}
 
-// TODO あとでちゃんとする
-type ResetStatusLog struct {
-}
+	// TODO あとでちゃんとする
+	ResetStatusLog struct {
+	}
 
-// TODO あとでちゃんとする
-type ResetDestinationLog struct {
-}
+	// TODO あとでちゃんとする
+	ResetDestinationLog struct {
+	}
 
-type ResetSessionExpiresLog struct {
-	Expires string `json:"expires"`
-}
+	ResetSessionExpiresLog struct {
+		Expires string `json:"expires"`
+	}
+)
 
 func format(log log.Entry) Entry {
 	entry := Entry{
@@ -143,18 +150,8 @@ func format(log log.Entry) Entry {
 		entry.Login = loginLog(log.Login)
 	}
 
-	if log.TicketNonce != nil {
-		entry.TicketNonce = ticketNonceLog(log.TicketNonce)
-	}
-	if log.ApiRoles != nil {
-		entry.ApiRoles = apiRolesLog(log.ApiRoles)
-	}
-
-	if log.CredentialExpires != nil {
-		entry.CredentialExpires = credentialExpiresLog(log.CredentialExpires)
-	}
-	if log.CredentialExtendLimit != nil {
-		entry.CredentialExtendLimit = credentialExtendLimitLog(log.CredentialExtendLimit)
+	if log.Credential != nil {
+		entry.Credential = credentialLog(log.Credential)
 	}
 
 	if log.ResetSession != nil {
@@ -206,6 +203,22 @@ func loginLog(login *user.Login) *LoginLog {
 	}
 }
 
+func credentialLog(log *log.CredentialEntry) (entry *CredentialEntry) {
+	if log.TicketNonce != nil {
+		entry.TicketNonce = ticketNonceLog(log.TicketNonce)
+	}
+	if log.ApiRoles != nil {
+		entry.ApiRoles = apiRolesLog(log.ApiRoles)
+	}
+
+	if log.Expires != nil {
+		entry.Expires = credentialExpiresLog(log.Expires)
+	}
+	if log.ExtendLimit != nil {
+		entry.ExtendLimit = credentialExtendLimitLog(log.ExtendLimit)
+	}
+	return
+}
 func ticketNonceLog(nonce *credential.TicketNonce) *TicketNonceLog {
 	return &TicketNonceLog{
 		Nonce: string(*nonce),
