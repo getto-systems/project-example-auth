@@ -1,7 +1,9 @@
 package password_reset
 
 import (
-	gotime "time"
+	"time"
+
+	"github.com/getto-systems/project-example-id/misc/expiration"
 
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -19,7 +21,7 @@ type (
 		user        user.User
 		login       user.Login
 		requestedAt request.RequestedAt
-		expires     Expires
+		expires     expiration.Expires
 	}
 
 	Destination struct {
@@ -50,10 +52,10 @@ type (
 		reason string
 	}
 
-	WaitingSince gotime.Time
-	SendingSince gotime.Time
-	CompleteAt   gotime.Time
-	FailedAt     gotime.Time
+	WaitingSince time.Time
+	SendingSince time.Time
+	CompleteAt   time.Time
+	FailedAt     time.Time
 )
 
 func NewSession(id SessionID) Session {
@@ -65,7 +67,7 @@ func (session Session) ID() SessionID {
 	return session.id
 }
 
-func NewSessionData(user user.User, login user.Login, requestedAt request.RequestedAt, expires Expires) SessionData {
+func NewSessionData(user user.User, login user.Login, requestedAt request.RequestedAt, expires expiration.Expires) SessionData {
 	return SessionData{
 		user:        user,
 		login:       login,
@@ -82,7 +84,7 @@ func (data SessionData) Login() user.Login {
 func (data SessionData) RequestedAt() request.RequestedAt {
 	return data.requestedAt
 }
-func (data SessionData) Expires() Expires {
+func (data SessionData) Expires() expiration.Expires {
 	return data.expires
 }
 

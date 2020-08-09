@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -19,7 +18,7 @@ func ExamplePasswordChange_getLogin_change() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -27,7 +26,7 @@ func ExamplePasswordChange_getLogin_change() {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/GetLogin", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).GetLogin(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -35,7 +34,7 @@ func ExamplePasswordChange_getLogin_change() {
 		f.printLogin(passwordChangeHandler.login)
 	})
 
-	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(2), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -71,13 +70,13 @@ func ExamplePasswordChange_getLoginLog() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/GetLogin", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).GetLogin(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -111,19 +110,19 @@ func ExamplePasswordChange_changeLog() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/GetLogin", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/GetLogin", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).GetLogin(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/Change", time.Minute(2), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(2), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -162,20 +161,20 @@ func ExamplePasswordChange_disableOldPassword() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 前のパスワードでログインを試みる
-	h.newRequest("PasswordLogin", time.Minute(2), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(2), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -210,14 +209,14 @@ func ExamplePasswordChange_getLoginFailedBecauseTicketExpired() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 有効期限切れでログイン情報の取得を試みる
-	h.newRequest("PasswordChange/GetLogin", time.Minute(10), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/GetLogin", minute(10), passwordChangeHandler, func() {
 		NewPasswordChange(client).GetLogin(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -253,14 +252,14 @@ func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
 	// 登録済みデータと同じパスワードで確認、新パスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 有効期限切れでパスワードの変更を試みる
-	h.newRequest("PasswordChange/Change", time.Minute(10), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(10), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -294,14 +293,14 @@ func ExamplePasswordChange_changeFailedBecauseDifferentPassword() {
 	// 登録済みデータと異なるパスワードで確認、空のパスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "different-password", "new-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 登録されているものと違うパスワードで変更を試みる
-	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -337,14 +336,14 @@ func ExamplePasswordChange_changeFailedBecauseEmptyPassword() {
 	// 登録済みデータと同じパスワードで確認、空のパスワードに変更
 	passwordChangeHandler := newPasswordChangeHandler(handler, "password", "")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 空のパスワードへの変更を試みる
-	h.newRequest("PasswordChange/Change", time.Minute(1), passwordChangeHandler, func() {
+	h.newRequest("PasswordChange/Change", minute(1), passwordChangeHandler, func() {
 		NewPasswordChange(client).Change(passwordChangeHandler)
 	}, func(f testFormatter) {
 		f.printRequest()

@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
@@ -24,7 +23,7 @@ func ExamplePasswordReset_reset() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -32,7 +31,7 @@ func ExamplePasswordReset_reset() {
 		f.printResetSession(passwordResetHandler.session)
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -41,14 +40,14 @@ func ExamplePasswordReset_reset() {
 		f.printResetStatus(passwordResetHandler.status)
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 		f.printMessage()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -59,7 +58,7 @@ func ExamplePasswordReset_reset() {
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(4), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(4), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -109,7 +108,7 @@ func ExamplePasswordReset_createSessionLog() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -140,13 +139,13 @@ func ExamplePasswordReset_sendTokenLog() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -176,19 +175,19 @@ func ExamplePasswordReset_getStatusLog() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -221,19 +220,19 @@ func ExamplePasswordReset_resetLog() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -242,7 +241,7 @@ func ExamplePasswordReset_resetLog() {
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -292,13 +291,13 @@ func ExamplePasswordReset_disableOldPassword() {
 	// 古いパスワードでログイン
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -307,14 +306,14 @@ func ExamplePasswordReset_disableOldPassword() {
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 前のパスワードでログインを試みる
-	h.newRequest("PasswordLogin", time.Minute(2), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(2), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -352,13 +351,13 @@ func ExamplePasswordReset_disableResetSession() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -367,14 +366,14 @@ func ExamplePasswordReset_disableResetSession() {
 	// メッセージからトークンを取得
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// もう一度同じトークンを使用してリセットを試みる
-	h.newRequest("PasswordReset/Reset", time.Minute(4), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(4), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -410,7 +409,7 @@ func ExamplePasswordReset_createSessionFailedBecauseLoginNotFound() {
 	// 登録ていないログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "unknown-login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -437,7 +436,7 @@ func ExamplePasswordReset_createSessionFailedBecauseDestinationNotFound() {
 	// 登録したログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -466,13 +465,13 @@ func ExamplePasswordReset_getStatus() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -482,7 +481,7 @@ func ExamplePasswordReset_getStatus() {
 	// 疑似的にステータスを変更
 	h.passwordReset.sessions.UpdateStatusToFailed(passwordResetHandler.session, h.now(), errors.New("send token error"))
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -515,7 +514,7 @@ func ExamplePasswordReset_getStatusFailedBecauseSessionNotFound() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -524,7 +523,7 @@ func ExamplePasswordReset_getStatusFailedBecauseSessionNotFound() {
 	// 存在しないセッションステータスの取得を試みる
 	passwordResetHandler.session = password_reset.NewSession("unknown-session")
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -554,7 +553,7 @@ func ExamplePasswordReset_getStatusFailedBecauseUnknownLogin() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -563,7 +562,7 @@ func ExamplePasswordReset_getStatusFailedBecauseUnknownLogin() {
 	// 存在しないログインID でステータスの取得を試みる
 	passwordResetHandler.login = user.NewLogin("unknown-login-id")
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -597,7 +596,7 @@ func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
 	// 別なユーザーでも並行してリセット
 	another_passwordResetHandler := newPasswordResetHandler(handler, "another-login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -605,7 +604,7 @@ func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
 
 	// 並行してリセット
 	h.passwordReset.sessionGenerator.another()
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), another_passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -614,7 +613,7 @@ func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
 	// 別なログインID のステータス取得を試みる
 	passwordResetHandler.login = user.NewLogin("another-login-id")
 
-	h.newRequest("PasswordReset/GetStatus", time.Minute(2), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/GetStatus", minute(2), passwordResetHandler, func() {
 		NewPasswordReset(client).GetStatus(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -647,13 +646,13 @@ func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -662,7 +661,7 @@ func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	// 違うトークンでリセットを試みる
 	passwordResetHandler.token = "unknown-token"
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -695,13 +694,13 @@ func ExamplePasswordReset_resetFailedBecauseSessionExpired() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -710,7 +709,7 @@ func ExamplePasswordReset_resetFailedBecauseSessionExpired() {
 	passwordResetHandler.fetchToken()
 
 	// 有効期限切れ
-	h.newRequest("PasswordReset/Reset", time.Minute(31), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(31), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -743,13 +742,13 @@ func ExamplePasswordReset_resetSuccessWithTimeLimit() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -758,7 +757,7 @@ func ExamplePasswordReset_resetSuccessWithTimeLimit() {
 	passwordResetHandler.fetchToken()
 
 	// 有効期限ぎりぎり
-	h.newRequest("PasswordReset/Reset", time.Minute(30), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(30), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -803,13 +802,13 @@ func ExamplePasswordReset_resetFailedBecauseUnknownLogin() {
 	// 登録されたログインID でリセット
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -820,7 +819,7 @@ func ExamplePasswordReset_resetFailedBecauseUnknownLogin() {
 	// 存在しないログインID でリセットを試みる
 	passwordResetHandler.login = user.NewLogin("unknown-login-id")
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -857,7 +856,7 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	// 別なユーザーでも並行してリセット
 	another_passwordResetHandler := newPasswordResetHandler(handler, "another-login-id", "new-password")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -865,13 +864,13 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 
 	// 並行してリセット
 	h.passwordReset.sessionGenerator.another()
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), another_passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), another_passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(another_passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -882,7 +881,7 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	// 別なログインID でリセットを試みる
 	passwordResetHandler.login = user.NewLogin("another-login-id")
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -918,13 +917,13 @@ func ExamplePasswordReset_resetFailedBecauseEmptyPassword() {
 	// 登録されたログインID で空のパスワードにリセットを試みる
 	passwordResetHandler := newPasswordResetHandler(handler, "login-id", "")
 
-	h.newRequest("PasswordReset/CreateSession", time.Minute(0), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/CreateSession", minute(0), passwordResetHandler, func() {
 		NewPasswordReset(client).CreateSession(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("PasswordReset/SendToken", time.Minute(1), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/SendToken", minute(1), passwordResetHandler, func() {
 		NewPasswordReset(client).SendToken(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -932,7 +931,7 @@ func ExamplePasswordReset_resetFailedBecauseEmptyPassword() {
 
 	passwordResetHandler.fetchToken()
 
-	h.newRequest("PasswordReset/Reset", time.Minute(3), passwordResetHandler, func() {
+	h.newRequest("PasswordReset/Reset", minute(3), passwordResetHandler, func() {
 		NewPasswordReset(client).Reset(passwordResetHandler)
 	}, func(f testFormatter) {
 		f.printError()

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	golog "log"
-	gotime "time"
+	"time"
 
 	"github.com/getto-systems/project-example-id/misc/expiration"
 
@@ -32,7 +32,6 @@ import (
 	user_infra "github.com/getto-systems/project-example-id/user/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
@@ -62,12 +61,11 @@ type (
 	}
 
 	testExtendSecond struct {
-		password      expiration.ExtendSecond
-		passwordReset password_reset.Expiration
+		password expiration.ExtendSecond
 	}
 
 	testSession struct {
-		nowSecond  time.Second
+		nowSecond  int64
 		credential *credential.Credential
 		nonce      *credential.TicketNonce
 	}
@@ -154,12 +152,11 @@ func newTestInfra() *testInfra {
 		message: newTestMessage(),
 
 		session: testSession{
-			nowSecond: time.Second(0),
+			nowSecond: 0,
 		},
 
 		extend: testExtendSecond{
-			password:      expiration.ExtendMinute(8),
-			passwordReset: password_reset.NewExpiration(time.Minute(30)),
+			password: expiration.ExtendMinute(8),
 		},
 
 		ticket: ticketTestInfra{
@@ -229,7 +226,8 @@ func (backend *testInfra) newBackend() Backend {
 			password_reset_log.NewLogger(backend.logger),
 
 			backend.extend.password,
-			backend.extend.passwordReset,
+			expiration.ExpireMinute(30),
+
 			backend.passwordReset.sessionGenerator,
 
 			backend.passwordReset.sessions,
@@ -242,11 +240,11 @@ func (backend *testInfra) newBackend() Backend {
 }
 
 func (backend *testInfra) now() request.RequestedAt {
-	now, err := gotime.Parse(gotime.RFC3339, "2020-01-01T00:00:00Z")
+	now, err := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")
 	if err != nil {
 		golog.Fatalf("failed to initialize 'now': %s", err)
 	}
-	return request.RequestedAt(now.Add(gotime.Duration(backend.session.nowSecond * 1_000_000_000)))
+	return request.RequestedAt(now.Add(time.Duration(backend.session.nowSecond * 1_000_000_000)))
 }
 
 func newTestLogger() *testLogger {
@@ -299,7 +297,7 @@ func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
-		Expires: gotime.Time(expires).Unix(),
+		Expires: time.Time(expires).Unix(),
 	})
 	if err != nil {
 		return
@@ -453,7 +451,7 @@ func (backend *testInfra) registerOnlyUserAndLogin(userID user.UserID, loginID u
 	}
 }
 
-func (backend *testInfra) newRequest(label string, nowSecond time.Second, handler testHandler, exec func(), format func(f testFormatter)) {
+func (backend *testInfra) newRequest(label string, nowSecond int64, handler testHandler, exec func(), format func(f testFormatter)) {
 	backend.session.nowSecond = nowSecond
 
 	fmt.Println(label)
@@ -466,6 +464,9 @@ func (backend *testInfra) newRequest(label string, nowSecond time.Second, handle
 	})
 	fmt.Println("")
 	backend.logger.clear()
+}
+func minute(minute int64) int64 {
+	return minute * 60
 }
 
 func (backend *testInfra) newHandler() *commonTestHandler {
@@ -496,7 +497,7 @@ func (f testFormatter) printError() {
 	}
 }
 func (f testFormatter) printRequest() {
-	fmt.Printf("request: \"%s\"\n", formatTime(gotime.Time(f.context.request.RequestedAt())))
+	fmt.Printf("request: \"%s\"\n", formatTime(time.Time(f.context.request.RequestedAt())))
 }
 func (f testFormatter) printCredential() {
 	if f.credential == nil {
@@ -504,7 +505,7 @@ func (f testFormatter) printCredential() {
 	} else {
 		fmt.Printf(
 			"credential: expires: \"%s\", roles: %s\n",
-			formatTime(gotime.Time(f.credential.Expires())),
+			formatTime(time.Time(f.credential.Expires())),
 			f.credential.ApiToken().ApiRoles(),
 		)
 	}
@@ -520,14 +521,14 @@ func (f testFormatter) printResetDestination(dest password_reset.Destination) {
 }
 func (f testFormatter) printResetStatus(status password_reset.Status) {
 	if status.Waiting() {
-		fmt.Printf("status: {waiting: {since: \"%s\"}}\n", formatTime(gotime.Time(status.WaitingSince())))
+		fmt.Printf("status: {waiting: {since: \"%s\"}}\n", formatTime(time.Time(status.WaitingSince())))
 	} else if status.Sending() {
-		fmt.Printf("status: {sending: {since: \"%s\"}}\n", formatTime(gotime.Time(status.SendingSince())))
+		fmt.Printf("status: {sending: {since: \"%s\"}}\n", formatTime(time.Time(status.SendingSince())))
 	} else if status.Complete() {
-		fmt.Printf("status: {complete: {at: \"%s\"}}\n", formatTime(gotime.Time(status.CompleteAt())))
+		fmt.Printf("status: {complete: {at: \"%s\"}}\n", formatTime(time.Time(status.CompleteAt())))
 	} else if status.Failed() {
 		at, reason := status.FailedAtAndReason()
-		fmt.Printf("status: {failed: {at: \"%s\", reason: \"%s\"}}\n", formatTime(gotime.Time(at)), reason)
+		fmt.Printf("status: {failed: {at: \"%s\", reason: \"%s\"}}\n", formatTime(time.Time(at)), reason)
 	} else {
 		fmt.Println("status: {EMPTY}")
 	}
@@ -547,6 +548,6 @@ func (f testFormatter) printMessage() {
 	}
 }
 
-func formatTime(t gotime.Time) string {
-	return gotime.Time(t).Format(gotime.RFC3339)
+func formatTime(t time.Time) string {
+	return time.Time(t).Format(time.RFC3339)
 }

@@ -3,7 +3,6 @@ package client
 import (
 	"strings"
 
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -22,7 +21,7 @@ func ExamplePasswordLogin_login_renew_logout() {
 	renewHandler := newRenewHandler(handler)
 	logoutHandler := newLogoutHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -30,7 +29,7 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printCredential()
 	})
 
-	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
+	h.newRequest("Renew", minute(1), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -38,7 +37,7 @@ func ExamplePasswordLogin_login_renew_logout() {
 		f.printCredential()
 	})
 
-	h.newRequest("Logout", time.Minute(2), logoutHandler, func() {
+	h.newRequest("Logout", minute(2), logoutHandler, func() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -75,7 +74,7 @@ func ExamplePasswordLogin_loginWithNoApiRoles() {
 	// 登録済みデータと同じログインID・パスワードでログイン
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -102,7 +101,7 @@ func ExamplePasswordLogin_log() {
 	// 登録済みデータと同じログインID・パスワードでログイン
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -139,13 +138,13 @@ func ExampleRenew_log() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("Renew", time.Minute(1), renewHandler, func() {
+	h.newRequest("Renew", minute(1), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -185,13 +184,13 @@ func ExampleLogout_log() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	logoutHandler := newLogoutHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("Logout", time.Minute(1), logoutHandler, func() {
+	h.newRequest("Logout", minute(1), logoutHandler, func() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -224,7 +223,7 @@ func ExamplePasswordLogin_failedBecausePasswordNotFound() {
 	// パスワードの登録なしでログインを試みる
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -256,7 +255,7 @@ func ExamplePasswordLogin_failedBecauseDifferentPassword() {
 	// 違うパスワードでログインを試みる
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "different-password")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -288,7 +287,7 @@ func ExamplePasswordLogin_failedBecauseEmptyPassword() {
 	// 空のパスワードでログインを試みる
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "")
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -322,7 +321,7 @@ func ExamplePasswordLogin_failedBecauseTooLongPassword() {
 	// 長いパスワードでログインを試みる
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", longPassword)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -356,7 +355,7 @@ func ExamplePasswordLogin_successWithLongPassword() {
 	// 長いパスワードでログインを試みる
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", longPassword)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -395,14 +394,14 @@ func ExampleRenew_limited() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 最大延長期間まで延長可能
-	h.newRequest("Renew", time.Minute(5), renewHandler, func() {
+	h.newRequest("Renew", minute(5), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -433,14 +432,14 @@ func ExampleRenew_failedBecauseAlreadyExpired() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
 	// 有効期限切れ
-	h.newRequest("Renew", time.Minute(6), renewHandler, func() {
+	h.newRequest("Renew", minute(6), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -477,7 +476,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	renewHandler := newRenewHandler(handler)
 	logoutHandler := newLogoutHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -487,7 +486,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	credential := h.session.credential
 
 	// Renew する前にログアウトしてしまう
-	h.newRequest("Logout", time.Minute(1), logoutHandler, func() {
+	h.newRequest("Logout", minute(1), logoutHandler, func() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -497,7 +496,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	h.session.credential = credential
 
 	// ログアウト済み
-	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+	h.newRequest("Renew", minute(2), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -536,7 +535,7 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -545,7 +544,7 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	// 違う Nonce を使用して認証を試みる
 	h.setNonce("different-nonce")
 
-	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+	h.newRequest("Renew", minute(2), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -579,7 +578,7 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -589,7 +588,7 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	h.setNonce("another-nonce")
 	h.setCredentialNonce("another-nonce")
 
-	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+	h.newRequest("Renew", minute(2), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -625,7 +624,7 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	renewHandler := newRenewHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
@@ -634,7 +633,7 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	// User を別なものにして認証を試みる
 	h.setCredentialUser(user.NewUser("another-user-id"))
 
-	h.newRequest("Renew", time.Minute(2), renewHandler, func() {
+	h.newRequest("Renew", minute(2), renewHandler, func() {
 		NewRenew(client).Renew(renewHandler)
 	}, func(f testFormatter) {
 		f.printRequest()
@@ -670,13 +669,13 @@ func ExampleLogout_failedBecauseAlreadyExpired() {
 	passwordLoginHandler := newPasswordLoginHandler(handler, "login-id", "password")
 	logoutHandler := newLogoutHandler(handler)
 
-	h.newRequest("PasswordLogin", time.Minute(0), passwordLoginHandler, func() {
+	h.newRequest("PasswordLogin", minute(0), passwordLoginHandler, func() {
 		NewPasswordLogin(client).Login(passwordLoginHandler)
 	}, func(f testFormatter) {
 		f.printError()
 	})
 
-	h.newRequest("Logout", time.Minute(10), logoutHandler, func() {
+	h.newRequest("Logout", minute(10), logoutHandler, func() {
 		NewLogout(client).Logout(logoutHandler)
 	}, func(f testFormatter) {
 		f.printRequest()

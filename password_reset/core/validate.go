@@ -45,12 +45,12 @@ func (action action) Validate(request request.Request, login user.Login, token p
 		action.logger.FailedToValidateTokenBecauseLoginMatchFailed(request, login, err)
 		return
 	}
-	if data.Expires().Expired(request.RequestedAt()) {
+	if request.Expired(data.Expires()) {
 		err = errValidateAlreadyExpired
 		action.logger.FailedToValidateTokenBecauseSessionExpired(request, login, err)
 		return
 	}
 
 	action.logger.AuthByToken(request, login, data.User())
-	return data.User(), session, action.credentialExtendSecond, nil
+	return data.User(), session, action.extendSecond, nil
 }
