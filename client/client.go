@@ -8,6 +8,11 @@ import (
 	"github.com/getto-systems/project-example-id/credential"
 )
 
+var (
+	ErrTicketValidate = errors.NewError("Ticket.Validate", "")
+	ErrPasswordCheck  = errors.NewError("Password.Check", "")
+)
+
 type (
 	Client struct {
 		Backend
@@ -36,7 +41,7 @@ func (client Client) handleCredential(credential credential.Credential, err erro
 	}
 }
 func (client Client) handleCredentialError(err error) {
-	if goerrors.Is(err, errors.ErrTicketValidate) {
+	if goerrors.Is(err, ErrTicketValidate) {
 		client.clearCredential()
 	}
 }

@@ -4,11 +4,6 @@ import (
 	"fmt"
 )
 
-var (
-	ErrTicketValidate = NewError("Ticket.Validate", "")
-	ErrPasswordCheck  = NewError("Password.Check", "")
-)
-
 type (
 	Error struct {
 		action  string
