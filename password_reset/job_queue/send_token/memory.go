@@ -1,4 +1,4 @@
-package password_reset_job_queue_send_token
+package password_reset_job_queue_sendToken
 
 import (
 	"errors"
