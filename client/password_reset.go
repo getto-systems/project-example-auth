@@ -99,7 +99,7 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ credential.Cr
 		return
 	}
 
-	err = client.password.change.Change(request, user, newPassword)
+	err = client.password.Change(request, user, newPassword)
 	if err != nil {
 		return
 	}
