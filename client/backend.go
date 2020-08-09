@@ -3,7 +3,6 @@ package client
 import (
 	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
 	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
-	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password"
@@ -13,23 +12,15 @@ import (
 
 	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
-	ticket_core "github.com/getto-systems/project-example-id/ticket"
 )
 
 type (
 	Backend struct {
-		ticket        TicketAction
+		ticket        ticket.Action
 		credential    CredentialAction
 		user          user.Action
 		password      password.Action
 		passwordReset PasswordResetAction
-	}
-
-	TicketAction struct {
-		register   ticket.Register
-		validate   ticket.Validate
-		extend     ticket.Extend
-		deactivate ticket.Deactivate
 	}
 
 	CredentialAction struct {
@@ -50,7 +41,7 @@ type (
 )
 
 func NewBackend(
-	ticket TicketAction,
+	ticket ticket.Action,
 	credential CredentialAction,
 	user user.Action,
 	password password.Action,
@@ -62,21 +53,6 @@ func NewBackend(
 		user:          user,
 		password:      password,
 		passwordReset: passwordReset,
-	}
-}
-
-func NewTicketAction(
-	logger ticket_infra.Logger,
-
-	gen credential_infra.TicketNonceGenerator,
-
-	tickets ticket_infra.TicketRepository,
-) TicketAction {
-	return TicketAction{
-		register:   ticket_core.NewRegister(logger, gen, tickets),
-		validate:   ticket_core.NewValidate(logger, tickets),
-		extend:     ticket_core.NewExtend(logger, tickets),
-		deactivate: ticket_core.NewDeactivate(logger, tickets),
 	}
 }
 

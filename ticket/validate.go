@@ -1,8 +1,6 @@
 package ticket
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
@@ -16,20 +14,8 @@ var (
 	errValidateAlreadyExpired   = data.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
-type Validate struct {
-	logger  infra.ValidateLogger
-	tickets infra.TicketRepository
-}
-
-func NewValidate(logger infra.ValidateLogger, tickets infra.TicketRepository) Validate {
-	return Validate{
-		logger:  logger,
-		tickets: tickets,
-	}
-}
-
 // user が正しいことは確認済みでなければならない
-func (action Validate) Validate(request request.Request, user user.User, ticket credential.Ticket) (err error) {
+func (action action) Validate(request request.Request, user user.User, ticket credential.Ticket) (err error) {
 	action.logger.TryToValidate(request, user, ticket.Nonce())
 
 	dataUser, expires, found, err := action.tickets.FindUserAndExpires(ticket.Nonce())
