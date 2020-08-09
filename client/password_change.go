@@ -39,7 +39,7 @@ func (client PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Log
 		return
 	}
 
-	user, err := client.credential.parseTicket.Parse(request, ticket)
+	user, err := client.credential.ParseTicket(request, ticket)
 	if err != nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (client PasswordChange) change(handler PasswordChangeHandler) (err error) {
 		return
 	}
 
-	user, err := client.credential.parseTicket.Parse(request, ticket)
+	user, err := client.credential.ParseTicket(request, ticket)
 	if err != nil {
 		return
 	}

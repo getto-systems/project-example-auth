@@ -1,29 +1,13 @@
 package credential
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/credential"
-
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )
 
-type IssueApiToken struct {
-	logger   infra.IssueApiTokenLogger
-	signer   infra.ApiTokenSigner
-	apiUsers infra.ApiUserRepository
-}
-
-func NewIssueApiToken(logger infra.IssueApiTokenLogger, signer infra.ApiTokenSigner, apiUsers infra.ApiUserRepository) IssueApiToken {
-	return IssueApiToken{
-		logger:   logger,
-		signer:   signer,
-		apiUsers: apiUsers,
-	}
-}
-
-func (action IssueApiToken) Issue(request request.Request, user user.User, expires time.Expires) (_ credential.ApiToken, err error) {
+func (action action) IssueApiToken(request request.Request, user user.User, expires time.Expires) (_ credential.ApiToken, err error) {
 	action.logger.TryToIssueApiToken(request, user, expires)
 
 	roles, found, err := action.apiUsers.FindApiRoles(user)
@@ -36,7 +20,7 @@ func (action IssueApiToken) Issue(request request.Request, user user.User, expir
 		roles = credential.EmptyApiRoles()
 	}
 
-	token, err := action.signer.Sign(user, roles, expires)
+	token, err := action.apiTokenSinger.Sign(user, roles, expires)
 	if err != nil {
 		action.logger.FailedToIssueApiToken(request, user, expires, err)
 		return

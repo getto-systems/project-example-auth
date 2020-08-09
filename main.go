@@ -49,6 +49,7 @@ import (
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 
+	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_core "github.com/getto-systems/project-example-id/password"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
 	user_core "github.com/getto-systems/project-example-id/user"
@@ -191,12 +192,12 @@ func (infra infra) newTicketAction() ticket.Action {
 		ticket_repository_ticket.NewMemoryStore(),
 	)
 }
-func (infra infra) newCredentialAction() client.CredentialAction {
+func (infra infra) newCredentialAction() credential.Action {
 	apiUsers := credential_repository_api_user.NewMemoryStore()
 
 	initApiUserRepository(apiUsers)
 
-	return client.NewCredentialAction(
+	return credential_core.NewAction(
 		credential_log.NewLogger(infra.logger),
 
 		newTicketSigner(),

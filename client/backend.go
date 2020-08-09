@@ -1,7 +1,6 @@
 package client
 
 import (
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
 	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
 
 	"github.com/getto-systems/project-example-id/data/credential"
@@ -10,24 +9,16 @@ import (
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/user"
 
-	credential_core "github.com/getto-systems/project-example-id/credential"
 	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (
 	Backend struct {
 		ticket        ticket.Action
-		credential    CredentialAction
+		credential    credential.Action
 		user          user.Action
 		password      password.Action
 		passwordReset PasswordResetAction
-	}
-
-	CredentialAction struct {
-		parseTicket       credential.ParseTicket
-		issueTicket       credential.IssueTicket
-		issueApiToken     credential.IssueApiToken
-		issueContentToken credential.IssueContentToken
 	}
 
 	PasswordResetAction struct {
@@ -42,7 +33,7 @@ type (
 
 func NewBackend(
 	ticket ticket.Action,
-	credential CredentialAction,
+	credential credential.Action,
 	user user.Action,
 	password password.Action,
 	passwordReset PasswordResetAction,
@@ -53,23 +44,6 @@ func NewBackend(
 		user:          user,
 		password:      password,
 		passwordReset: passwordReset,
-	}
-}
-
-func NewCredentialAction(
-	logger credential_infra.Logger,
-
-	ticketSign credential_infra.TicketSign,
-	apiTokenSinger credential_infra.ApiTokenSigner,
-	contentTokenSigner credential_infra.ContentTokenSigner,
-
-	apiUsers credential_infra.ApiUserRepository,
-) CredentialAction {
-	return CredentialAction{
-		parseTicket:       credential_core.NewParseTicket(logger, ticketSign),
-		issueTicket:       credential_core.NewIssueTicket(logger, ticketSign),
-		issueApiToken:     credential_core.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
-		issueContentToken: credential_core.NewIssueContentToken(logger, contentTokenSigner),
 	}
 }
 
