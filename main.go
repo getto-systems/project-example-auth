@@ -48,6 +48,8 @@ import (
 	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
+
+	user_core "github.com/getto-systems/project-example-id/user"
 )
 
 const (
@@ -202,12 +204,12 @@ func (infra infra) newCredentialAction() client.CredentialAction {
 		apiUsers,
 	)
 }
-func (infra infra) newUserAction() client.UserAction {
+func (infra infra) newUserAction() user.Action {
 	users := user_repository_user.NewMemoryStore()
 
 	initUserRepository(users)
 
-	return client.NewUserAction(
+	return user_core.NewAction(
 		user_log.NewLogger(infra.logger),
 
 		users,

@@ -1,8 +1,6 @@
 package user
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/user"
-
 	"github.com/getto-systems/project-example-id/data"
 	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/user"
@@ -12,19 +10,7 @@ var (
 	errGetUserNotFoundUser = data.NewError("User.GetUser", "NotFound.User")
 )
 
-type GetUser struct {
-	logger infra.GetUserLogger
-	users  infra.UserRepository
-}
-
-func NewGetUser(logger infra.GetUserLogger, users infra.UserRepository) GetUser {
-	return GetUser{
-		logger: logger,
-		users:  users,
-	}
-}
-
-func (action GetUser) Get(request request.Request, login user.Login) (_ user.User, err error) {
+func (action action) GetUser(request request.Request, login user.Login) (_ user.User, err error) {
 	action.logger.TryToGetUser(request, login)
 
 	user, found, err := action.users.FindUser(login)

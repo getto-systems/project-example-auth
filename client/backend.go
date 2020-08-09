@@ -5,7 +5,6 @@ import (
 	password_infra "github.com/getto-systems/project-example-id/infra/password"
 	password_reset_infra "github.com/getto-systems/project-example-id/infra/password_reset"
 	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
-	user_infra "github.com/getto-systems/project-example-id/infra/user"
 
 	"github.com/getto-systems/project-example-id/data/credential"
 	"github.com/getto-systems/project-example-id/data/password"
@@ -17,14 +16,13 @@ import (
 	password_core "github.com/getto-systems/project-example-id/password"
 	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
 	ticket_core "github.com/getto-systems/project-example-id/ticket"
-	user_core "github.com/getto-systems/project-example-id/user"
 )
 
 type (
 	Backend struct {
 		ticket        TicketAction
 		credential    CredentialAction
-		user          UserAction
+		user          user.Action
 		password      PasswordAction
 		passwordReset PasswordResetAction
 	}
@@ -41,11 +39,6 @@ type (
 		issueTicket       credential.IssueTicket
 		issueApiToken     credential.IssueApiToken
 		issueContentToken credential.IssueContentToken
-	}
-
-	UserAction struct {
-		getLogin user.GetLogin
-		getUser  user.GetUser
 	}
 
 	PasswordAction struct {
@@ -66,7 +59,7 @@ type (
 func NewBackend(
 	ticket TicketAction,
 	credential CredentialAction,
-	user UserAction,
+	user user.Action,
 	password PasswordAction,
 	passwordReset PasswordResetAction,
 ) Backend {
@@ -108,17 +101,6 @@ func NewCredentialAction(
 		issueTicket:       credential_core.NewIssueTicket(logger, ticketSign),
 		issueApiToken:     credential_core.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
 		issueContentToken: credential_core.NewIssueContentToken(logger, contentTokenSigner),
-	}
-}
-
-func NewUserAction(
-	logger user_infra.Logger,
-
-	users user_infra.UserRepository,
-) UserAction {
-	return UserAction{
-		getLogin: user_core.NewGetLogin(logger, users),
-		getUser:  user_core.NewGetUser(logger, users),
 	}
 }
 

@@ -41,7 +41,7 @@ func (client PasswordReset) createSession(handler PasswordResetHandler) (_ passw
 		return
 	}
 
-	user, err := client.user.getUser.Get(request, login)
+	user, err := client.user.GetUser(request, login)
 	if err != nil {
 		return
 	}

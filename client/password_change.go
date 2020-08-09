@@ -49,7 +49,7 @@ func (client PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Log
 		return
 	}
 
-	login, err := client.user.getLogin.Get(request, user)
+	login, err := client.user.GetLogin(request, user)
 	if err != nil {
 		return
 	}
