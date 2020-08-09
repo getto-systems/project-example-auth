@@ -8,8 +8,24 @@ import (
 
 type (
 	Logger interface {
+		ParseTicketLogger
+
+		IssueTicketLogger
 		IssueApiTokenLogger
 		IssueContentTokenLogger
+	}
+
+	ParseTicketLogger interface {
+		TryToParseTicket(request.Request, TicketNonce)
+		FailedToParseTicket(request.Request, TicketNonce, error)
+		FailedToParseTicketBecauseNonceMatchFailed(request.Request, TicketNonce, error)
+		ParseTicket(request.Request, TicketNonce, user.User)
+	}
+
+	IssueTicketLogger interface {
+		TryToIssueTicket(request.Request, user.User, TicketNonce, time.Expires)
+		FailedToIssueTicket(request.Request, user.User, TicketNonce, time.Expires, error)
+		IssueTicket(request.Request, user.User, TicketNonce, time.Expires)
 	}
 
 	IssueApiTokenLogger interface {

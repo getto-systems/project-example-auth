@@ -109,5 +109,10 @@ func (client PasswordReset) reset(handler PasswordResetHandler) (_ credential.Cr
 		return
 	}
 
-	return client.issueCredential(request, user, exp)
+	nonce, expires, err := client.ticket.register.Register(request, user, exp)
+	if err != nil {
+		return
+	}
+
+	return client.issueCredential(request, user, nonce, expires)
 }

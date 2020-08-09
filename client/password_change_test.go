@@ -90,6 +90,8 @@ func ExamplePasswordChange_getLoginLog() {
 	//
 	// PasswordChange/GetLogin
 	// err: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "User/GetLogin/TryToGetLogin", debug
@@ -137,6 +139,8 @@ func ExamplePasswordChange_changeLog() {
 	//
 	// PasswordChange/Change
 	// err: nil
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -230,6 +234,8 @@ func ExamplePasswordChange_getLoginFailedBecauseTicketExpired() {
 	// request: "2020-01-01T00:10:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// login: {}
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -269,6 +275,8 @@ func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
 	// PasswordChange/Change
 	// request: "2020-01-01T00:10:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -308,6 +316,8 @@ func ExamplePasswordChange_changeFailedBecauseDifferentPassword() {
 	// PasswordChange/Change
 	// request: "2020-01-01T00:01:00Z"
 	// err: "Password.Validate/MatchFailed"
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -349,6 +359,8 @@ func ExamplePasswordChange_changeFailedBecauseEmptyPassword() {
 	// PasswordChange/Change
 	// request: "2020-01-01T00:01:00Z"
 	// err: "Password.Check/Length.Empty"
+	// log: "Credential/ParseTicket/TryToParseTicket", debug
+	// log: "Credential/ParseTicket/ParseTicket", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Password/Validate/TryToValidate", debug

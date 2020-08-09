@@ -267,12 +267,14 @@ func ExamplePasswordReset_resetLog() {
 	// log: "Password/Change/Change", audit
 	// log: "PasswordReset/CloseSession/TryToCloseSession", debug
 	// log: "PasswordReset/CloseSession/CloseSession", info
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "Ticket/Register/TryToRegister", debug
+	// log: "Ticket/Register/Register", info
+	// log: "Credential/IssueTicket/TryToIssueTicket", debug
+	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueApiToken/TryToIssue", debug
+	// log: "Credential/IssueApiToken/Issue", info
+	// log: "Credential/IssueContentToken/TryToIssue", debug
+	// log: "Credential/IssueContentToken/Issue", info
 	//
 }
 
@@ -778,12 +780,14 @@ func ExamplePasswordReset_resetSuccessWithTimeLimit() {
 	// log: "Password/Change/Change", audit
 	// log: "PasswordReset/CloseSession/TryToCloseSession", debug
 	// log: "PasswordReset/CloseSession/CloseSession", info
-	// log: "Ticket/Issue/TryToIssue", debug
-	// log: "Ticket/Issue/Issue", info
-	// log: "ApiToken/IssueApiToken/TryToIssue", debug
-	// log: "ApiToken/IssueApiToken/Issue", info
-	// log: "ApiToken/IssueContentToken/TryToIssue", debug
-	// log: "ApiToken/IssueContentToken/Issue", info
+	// log: "Ticket/Register/TryToRegister", debug
+	// log: "Ticket/Register/Register", info
+	// log: "Credential/IssueTicket/TryToIssueTicket", debug
+	// log: "Credential/IssueTicket/IssueTicket", info
+	// log: "Credential/IssueApiToken/TryToIssue", debug
+	// log: "Credential/IssueApiToken/Issue", info
+	// log: "Credential/IssueContentToken/TryToIssue", debug
+	// log: "Credential/IssueContentToken/Issue", info
 	//
 }
 

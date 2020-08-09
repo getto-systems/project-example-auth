@@ -17,20 +17,22 @@ import (
 type (
 	Backend struct {
 		ticket        TicketAction
-		apiToken      ApiTokenAction
+		credential    CredentialAction
 		user          UserAction
 		password      PasswordAction
 		passwordReset PasswordResetAction
 	}
 
 	TicketAction struct {
+		register   ticket.Register
 		validate   ticket.Validate
 		extend     ticket.Extend
 		deactivate ticket.Deactivate
-		issue      ticket.Issue
 	}
 
-	ApiTokenAction struct {
+	CredentialAction struct {
+		parseTicket       credential.ParseTicket
+		issueTicket       credential.IssueTicket
 		issueApiToken     credential.IssueApiToken
 		issueContentToken credential.IssueContentToken
 	}
@@ -57,14 +59,14 @@ type (
 
 func NewBackend(
 	ticket TicketAction,
-	apiToken ApiTokenAction,
+	credential CredentialAction,
 	user UserAction,
 	password PasswordAction,
 	passwordReset PasswordResetAction,
 ) Backend {
 	return Backend{
 		ticket:        ticket,
-		apiToken:      apiToken,
+		credential:    credential,
 		user:          user,
 		password:      password,
 		passwordReset: passwordReset,
@@ -74,28 +76,30 @@ func NewBackend(
 func NewTicketAction(
 	logger ticket_data.Logger,
 
-	sign credential_data.TicketSign,
 	gen credential_data.TicketNonceGenerator,
 
 	tickets ticket_data.TicketRepository,
 ) TicketAction {
 	return TicketAction{
-		validate:   ticket.NewValidate(logger, sign, tickets),
-		extend:     ticket.NewExtend(logger, sign, tickets),
+		register:   ticket.NewRegister(logger, gen, tickets),
+		validate:   ticket.NewValidate(logger, tickets),
+		extend:     ticket.NewExtend(logger, tickets),
 		deactivate: ticket.NewDeactivate(logger, tickets),
-		issue:      ticket.NewIssue(logger, sign, gen, tickets),
 	}
 }
 
-func NewApiTokenAction(
+func NewCredentialAction(
 	logger credential_data.Logger,
 
+	ticketSign credential_data.TicketSign,
 	apiTokenSinger credential_data.ApiTokenSigner,
 	contentTokenSigner credential_data.ContentTokenSigner,
 
 	apiUsers credential_data.ApiUserRepository,
-) ApiTokenAction {
-	return ApiTokenAction{
+) CredentialAction {
+	return CredentialAction{
+		parseTicket:       credential.NewParseTicket(logger, ticketSign),
+		issueTicket:       credential.NewIssueTicket(logger, ticketSign),
 		issueApiToken:     credential.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
 		issueContentToken: credential.NewIssueContentToken(logger, contentTokenSigner),
 	}

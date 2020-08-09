@@ -17,55 +17,41 @@ var (
 
 type Validate struct {
 	logger  ticket.ValidateLogger
-	parser  credential.TicketParser
 	tickets ticket.TicketRepository
 }
 
-func NewValidate(logger ticket.ValidateLogger, parser credential.TicketParser, tickets ticket.TicketRepository) Validate {
+func NewValidate(logger ticket.ValidateLogger, tickets ticket.TicketRepository) Validate {
 	return Validate{
 		logger:  logger,
-		parser:  parser,
 		tickets: tickets,
 	}
 }
 
-func (action Validate) Validate(request request.Request, ticket credential.Ticket) (_ user.User, err error) {
-	action.logger.TryToValidate(request, ticket.Nonce())
+// user が正しいことは確認済みでなければならない
+func (action Validate) Validate(request request.Request, user user.User, ticket credential.Ticket) (err error) {
+	action.logger.TryToValidate(request, user, ticket.Nonce())
 
-	ticketUser, nonce, err := action.parser.Parse(ticket.Signature())
+	dataUser, expires, found, err := action.tickets.FindUserAndExpires(ticket.Nonce())
 	if err != nil {
-		action.logger.FailedToValidate(request, ticket.Nonce(), err)
-		return
-	}
-
-	if nonce != ticket.Nonce() {
-		err = errValidateMatchFailedNonce
-		action.logger.FailedToValidateBecauseMatchFailed(request, ticket.Nonce(), err)
-		return
-	}
-
-	dataUser, expires, found, err := action.tickets.FindUserAndExpires(nonce)
-	if err != nil {
-		action.logger.FailedToValidate(request, ticket.Nonce(), err)
+		action.logger.FailedToValidate(request, user, ticket.Nonce(), err)
 		return
 	}
 	if !found {
 		err = errValidateNotFoundTicket
-		action.logger.FailedToValidateBecauseTicketNotFound(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseTicketNotFound(request, user, ticket.Nonce(), err)
 		return
 	}
-	if ticketUser.ID() != dataUser.ID() {
+	if user.ID() != dataUser.ID() {
 		err = errValidateMatchFailedUser
-		action.logger.FailedToValidateBecauseMatchFailed(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseUserMatchFailed(request, user, ticket.Nonce(), err)
 		return
 	}
-
 	if request.RequestedAt().Expired(expires) {
 		err = errValidateAlreadyExpired
-		action.logger.FailedToValidateBecauseExpired(request, ticket.Nonce(), err)
+		action.logger.FailedToValidateBecauseExpired(request, user, ticket.Nonce(), err)
 		return
 	}
 
 	action.logger.AuthByTicket(request, dataUser, ticket.Nonce())
-	return dataUser, nil
+	return nil
 }

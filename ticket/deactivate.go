@@ -19,8 +19,8 @@ func NewDeactivate(logger ticket.DeactivateLogger, tickets ticket.TicketReposito
 	}
 }
 
+// user が正しいことは確認済みでなければならない
 func (action Deactivate) Deactivate(request request.Request, user user.User, ticket credential.Ticket) (err error) {
-	// user が正しいことは確認済みでなければならない
 	action.logger.TryToDeactivate(request, user, ticket.Nonce())
 
 	err = action.tickets.DeactivateExpiresAndExtendLimit(ticket.Nonce())

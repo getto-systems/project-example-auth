@@ -52,6 +52,18 @@ func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce credential.Ticket
 	return data.expireSecond, data.limit, true, nil
 }
 
+func (store *MemoryStore) UpdateExpires(nonce credential.TicketNonce, expires time.Expires) (err error) {
+	data, found := store.ticket[nonce]
+	if !found {
+		return nil
+	}
+
+	data.expires = expires
+	store.ticket[nonce] = data
+
+	return nil
+}
+
 func (store *MemoryStore) FindUser(nonce credential.TicketNonce) (_ user.User, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
@@ -63,7 +75,6 @@ func (store *MemoryStore) FindUser(nonce credential.TicketNonce) (_ user.User, f
 func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce credential.TicketNonce) (err error) {
 	data, found := store.ticket[nonce]
 	if !found {
-		// 見つからない場合は何もせず、特にエラーにもしない
 		return nil
 	}
 

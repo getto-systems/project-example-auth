@@ -37,15 +37,20 @@ func (client Renew) renew(handler RenewHandler) (_ credential.Credential, err er
 		return
 	}
 
-	user, err := client.ticket.validate.Validate(request, ticket)
+	user, err := client.credential.parseTicket.Parse(request, ticket)
 	if err != nil {
 		return
 	}
 
-	newTicket, expires, err := client.ticket.extend.Extend(request, user, ticket)
+	err = client.ticket.validate.Validate(request, user, ticket)
 	if err != nil {
 		return
 	}
 
-	return client.issueCredentialByTicket(request, user, newTicket, expires)
+	expires, err := client.ticket.extend.Extend(request, user, ticket)
+	if err != nil {
+		return
+	}
+
+	return client.issueCredential(request, user, ticket.Nonce(), expires)
 }

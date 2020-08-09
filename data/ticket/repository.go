@@ -11,6 +11,7 @@ type (
 		FindUserAndExpires(credential.TicketNonce) (user.User, time.Expires, bool, error)
 
 		FindExpireSecondAndExtendLimit(credential.TicketNonce) (time.Second, time.ExtendLimit, bool, error)
+		UpdateExpires(credential.TicketNonce, time.Expires) error
 
 		FindUser(credential.TicketNonce) (user.User, bool, error)
 		DeactivateExpiresAndExtendLimit(credential.TicketNonce) error
