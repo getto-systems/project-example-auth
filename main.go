@@ -39,16 +39,16 @@ import (
 	password_reset_infra "github.com/getto-systems/project-example-id/password_reset/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/ticket"
 
 	"github.com/getto-systems/project-example-id/credential/core"
 	"github.com/getto-systems/project-example-id/password/core"
 	"github.com/getto-systems/project-example-id/password_reset/core"
-	ticket_core "github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-id/ticket/core"
 	user_core "github.com/getto-systems/project-example-id/user"
 )
 

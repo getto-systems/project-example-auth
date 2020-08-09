@@ -1,4 +1,4 @@
-package ticket
+package infra
 
 import (
 	"github.com/getto-systems/project-example-id/credential"

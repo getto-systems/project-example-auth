@@ -1,4 +1,4 @@
-package ticket
+package ticket_core
 
 import (
 	"github.com/getto-systems/project-example-id/credential"

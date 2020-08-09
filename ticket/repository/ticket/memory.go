@@ -1,9 +1,9 @@
-package ticket
+package ticket_repository_ticket
 
 import (
 	"errors"
 
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
+	"github.com/getto-systems/project-example-id/ticket/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"

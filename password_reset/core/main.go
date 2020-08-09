@@ -3,8 +3,8 @@ package password_reset_core
 import (
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type (

@@ -3,8 +3,8 @@ package password_core
 import (
 	"github.com/getto-systems/project-example-id/password/infra"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
 	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type (
