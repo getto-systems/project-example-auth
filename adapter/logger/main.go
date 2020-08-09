@@ -72,21 +72,24 @@ type (
 		User  *UserLog  `json:"user,omitempty"`
 		Login *LoginLog `json:"login,omitempty"`
 
-		Credential *CredentialEntry `json:"credential,omitempty"`
-
-		ResetSession        *ResetSessionLog        `json:"reset_session,omitempty"`
-		ResetStatus         *ResetStatusLog         `json:"reset_status,omitempty"`
-		ResetDestination    *ResetDestinationLog    `json:"reset_destination,omitempty"`
-		ResetSessionExpires *ResetSessionExpiresLog `json:"reset_session_expires,omitempty"`
+		Credential    *CredentialEntry    `json:"credential,omitempty"`
+		PasswordReset *PasswordResetEntry `json:"password_reset,omitempty"`
 
 		Error string `json:"error,omitempty"`
 	}
 
 	CredentialEntry struct {
-		TicketNonce *TicketNonceLog           `json:"ticket_nonce,omitempty"`
-		ApiRoles    *ApiRolesLog              `json:"api_roles,omitempty"`
+		TicketNonce *TicketNonceLog           `json:"nonce,omitempty"`
+		ApiRoles    *ApiRolesLog              `json:"roles,omitempty"`
 		Expires     *CredentialExpiresLog     `json:"expires,omitempty"`
-		ExtendLimit *CredentialExtendLimitLog `json:"extend_limit,omitempty"`
+		ExtendLimit *CredentialExtendLimitLog `json:"limit,omitempty"`
+	}
+
+	PasswordResetEntry struct {
+		Session     *ResetSessionLog        `json:"session,omitempty"`
+		Status      *ResetStatusLog         `json:"status,omitempty"`
+		Destination *ResetDestinationLog    `json:"destination,omitempty"`
+		Expires     *ResetSessionExpiresLog `json:"expires,omitempty"`
 	}
 
 	RequestLog struct {
@@ -153,18 +156,8 @@ func format(log log.Entry) Entry {
 	if log.Credential != nil {
 		entry.Credential = credentialLog(log.Credential)
 	}
-
-	if log.ResetSession != nil {
-		entry.ResetSession = resetSessionLog(log.ResetSession)
-	}
-	if log.ResetStatus != nil {
-		entry.ResetStatus = resetStatusLog(log.ResetStatus)
-	}
-	if log.ResetDestination != nil {
-		entry.ResetDestination = resetDestinationLog(log.ResetDestination)
-	}
-	if log.ResetSessionExpires != nil {
-		entry.ResetSessionExpires = resetSessionExpiresLog(log.ResetSessionExpires)
+	if log.PasswordReset != nil {
+		entry.PasswordReset = passwordResetLog(log.PasswordReset)
 	}
 
 	if log.Error != nil {
@@ -232,7 +225,6 @@ func apiRolesLog(roles *credential.ApiRoles) *ApiRolesLog {
 
 	return &log
 }
-
 func credentialExpiresLog(expires *expiration.Expires) *CredentialExpiresLog {
 	return &CredentialExpiresLog{
 		Expires: time.Time(*expires).String(),
@@ -244,6 +236,21 @@ func credentialExtendLimitLog(limit *expiration.ExtendLimit) *CredentialExtendLi
 	}
 }
 
+func passwordResetLog(log *log.PasswordResetEntry) (entry *PasswordResetEntry) {
+	if log.Session != nil {
+		entry.Session = resetSessionLog(log.Session)
+	}
+	if log.Status != nil {
+		entry.Status = resetStatusLog(log.Status)
+	}
+	if log.Destination != nil {
+		entry.Destination = resetDestinationLog(log.Destination)
+	}
+	if log.Expires != nil {
+		entry.Expires = resetSessionExpiresLog(log.Expires)
+	}
+	return
+}
 func resetSessionLog(session *password_reset.Session) *ResetSessionLog {
 	return &ResetSessionLog{
 		SessionID: string(session.ID()),

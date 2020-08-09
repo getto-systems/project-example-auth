@@ -24,12 +24,8 @@ type (
 		User  *user.User
 		Login *user.Login
 
-		Credential *CredentialEntry
-
-		ResetSession        *password_reset.Session
-		ResetStatus         *password_reset.Status
-		ResetDestination    *password_reset.Destination
-		ResetSessionExpires *expiration.Expires
+		Credential    *CredentialEntry
+		PasswordReset *PasswordResetEntry
 
 		Error error
 	}
@@ -42,5 +38,9 @@ type (
 	}
 
 	PasswordResetEntry struct {
+		Session     *password_reset.Session
+		Status      *password_reset.Status
+		Destination *password_reset.Destination
+		Expires     *expiration.Expires
 	}
 )

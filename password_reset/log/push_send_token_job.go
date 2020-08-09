@@ -30,8 +30,10 @@ func pushSendTokenJobEntry(event string, request request.Request, session passwo
 		Message: fmt.Sprintf("PasswordReset/PushSendTokenJob/%s", event),
 		Request: request,
 
-		ResetSession:     &session,
-		ResetDestination: &dest,
+		PasswordReset: &log.PasswordResetEntry{
+			Session:     &session,
+			Destination: &dest,
+		},
 
 		Error: err,
 	}

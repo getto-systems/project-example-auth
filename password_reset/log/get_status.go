@@ -36,8 +36,10 @@ func getStatusEntry(event string, request request.Request, session password_rese
 		Message: fmt.Sprintf("PasswordReset/GetStatus/%s", event),
 		Request: request,
 
-		ResetSession: &session,
-		ResetStatus:  status,
+		PasswordReset: &log.PasswordResetEntry{
+			Session: &session,
+			Status:  status,
+		},
 
 		Error: err,
 	}

@@ -33,14 +33,16 @@ func (log Logger) CreateSession(request request.Request, user user.User, login u
 
 func createSessionEntry(event string, request request.Request, user user.User, login user.Login, expires expiration.Expires, session *password_reset.Session, dest *password_reset.Destination, err error) log.Entry {
 	return log.Entry{
-		Message:             fmt.Sprintf("PasswordReset/CreateSession/%s", event),
-		Request:             request,
-		User:                &user,
-		Login:               &login,
-		ResetSessionExpires: &expires,
+		Message: fmt.Sprintf("PasswordReset/CreateSession/%s", event),
+		Request: request,
+		User:    &user,
+		Login:   &login,
 
-		ResetSession:     session,
-		ResetDestination: dest,
+		PasswordReset: &log.PasswordResetEntry{
+			Expires:     &expires,
+			Session:     session,
+			Destination: dest,
+		},
 
 		Error: err,
 	}
