@@ -7,14 +7,17 @@ import (
 	ticket_infra "github.com/getto-systems/project-example-id/infra/ticket"
 	user_infra "github.com/getto-systems/project-example-id/infra/user"
 
-	password_reset_data "github.com/getto-systems/project-example-id/data/password_reset"
-	ticket_data "github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/data/password"
+	"github.com/getto-systems/project-example-id/data/password_reset"
+	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/data/user"
 
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/password"
-	"github.com/getto-systems/project-example-id/password_reset"
-	"github.com/getto-systems/project-example-id/ticket"
-	"github.com/getto-systems/project-example-id/user"
+	credential_core "github.com/getto-systems/project-example-id/credential"
+	password_core "github.com/getto-systems/project-example-id/password"
+	password_reset_core "github.com/getto-systems/project-example-id/password_reset"
+	ticket_core "github.com/getto-systems/project-example-id/ticket"
+	user_core "github.com/getto-systems/project-example-id/user"
 )
 
 type (
@@ -84,10 +87,10 @@ func NewTicketAction(
 	tickets ticket_infra.TicketRepository,
 ) TicketAction {
 	return TicketAction{
-		register:   ticket.NewRegister(logger, gen, tickets),
-		validate:   ticket.NewValidate(logger, tickets),
-		extend:     ticket.NewExtend(logger, tickets),
-		deactivate: ticket.NewDeactivate(logger, tickets),
+		register:   ticket_core.NewRegister(logger, gen, tickets),
+		validate:   ticket_core.NewValidate(logger, tickets),
+		extend:     ticket_core.NewExtend(logger, tickets),
+		deactivate: ticket_core.NewDeactivate(logger, tickets),
 	}
 }
 
@@ -101,10 +104,10 @@ func NewCredentialAction(
 	apiUsers credential_infra.ApiUserRepository,
 ) CredentialAction {
 	return CredentialAction{
-		parseTicket:       credential.NewParseTicket(logger, ticketSign),
-		issueTicket:       credential.NewIssueTicket(logger, ticketSign),
-		issueApiToken:     credential.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
-		issueContentToken: credential.NewIssueContentToken(logger, contentTokenSigner),
+		parseTicket:       credential_core.NewParseTicket(logger, ticketSign),
+		issueTicket:       credential_core.NewIssueTicket(logger, ticketSign),
+		issueApiToken:     credential_core.NewIssueApiToken(logger, apiTokenSinger, apiUsers),
+		issueContentToken: credential_core.NewIssueContentToken(logger, contentTokenSigner),
 	}
 }
 
@@ -114,30 +117,30 @@ func NewUserAction(
 	users user_infra.UserRepository,
 ) UserAction {
 	return UserAction{
-		getLogin: user.NewGetLogin(logger, users),
-		getUser:  user.NewGetUser(logger, users),
+		getLogin: user_core.NewGetLogin(logger, users),
+		getUser:  user_core.NewGetUser(logger, users),
 	}
 }
 
 func NewPasswordAction(
 	logger password_infra.Logger,
 
-	exp ticket_data.Expiration,
+	exp ticket.Expiration,
 	enc password_infra.PasswordEncrypter,
 
 	passwords password_infra.PasswordRepository,
 ) PasswordAction {
 	return PasswordAction{
-		validate: password.NewValidate(logger, exp, enc, passwords),
-		change:   password.NewChange(logger, enc, passwords),
+		validate: password_core.NewValidate(logger, exp, enc, passwords),
+		change:   password_core.NewChange(logger, enc, passwords),
 	}
 }
 
 func NewPasswordResetAction(
 	logger password_reset_infra.Logger,
 
-	ticketExp ticket_data.Expiration,
-	exp password_reset_data.Expiration,
+	ticketExp ticket.Expiration,
+	exp password_reset.Expiration,
 	gen password_reset_infra.SessionGenerator,
 
 	sessions password_reset_infra.SessionRepository,
@@ -148,11 +151,11 @@ func NewPasswordResetAction(
 	tokenSender password_reset_infra.TokenSender,
 ) PasswordResetAction {
 	return PasswordResetAction{
-		createSession:    password_reset.NewCreateSession(logger, exp, gen, sessions, destinations),
-		pushSendTokenJob: password_reset.NewPushSendTokenJob(logger, sessions, tokenQueue),
-		sendToken:        password_reset.NewSendToken(logger, sessions, tokenQueue, tokenSender),
-		getStatus:        password_reset.NewGetStatus(logger, sessions),
-		validate:         password_reset.NewValidate(logger, ticketExp, sessions),
-		closeSession:     password_reset.NewCloseSession(logger, sessions),
+		createSession:    password_reset_core.NewCreateSession(logger, exp, gen, sessions, destinations),
+		pushSendTokenJob: password_reset_core.NewPushSendTokenJob(logger, sessions, tokenQueue),
+		sendToken:        password_reset_core.NewSendToken(logger, sessions, tokenQueue, tokenSender),
+		getStatus:        password_reset_core.NewGetStatus(logger, sessions),
+		validate:         password_reset_core.NewValidate(logger, ticketExp, sessions),
+		closeSession:     password_reset_core.NewCloseSession(logger, sessions),
 	}
 }
