@@ -19,23 +19,19 @@ import (
 
 	"github.com/getto-systems/project-example-id/client"
 
-	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
-	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
-
 	credential_log "github.com/getto-systems/project-example-id/credential/log"
-	credential_repository_api_user "github.com/getto-systems/project-example-id/credential/repository/api_user"
-
-	user_log "github.com/getto-systems/project-example-id/user/log"
-	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
-
+	credential_repository_apiUser "github.com/getto-systems/project-example-id/credential/repository/api_user"
 	password_log "github.com/getto-systems/project-example-id/password/log"
 	password_repository_password "github.com/getto-systems/project-example-id/password/repository/password"
-
 	password_reset_job_queue_send_token "github.com/getto-systems/project-example-id/password_reset/job_queue/send_token"
 	password_reset_log "github.com/getto-systems/project-example-id/password_reset/log"
 	password_reset_repository_destination "github.com/getto-systems/project-example-id/password_reset/repository/destination"
 	password_reset_repository_session "github.com/getto-systems/project-example-id/password_reset/repository/session"
 	password_reset_sender "github.com/getto-systems/project-example-id/password_reset/sender"
+	ticket_log "github.com/getto-systems/project-example-id/ticket/log"
+	ticket_repository_ticket "github.com/getto-systems/project-example-id/ticket/repository/ticket"
+	user_log "github.com/getto-systems/project-example-id/user/log"
+	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
 
 	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
 	password_infra "github.com/getto-systems/project-example-id/infra/password"
@@ -194,7 +190,7 @@ func (infra infra) newTicketAction() ticket.Action {
 	)
 }
 func (infra infra) newCredentialAction() credential.Action {
-	apiUsers := credential_repository_api_user.NewMemoryStore()
+	apiUsers := credential_repository_apiUser.NewMemoryStore()
 
 	initApiUserRepository(apiUsers)
 
