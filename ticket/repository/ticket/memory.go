@@ -3,7 +3,6 @@ package ticket
 import (
 	"errors"
 
-	credential_infra "github.com/getto-systems/project-example-id/infra/credential"
 	infra "github.com/getto-systems/project-example-id/infra/ticket"
 
 	"github.com/getto-systems/project-example-id/data/credential"
@@ -87,9 +86,9 @@ func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce credential.Ticke
 	return nil
 }
 
-func (store *MemoryStore) RegisterTicket(gen credential_infra.TicketNonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ credential.TicketNonce, err error) {
+func (store *MemoryStore) RegisterTicket(gen infra.TicketNonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ credential.TicketNonce, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
-		nonce, genErr := gen.GenerateNonce()
+		nonce, genErr := gen.GenerateTicketNonce()
 		if genErr != nil {
 			err = genErr
 			return
