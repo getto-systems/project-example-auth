@@ -3,8 +3,8 @@ package client
 import (
 	"errors"
 
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data"
-	"github.com/getto-systems/project-example-id/data/credential"
 )
 
 type (

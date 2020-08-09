@@ -5,7 +5,7 @@ import (
 
 	infra "github.com/getto-systems/project-example-id/infra/ticket"
 
-	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/data/user"
 )

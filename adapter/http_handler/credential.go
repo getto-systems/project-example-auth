@@ -9,7 +9,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/client"
 
-	"github.com/getto-systems/project-example-id/data/credential"
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"
 )
 
