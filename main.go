@@ -19,8 +19,8 @@ import (
 
 	"github.com/getto-systems/project-example-id/client"
 
-	credential_log "github.com/getto-systems/project-example-id/credential/log"
-	credential_repository_apiUser "github.com/getto-systems/project-example-id/credential/repository/api_user"
+	"github.com/getto-systems/project-example-id/credential/log"
+	"github.com/getto-systems/project-example-id/credential/repository/api_user"
 	password_log "github.com/getto-systems/project-example-id/password/log"
 	password_repository_password "github.com/getto-systems/project-example-id/password/repository/password"
 	password_reset_job_queue_send_token "github.com/getto-systems/project-example-id/password_reset/job_queue/send_token"

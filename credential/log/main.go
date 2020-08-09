@@ -1,4 +1,4 @@
-package log
+package credential_log
 
 import (
 	"github.com/getto-systems/project-example-id/log"

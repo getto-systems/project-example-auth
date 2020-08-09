@@ -1,4 +1,4 @@
-package api_user
+package credential_repository_apiUser
 
 import (
 	"github.com/getto-systems/project-example-id/credential/infra"
