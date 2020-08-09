@@ -241,12 +241,12 @@ func (backend *testInfra) newBackend() Backend {
 	)
 }
 
-func (backend *testInfra) now() time.RequestedAt {
+func (backend *testInfra) now() request.RequestedAt {
 	now, err := gotime.Parse(gotime.RFC3339, "2020-01-01T00:00:00Z")
 	if err != nil {
 		golog.Fatalf("failed to initialize 'now': %s", err)
 	}
-	return time.RequestedAt(now.Add(gotime.Duration(backend.session.nowSecond * 1_000_000_000)))
+	return request.RequestedAt(now.Add(gotime.Duration(backend.session.nowSecond * 1_000_000_000)))
 }
 
 func newTestLogger() *testLogger {

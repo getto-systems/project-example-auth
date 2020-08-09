@@ -1,8 +1,8 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -15,9 +15,9 @@ type (
 		CreateSession(SessionGenerator, password_reset.SessionData, password_reset.Destination) (password_reset.Session, password_reset.Token, error)
 		CloseSession(password_reset.Session) error
 
-		UpdateStatusToSending(password_reset.Session, time.RequestedAt) error
-		UpdateStatusToFailed(password_reset.Session, time.RequestedAt, error) error
-		UpdateStatusToComplete(password_reset.Session, time.RequestedAt) error
+		UpdateStatusToSending(password_reset.Session, request.RequestedAt) error
+		UpdateStatusToFailed(password_reset.Session, request.RequestedAt, error) error
+		UpdateStatusToComplete(password_reset.Session, request.RequestedAt) error
 	}
 
 	DestinationRepository interface {

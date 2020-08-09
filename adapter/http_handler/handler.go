@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/errors"
 	"github.com/getto-systems/project-example-id/request"
 )
@@ -35,7 +34,7 @@ func NewHandler(w http.ResponseWriter, r *http.Request) Handler {
 }
 
 func (handler Handler) newRequest() request.Request {
-	return request.NewRequest(time.Now(), request.RemoteAddr(handler.httpRequest.RemoteAddr))
+	return request.NewRequest(request.RequestedAtNow(), request.RemoteAddr(handler.httpRequest.RemoteAddr))
 }
 
 func (handler Handler) parseBody(input interface{}) (err error) {

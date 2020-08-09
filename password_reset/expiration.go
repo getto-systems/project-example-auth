@@ -25,14 +25,14 @@ func (exp Expiration) Expires(request request.Request) Expires {
 	return NewExpires(request.RequestedAt(), exp.expires)
 }
 
-func NewExpires(requestedAt time.RequestedAt, second time.Second) Expires {
+func NewExpires(requestedAt request.RequestedAt, second time.Second) Expires {
 	return Expires(addSecond(requestedAt, second))
 }
-func addSecond(requestedAt time.RequestedAt, second time.Second) gotime.Time {
+func addSecond(requestedAt request.RequestedAt, second time.Second) gotime.Time {
 	duration := gotime.Duration(second * 1_000_000_000)
 	return gotime.Time(requestedAt).Add(duration)
 }
 
-func (expires Expires) Expired(requestedAt time.RequestedAt) bool {
+func (expires Expires) Expired(requestedAt request.RequestedAt) bool {
 	return gotime.Time(expires).Before(gotime.Time(requestedAt))
 }

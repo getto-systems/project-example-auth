@@ -1,14 +1,16 @@
 package request
 
 import (
-	"github.com/getto-systems/project-example-id/data/time"
+	"time"
 )
 
 type (
 	Request struct {
-		requestedAt time.RequestedAt
+		requestedAt RequestedAt
 		route       Route
 	}
+
+	RequestedAt time.Time
 
 	Route struct {
 		remoteAddr RemoteAddr
@@ -17,7 +19,11 @@ type (
 	RemoteAddr string
 )
 
-func NewRequest(requestedAt time.RequestedAt, remoteAddr RemoteAddr) Request {
+func RequestedAtNow() RequestedAt {
+	return RequestedAt(time.Now().UTC())
+}
+
+func NewRequest(requestedAt RequestedAt, remoteAddr RemoteAddr) Request {
 	return Request{
 		requestedAt: requestedAt,
 		route: Route{
@@ -26,7 +32,7 @@ func NewRequest(requestedAt time.RequestedAt, remoteAddr RemoteAddr) Request {
 	}
 }
 
-func (request Request) RequestedAt() time.RequestedAt {
+func (request Request) RequestedAt() RequestedAt {
 	return request.requestedAt
 }
 

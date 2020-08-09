@@ -5,8 +5,8 @@ import (
 
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/request"
 )
 
 const (
@@ -124,7 +124,7 @@ func (store *MemoryStore) CloseSession(session password_reset.Session) (err erro
 	return nil
 }
 
-func (store *MemoryStore) UpdateStatusToSending(session password_reset.Session, requestedAt time.RequestedAt) (err error) {
+func (store *MemoryStore) UpdateStatusToSending(session password_reset.Session, requestedAt request.RequestedAt) (err error) {
 	data, found := store.session[session]
 	if !found {
 		err = errors.New("session not found")
@@ -136,7 +136,7 @@ func (store *MemoryStore) UpdateStatusToSending(session password_reset.Session, 
 
 	return nil
 }
-func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, requestedAt time.RequestedAt, cause error) (err error) {
+func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, requestedAt request.RequestedAt, cause error) (err error) {
 	data, found := store.session[session]
 	if !found {
 		return errors.New("session not found")
@@ -147,7 +147,7 @@ func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, r
 
 	return nil
 }
-func (store *MemoryStore) UpdateStatusToComplete(session password_reset.Session, requestedAt time.RequestedAt) (err error) {
+func (store *MemoryStore) UpdateStatusToComplete(session password_reset.Session, requestedAt request.RequestedAt) (err error) {
 	data, found := store.session[session]
 	if !found {
 		return errors.New("session not found")
