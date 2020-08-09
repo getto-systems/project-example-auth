@@ -21,9 +21,9 @@ type (
 
 	memoryTicketData struct {
 		user         user.User
-		expires      time.Expires
+		expires      credential.Expires
 		expireSecond time.Second
-		limit        time.ExtendLimit
+		limit        credential.ExtendLimit
 	}
 )
 
@@ -37,7 +37,7 @@ func (store *MemoryStore) repo() infra.TicketRepository {
 	return store
 }
 
-func (store *MemoryStore) FindUserAndExpires(nonce credential.TicketNonce) (_ user.User, _ time.Expires, found bool, err error) {
+func (store *MemoryStore) FindUserAndExpires(nonce credential.TicketNonce) (_ user.User, _ credential.Expires, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
@@ -45,7 +45,7 @@ func (store *MemoryStore) FindUserAndExpires(nonce credential.TicketNonce) (_ us
 	return data.user, data.expires, true, nil
 }
 
-func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce credential.TicketNonce) (_ time.Second, _ time.ExtendLimit, found bool, err error) {
+func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce credential.TicketNonce) (_ time.Second, _ credential.ExtendLimit, found bool, err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return
@@ -53,7 +53,7 @@ func (store *MemoryStore) FindExpireSecondAndExtendLimit(nonce credential.Ticket
 	return data.expireSecond, data.limit, true, nil
 }
 
-func (store *MemoryStore) UpdateExpires(nonce credential.TicketNonce, expires time.Expires) (err error) {
+func (store *MemoryStore) UpdateExpires(nonce credential.TicketNonce, expires credential.Expires) (err error) {
 	data, found := store.ticket[nonce]
 	if !found {
 		return nil
@@ -79,14 +79,14 @@ func (store *MemoryStore) DeactivateExpiresAndExtendLimit(nonce credential.Ticke
 		return nil
 	}
 
-	data.expires = time.EmptyExpires()
-	data.limit = time.EmptyExtendLimit()
+	data.expires = credential.EmptyExpires()
+	data.limit = credential.EmptyExtendLimit()
 	store.ticket[nonce] = data
 
 	return nil
 }
 
-func (store *MemoryStore) RegisterTicket(gen infra.TicketNonceGenerator, user user.User, expires time.Expires, expireSecond time.Second, limit time.ExtendLimit) (_ credential.TicketNonce, err error) {
+func (store *MemoryStore) RegisterTicket(gen infra.TicketNonceGenerator, user user.User, expires credential.Expires, expireSecond time.Second, limit credential.ExtendLimit) (_ credential.TicketNonce, err error) {
 	for count := 0; count < GENERATE_LIMIT; count++ {
 		nonce, genErr := gen.GenerateTicketNonce()
 		if genErr != nil {

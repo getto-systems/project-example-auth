@@ -2,14 +2,12 @@ package ticket_core
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Register(request request.Request, user user.User, exp ticket.Expiration) (_ credential.TicketNonce, _ time.Expires, err error) {
+func (action action) Register(request request.Request, user user.User, exp credential.Expiration) (_ credential.TicketNonce, _ credential.Expires, err error) {
 	expires := exp.Expires(request)
 	limit := exp.ExtendLimit(request)
 

@@ -8,7 +8,6 @@ import (
 	"github.com/getto-systems/project-example-id/ticket/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -23,18 +22,18 @@ func (log Logger) TryToExtend(request request.Request, user user.User, nonce cre
 func (log Logger) FailedToExtend(request request.Request, user user.User, nonce credential.TicketNonce, err error) {
 	log.logger.Error(extendEntry("FailedToExtend", request, user, nonce, nil, nil, err))
 }
-func (log Logger) Extend(request request.Request, user user.User, nonce credential.TicketNonce, expires time.Expires, limit time.ExtendLimit) {
+func (log Logger) Extend(request request.Request, user user.User, nonce credential.TicketNonce, expires credential.Expires, limit credential.ExtendLimit) {
 	log.logger.Info(extendEntry("Extend", request, user, nonce, &expires, &limit, nil))
 }
 
-func extendEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, expires *time.Expires, limit *time.ExtendLimit, err error) log.Entry {
+func extendEntry(event string, request request.Request, user user.User, nonce credential.TicketNonce, expires *credential.Expires, limit *credential.ExtendLimit, err error) log.Entry {
 	return log.Entry{
-		Message:     fmt.Sprintf("Ticket/Extend/%s", event),
-		Request:     request,
-		User:        &user,
-		TicketNonce: &nonce,
-		Expires:     expires,
-		ExtendLimit: limit,
-		Error:       err,
+		Message:               fmt.Sprintf("Ticket/Extend/%s", event),
+		Request:               request,
+		User:                  &user,
+		TicketNonce:           &nonce,
+		CredentialExpires:     expires,
+		CredentialExtendLimit: limit,
+		Error:                 err,
 	}
 }

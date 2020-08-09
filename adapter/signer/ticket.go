@@ -9,7 +9,6 @@ import (
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -55,7 +54,7 @@ func parseUser(raw interface{}) (_ user.User) {
 	return user.NewUser(user.UserID(userID))
 }
 
-func (signer TicketSigner) Sign(user user.User, nonce credential.TicketNonce, expires time.Expires) (_ credential.TicketSignature, err error) {
+func (signer TicketSigner) Sign(user user.User, nonce credential.TicketNonce, expires credential.Expires) (_ credential.TicketSignature, err error) {
 	signature, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"exp": strconv.Itoa(int(gotime.Time(expires).Unix())),

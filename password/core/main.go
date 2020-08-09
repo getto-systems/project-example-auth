@@ -3,15 +3,15 @@ package password_core
 import (
 	"github.com/getto-systems/project-example-id/password/infra"
 
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
-	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type (
 	action struct {
 		logger infra.Logger
 
-		exp ticket.Expiration
+		exp credential.Expiration
 
 		gen     infra.PasswordGenerator
 		matcher infra.PasswordMatcher
@@ -23,7 +23,7 @@ type (
 func NewAction(
 	logger infra.Logger,
 
-	exp ticket.Expiration,
+	exp credential.Expiration,
 	enc infra.PasswordEncrypter,
 
 	passwords infra.PasswordRepository,

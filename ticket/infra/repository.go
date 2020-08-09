@@ -8,14 +8,14 @@ import (
 
 type (
 	TicketRepository interface {
-		FindUserAndExpires(credential.TicketNonce) (user.User, time.Expires, bool, error)
+		FindUserAndExpires(credential.TicketNonce) (user.User, credential.Expires, bool, error)
 
-		FindExpireSecondAndExtendLimit(credential.TicketNonce) (time.Second, time.ExtendLimit, bool, error)
-		UpdateExpires(credential.TicketNonce, time.Expires) error
+		FindExpireSecondAndExtendLimit(credential.TicketNonce) (time.Second, credential.ExtendLimit, bool, error)
+		UpdateExpires(credential.TicketNonce, credential.Expires) error
 
 		FindUser(credential.TicketNonce) (user.User, bool, error)
 		DeactivateExpiresAndExtendLimit(credential.TicketNonce) error
 
-		RegisterTicket(TicketNonceGenerator, user.User, time.Expires, time.Second, time.ExtendLimit) (credential.TicketNonce, error)
+		RegisterTicket(TicketNonceGenerator, user.User, credential.Expires, time.Second, credential.ExtendLimit) (credential.TicketNonce, error)
 	}
 )

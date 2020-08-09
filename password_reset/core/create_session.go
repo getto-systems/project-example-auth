@@ -12,8 +12,7 @@ var (
 )
 
 func (action action) CreateSession(request request.Request, user user.User, login user.Login) (_ password_reset.Session, _ password_reset.Destination, _ password_reset.Token, err error) {
-	requestedAt := request.RequestedAt()
-	expires := action.exp.Expires(requestedAt)
+	expires := action.exp.Expires(request)
 
 	action.logger.TryToCreateSession(request, user, login, expires)
 
@@ -30,7 +29,7 @@ func (action action) CreateSession(request request.Request, user user.User, logi
 
 	session, token, err := action.sessions.CreateSession(
 		action.gen,
-		password_reset.NewSessionData(user, login, requestedAt, expires),
+		password_reset.NewSessionData(user, login, request.RequestedAt(), expires),
 		dest,
 	)
 	if err != nil {

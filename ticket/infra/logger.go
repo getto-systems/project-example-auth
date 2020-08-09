@@ -2,7 +2,6 @@ package infra
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -16,9 +15,9 @@ type (
 	}
 
 	RegisterLogger interface {
-		TryToRegister(request.Request, user.User, time.Expires, time.ExtendLimit)
-		FailedToRegister(request.Request, user.User, time.Expires, time.ExtendLimit, error)
-		Register(request.Request, user.User, time.Expires, time.ExtendLimit, credential.TicketNonce)
+		TryToRegister(request.Request, user.User, credential.Expires, credential.ExtendLimit)
+		FailedToRegister(request.Request, user.User, credential.Expires, credential.ExtendLimit, error)
+		Register(request.Request, user.User, credential.Expires, credential.ExtendLimit, credential.TicketNonce)
 	}
 
 	ValidateLogger interface {
@@ -39,6 +38,6 @@ type (
 	ExtendLogger interface {
 		TryToExtend(request.Request, user.User, credential.TicketNonce)
 		FailedToExtend(request.Request, user.User, credential.TicketNonce, error)
-		Extend(request.Request, user.User, credential.TicketNonce, time.Expires, time.ExtendLimit)
+		Extend(request.Request, user.User, credential.TicketNonce, credential.Expires, credential.ExtendLimit)
 	}
 )

@@ -10,7 +10,6 @@ import (
 	"github.com/getto-systems/project-example-id/client"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 )
 
 var (
@@ -82,7 +81,7 @@ func (handler CredentialHandler) ClearCredential() {
 	handler.clearContentToken()
 }
 
-func (handler CredentialHandler) setTicket(ticket credential.Ticket, expires time.Expires) {
+func (handler CredentialHandler) setTicket(ticket credential.Ticket, expires credential.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    COOKIE_TICKET,
 		Value:   string(ticket.Signature()),
@@ -127,7 +126,7 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 	}
 }
 
-func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken, expires time.Expires) {
+func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken, expires credential.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Key-Pair-Id",
 		Value:   string(contentToken.KeyID()),

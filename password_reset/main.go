@@ -1,6 +1,8 @@
 package password_reset
 
 import (
+	gotime "time"
+
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -17,7 +19,7 @@ type (
 		user        user.User
 		login       user.Login
 		requestedAt time.RequestedAt
-		expires     time.Expires
+		expires     Expires
 	}
 
 	Destination struct {
@@ -35,18 +37,23 @@ type (
 		failed   *StatusFailed
 	}
 	StatusWaiting struct {
-		since time.Time
+		since WaitingSince
 	}
 	StatusSending struct {
-		since time.Time
+		since SendingSince
 	}
 	StatusComplete struct {
-		at time.Time
+		at CompleteAt
 	}
 	StatusFailed struct {
-		at     time.Time
+		at     FailedAt
 		reason string
 	}
+
+	WaitingSince gotime.Time
+	SendingSince gotime.Time
+	CompleteAt   gotime.Time
+	FailedAt     gotime.Time
 )
 
 func NewSession(id SessionID) Session {
@@ -58,7 +65,7 @@ func (session Session) ID() SessionID {
 	return session.id
 }
 
-func NewSessionData(user user.User, login user.Login, requestedAt time.RequestedAt, expires time.Expires) SessionData {
+func NewSessionData(user user.User, login user.Login, requestedAt time.RequestedAt, expires Expires) SessionData {
 	return SessionData{
 		user:        user,
 		login:       login,
@@ -75,7 +82,7 @@ func (data SessionData) Login() user.Login {
 func (data SessionData) RequestedAt() time.RequestedAt {
 	return data.requestedAt
 }
-func (data SessionData) Expires() time.Expires {
+func (data SessionData) Expires() Expires {
 	return data.expires
 }
 
@@ -85,48 +92,48 @@ func NewLogDestination() Destination {
 	}
 }
 
-func NewStatusWaiting(since time.Time) Status {
-	waiting := newStatusWaiting(since)
+func NewStatusWaiting(requestedAt time.RequestedAt) Status {
+	waiting := newStatusWaiting(requestedAt)
 	return Status{
 		waiting: &waiting,
 	}
 }
-func NewStatusSending(since time.Time) Status {
-	sending := newStatusSending(since)
+func NewStatusSending(requestedAt time.RequestedAt) Status {
+	sending := newStatusSending(requestedAt)
 	return Status{
 		sending: &sending,
 	}
 }
-func NewStatusComplete(at time.Time) Status {
-	complete := newStatusComplete(at)
+func NewStatusComplete(requestedAt time.RequestedAt) Status {
+	complete := newStatusComplete(requestedAt)
 	return Status{
 		complete: &complete,
 	}
 }
-func NewStatusFailed(at time.Time, reason string) Status {
-	failed := newStatusFailed(at, reason)
+func NewStatusFailed(requestedAt time.RequestedAt, reason string) Status {
+	failed := newStatusFailed(requestedAt, reason)
 	return Status{
 		failed: &failed,
 	}
 }
 
-func newStatusWaiting(since time.Time) StatusWaiting {
-	return StatusWaiting{since: since}
+func newStatusWaiting(requestedAt time.RequestedAt) StatusWaiting {
+	return StatusWaiting{since: WaitingSince(requestedAt)}
 }
-func newStatusSending(since time.Time) StatusSending {
-	return StatusSending{since: since}
+func newStatusSending(requestedAt time.RequestedAt) StatusSending {
+	return StatusSending{since: SendingSince(requestedAt)}
 }
-func newStatusComplete(at time.Time) StatusComplete {
-	return StatusComplete{at: at}
+func newStatusComplete(requestedAt time.RequestedAt) StatusComplete {
+	return StatusComplete{at: CompleteAt(requestedAt)}
 }
-func newStatusFailed(at time.Time, reason string) StatusFailed {
-	return StatusFailed{at: at, reason: reason}
+func newStatusFailed(requestedAt time.RequestedAt, reason string) StatusFailed {
+	return StatusFailed{at: FailedAt(requestedAt), reason: reason}
 }
 
 func (status Status) Waiting() bool {
 	return status.waiting != nil
 }
-func (status Status) WaitingSince() (_ time.Time) {
+func (status Status) WaitingSince() (_ WaitingSince) {
 	if status.waiting == nil {
 		return
 	}
@@ -135,7 +142,7 @@ func (status Status) WaitingSince() (_ time.Time) {
 func (status Status) Sending() bool {
 	return status.sending != nil
 }
-func (status Status) SendingSince() (_ time.Time) {
+func (status Status) SendingSince() (_ SendingSince) {
 	if status.sending == nil {
 		return
 	}
@@ -144,7 +151,7 @@ func (status Status) SendingSince() (_ time.Time) {
 func (status Status) Complete() bool {
 	return status.complete != nil
 }
-func (status Status) CompleteAt() (_ time.Time) {
+func (status Status) CompleteAt() (_ CompleteAt) {
 	if status.complete == nil {
 		return
 	}
@@ -153,7 +160,7 @@ func (status Status) CompleteAt() (_ time.Time) {
 func (status Status) Failed() bool {
 	return status.failed != nil
 }
-func (status Status) FailedAtAndReason() (_ time.Time, _ string) {
+func (status Status) FailedAtAndReason() (_ FailedAt, _ string) {
 	if status.failed == nil {
 		return
 	}

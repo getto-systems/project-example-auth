@@ -8,7 +8,6 @@ import (
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/user"
 )
 
@@ -26,7 +25,7 @@ func (signer ApiTokenSigner) signer() infra.ApiTokenSigner {
 	return signer
 }
 
-func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, expires time.Expires) (_ credential.ApiToken, err error) {
+func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, expires credential.Expires) (_ credential.ApiToken, err error) {
 	token, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"aud": roles,

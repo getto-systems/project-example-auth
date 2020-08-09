@@ -97,7 +97,7 @@ func (store *MemoryStore) CreateSession(gen infra.SessionGenerator, data passwor
 			session: session,
 			data:    data,
 			dest:    dest,
-			status:  password_reset.NewStatusWaiting(data.RequestedAt().Time()),
+			status:  password_reset.NewStatusWaiting(data.RequestedAt()),
 			token:   token,
 		}
 		store.token[token] = session
@@ -131,7 +131,7 @@ func (store *MemoryStore) UpdateStatusToSending(session password_reset.Session, 
 		return
 	}
 
-	data.status = password_reset.NewStatusSending(requestedAt.Time())
+	data.status = password_reset.NewStatusSending(requestedAt)
 	store.session[session] = data
 
 	return nil
@@ -142,7 +142,7 @@ func (store *MemoryStore) UpdateStatusToFailed(session password_reset.Session, r
 		return errors.New("session not found")
 	}
 
-	data.status = password_reset.NewStatusFailed(requestedAt.Time(), cause.Error())
+	data.status = password_reset.NewStatusFailed(requestedAt, cause.Error())
 	store.session[session] = data
 
 	return nil
@@ -153,7 +153,7 @@ func (store *MemoryStore) UpdateStatusToComplete(session password_reset.Session,
 		return errors.New("session not found")
 	}
 
-	data.status = password_reset.NewStatusComplete(requestedAt.Time())
+	data.status = password_reset.NewStatusComplete(requestedAt)
 	store.session[session] = data
 
 	return nil
