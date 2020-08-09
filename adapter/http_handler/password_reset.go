@@ -3,9 +3,9 @@ package http_handler
 import (
 	"github.com/getto-systems/project-example-id/client"
 
-	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 

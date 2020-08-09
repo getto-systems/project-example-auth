@@ -1,7 +1,7 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )

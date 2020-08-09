@@ -2,9 +2,9 @@ package ticket_core
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/request"
 	"github.com/getto-systems/project-example-id/data/time"
 	"github.com/getto-systems/project-example-id/errors"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 

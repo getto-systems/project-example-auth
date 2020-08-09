@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/request"
 )
 
 type (
