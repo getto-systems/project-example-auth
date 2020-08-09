@@ -3,7 +3,7 @@ package request
 import (
 	"time"
 
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 )
 
 type (

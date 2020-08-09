@@ -1,8 +1,8 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/misc/errors"
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/errors"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"

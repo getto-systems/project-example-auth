@@ -6,7 +6,7 @@ import (
 
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/gateway/message"
+	"github.com/getto-systems/project-example-id/_gateway/message"
 	"github.com/getto-systems/project-example-id/password_reset"
 )
 

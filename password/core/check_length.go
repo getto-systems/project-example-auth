@@ -1,7 +1,7 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/misc/errors"
+	"github.com/getto-systems/project-example-id/_misc/errors"
 
 	"github.com/getto-systems/project-example-id/password"
 )

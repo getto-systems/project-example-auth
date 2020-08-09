@@ -9,17 +9,17 @@ import (
 
 	"github.com/rs/cors"
 
-	"github.com/getto-systems/project-example-id/adapter/http_handler"
-	"github.com/getto-systems/project-example-id/adapter/logger"
-	"github.com/getto-systems/project-example-id/adapter/message"
-	"github.com/getto-systems/project-example-id/adapter/nonce_generator"
-	"github.com/getto-systems/project-example-id/adapter/password_encrypter"
-	"github.com/getto-systems/project-example-id/adapter/reset_session_generator"
-	"github.com/getto-systems/project-example-id/adapter/signer"
+	"github.com/getto-systems/project-example-id/_adapter/http_handler"
+	"github.com/getto-systems/project-example-id/_adapter/logger"
+	"github.com/getto-systems/project-example-id/_adapter/message"
+	"github.com/getto-systems/project-example-id/_adapter/nonce_generator"
+	"github.com/getto-systems/project-example-id/_adapter/password_encrypter"
+	"github.com/getto-systems/project-example-id/_adapter/reset_session_generator"
+	"github.com/getto-systems/project-example-id/_adapter/signer"
 
-	"github.com/getto-systems/project-example-id/misc/expiration"
+	"github.com/getto-systems/project-example-id/_misc/expiration"
 
-	"github.com/getto-systems/project-example-id/client"
+	"github.com/getto-systems/project-example-id/_usecase"
 
 	"github.com/getto-systems/project-example-id/credential/log"
 	"github.com/getto-systems/project-example-id/credential/repository/api_user"
@@ -64,7 +64,7 @@ type (
 		tls  tls
 
 		cookieDomain http_handler.CookieDomain
-		backend      client.Backend
+		backend      _usecase.Backend
 	}
 
 	tls struct {
@@ -110,30 +110,30 @@ func (server server) mux() *http.ServeMux {
 
 func (server server) handle(w http.ResponseWriter, r *http.Request) {
 	h := http_handler.NewHandler(w, r)
-	c := client.NewClient(server.backend, http_handler.NewCredentialHandler(server.cookieDomain, w, r))
+	u := _usecase.NewUsecase(server.backend, http_handler.NewCredentialHandler(server.cookieDomain, w, r))
 
 	switch r.Header.Get(HEADER_HANDLER) {
 	case "Renew":
-		client.NewRenew(c).Renew(http_handler.NewRenew(h))
+		_usecase.NewRenew(u).Renew(http_handler.NewRenew(h))
 	case "Logout":
-		client.NewLogout(c).Logout(http_handler.NewLogout(h))
+		_usecase.NewLogout(u).Logout(http_handler.NewLogout(h))
 
 	case "PasswordLogin":
-		client.NewPasswordLogin(c).Login(http_handler.NewPasswordLogin(h))
+		_usecase.NewPasswordLogin(u).Login(http_handler.NewPasswordLogin(h))
 
 	case "PasswordChange/GetLogin":
-		client.NewPasswordChange(c).GetLogin(http_handler.NewPasswordChange(h))
+		_usecase.NewPasswordChange(u).GetLogin(http_handler.NewPasswordChange(h))
 	case "PasswordChange/Change":
-		client.NewPasswordChange(c).Change(http_handler.NewPasswordChange(h))
+		_usecase.NewPasswordChange(u).Change(http_handler.NewPasswordChange(h))
 
 	case "PasswordReset/CreateSession":
-		client.NewPasswordReset(c).CreateSession(http_handler.NewPasswordReset(h))
+		_usecase.NewPasswordReset(u).CreateSession(http_handler.NewPasswordReset(h))
 	case "PasswordReset/SendToken":
-		client.NewPasswordReset(c).SendToken(http_handler.NewPasswordReset(h))
+		_usecase.NewPasswordReset(u).SendToken(http_handler.NewPasswordReset(h))
 	case "PasswordReset/GetStatus":
-		client.NewPasswordReset(c).GetStatus(http_handler.NewPasswordReset(h))
+		_usecase.NewPasswordReset(u).GetStatus(http_handler.NewPasswordReset(h))
 	case "PasswordReset/Reset":
-		client.NewPasswordReset(c).Reset(http_handler.NewPasswordReset(h))
+		_usecase.NewPasswordReset(u).Reset(http_handler.NewPasswordReset(h))
 
 	default:
 		w.Header().Set("Content-Type", "application/json")
@@ -163,10 +163,10 @@ func newServer() server {
 	}
 }
 
-func newBackend() client.Backend {
+func newBackend() _usecase.Backend {
 	infra := newInfra()
 
-	return client.NewBackend(
+	return _usecase.NewBackend(
 		infra.newTicketAction(),
 		infra.newCredentialAction(),
 		infra.newUserAction(),
