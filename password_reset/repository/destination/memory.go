@@ -1,10 +1,10 @@
-package destination
+package password_reset_repository_destination
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (

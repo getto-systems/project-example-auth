@@ -1,12 +1,12 @@
-package send_token
+package password_reset_job_queue_send_token
 
 import (
 	"errors"
 
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/data/request"
+	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (

@@ -1,13 +1,13 @@
-package sender
+package password_reset_sender
 
 import (
 	"errors"
 	"fmt"
 
-	infra "github.com/getto-systems/project-example-id/infra/password_reset"
+	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/password_reset"
 	"github.com/getto-systems/project-example-id/message"
+	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (
