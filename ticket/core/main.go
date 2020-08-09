@@ -1,9 +1,9 @@
-package ticket
+package ticket_core
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
+	"github.com/getto-systems/project-example-id/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/data/ticket"
+	"github.com/getto-systems/project-example-id/ticket"
 )
 
 type (

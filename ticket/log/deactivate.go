@@ -1,11 +1,11 @@
-package log
+package ticket_log
 
 import (
 	"fmt"
 
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
+	"github.com/getto-systems/project-example-id/ticket/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/request"

@@ -1,9 +1,9 @@
-package log
+package ticket_log
 
 import (
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/ticket"
+	"github.com/getto-systems/project-example-id/ticket/infra"
 )
 
 type Logger struct {
