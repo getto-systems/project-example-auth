@@ -1,24 +1,33 @@
 package user
 
-import (
-	infra "github.com/getto-systems/project-example-id/infra/user"
-
-	"github.com/getto-systems/project-example-id/data/user"
-)
-
 type (
-	action struct {
-		logger infra.Logger
-		users  infra.UserRepository
+	User struct {
+		id UserID
+	}
+	UserID string
+
+	LoginID string
+	Login   struct {
+		id LoginID
 	}
 )
 
-func NewAction(
-	logger infra.Logger,
-	users infra.UserRepository,
-) user.Action {
-	return action{
-		logger: logger,
-		users:  users,
+func NewUser(userID UserID) User {
+	return User{
+		id: userID,
 	}
+}
+
+func (user User) ID() UserID {
+	return user.id
+}
+
+func NewLogin(loginID LoginID) Login {
+	return Login{
+		id: loginID,
+	}
+}
+
+func (login Login) ID() LoginID {
+	return login.id
 }

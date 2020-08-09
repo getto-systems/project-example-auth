@@ -1,9 +1,9 @@
-package user
+package user_repository_user
 
 import (
-	infra "github.com/getto-systems/project-example-id/infra/user"
+	"github.com/getto-systems/project-example-id/user/infra"
 
-	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 type (

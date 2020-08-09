@@ -1,14 +1,14 @@
-package log
+package user_log
 
 import (
 	"fmt"
 
 	"github.com/getto-systems/project-example-id/log"
 
-	infra "github.com/getto-systems/project-example-id/infra/user"
+	"github.com/getto-systems/project-example-id/user/infra"
 
 	"github.com/getto-systems/project-example-id/data/request"
-	"github.com/getto-systems/project-example-id/data/user"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 func (log Logger) getUser() infra.GetUserLogger {

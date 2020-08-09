@@ -30,26 +30,26 @@ import (
 	"github.com/getto-systems/project-example-id/password_reset/sender"
 	"github.com/getto-systems/project-example-id/ticket/log"
 	"github.com/getto-systems/project-example-id/ticket/repository/ticket"
-	user_log "github.com/getto-systems/project-example-id/user/log"
-	user_repository_user "github.com/getto-systems/project-example-id/user/repository/user"
+	"github.com/getto-systems/project-example-id/user/log"
+	"github.com/getto-systems/project-example-id/user/repository/user"
 
 	credential_infra "github.com/getto-systems/project-example-id/credential/infra"
-	user_infra "github.com/getto-systems/project-example-id/infra/user"
 	password_infra "github.com/getto-systems/project-example-id/password/infra"
 	password_reset_infra "github.com/getto-systems/project-example-id/password_reset/infra"
+	user_infra "github.com/getto-systems/project-example-id/user/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/data/time"
-	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-id/user"
 
 	"github.com/getto-systems/project-example-id/credential/core"
 	"github.com/getto-systems/project-example-id/password/core"
 	"github.com/getto-systems/project-example-id/password_reset/core"
 	"github.com/getto-systems/project-example-id/ticket/core"
-	user_core "github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-id/user/core"
 )
 
 const (

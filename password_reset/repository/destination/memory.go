@@ -3,8 +3,8 @@ package password_reset_repository_destination
 import (
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/data/user"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/user"
 )
 
 type (
