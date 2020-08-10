@@ -11,13 +11,13 @@ import (
 
 	"github.com/getto-systems/project-example-id"
 
-	"github.com/getto-systems/project-example-id/_adapter/http_handler"
-	"github.com/getto-systems/project-example-id/_adapter/logger"
-	"github.com/getto-systems/project-example-id/_adapter/message"
-	"github.com/getto-systems/project-example-id/_adapter/nonce_generator"
-	"github.com/getto-systems/project-example-id/_adapter/password_encrypter"
-	"github.com/getto-systems/project-example-id/_adapter/reset_session_generator"
-	"github.com/getto-systems/project-example-id/_adapter/signer"
+	"github.com/getto-systems/project-example-id/_main/adapter/http_handler"
+	"github.com/getto-systems/project-example-id/_main/adapter/logger"
+	"github.com/getto-systems/project-example-id/_main/adapter/message"
+	"github.com/getto-systems/project-example-id/_main/adapter/nonce_generator"
+	"github.com/getto-systems/project-example-id/_main/adapter/password_encrypter"
+	"github.com/getto-systems/project-example-id/_main/adapter/reset_session_generator"
+	"github.com/getto-systems/project-example-id/_main/adapter/signer"
 
 	"github.com/getto-systems/project-example-id/_misc/expiration"
 
