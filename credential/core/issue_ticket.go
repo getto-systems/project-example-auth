@@ -18,5 +18,5 @@ func (action action) IssueTicket(request request.Request, user user.User, nonce 
 	}
 
 	action.logger.IssueTicket(request, user, expires)
-	return credential.NewTicket(signature, nonce), nil
+	return credential.NewTicketToken(signature, nonce), nil
 }

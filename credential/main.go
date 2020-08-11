@@ -25,7 +25,7 @@ type (
 	}
 )
 
-func NewTicket(signature TicketSignature, nonce TicketNonce) TicketToken {
+func NewTicketToken(signature TicketSignature, nonce TicketNonce) TicketToken {
 	return TicketToken{
 		signature: signature,
 		nonce:     nonce,
