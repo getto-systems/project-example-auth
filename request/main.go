@@ -2,8 +2,6 @@ package request
 
 import (
 	"time"
-
-	"github.com/getto-systems/project-example-id/_misc/expiration"
 )
 
 type (
@@ -36,19 +34,6 @@ func NewRequest(requestedAt RequestedAt, remoteAddr RemoteAddr) Request {
 
 func (request Request) RequestedAt() RequestedAt {
 	return request.requestedAt
-}
-func (request Request) Expired(expires expiration.Expires) bool {
-	return expires.Expired(time.Time(request.requestedAt))
-}
-func (request Request) Extend(limit expiration.ExtendLimit, second expiration.ExpireSecond) expiration.Expires {
-	return expiration.Extend(time.Time(request.RequestedAt()), limit, second)
-}
-
-func (request Request) NewExpires(second expiration.ExpireSecond) expiration.Expires {
-	return expiration.NewExpires(time.Time(request.RequestedAt()), second)
-}
-func (request Request) NewExtendLimit(second expiration.ExtendSecond) expiration.ExtendLimit {
-	return expiration.NewExtendLimit(time.Time(request.RequestedAt()), second)
 }
 
 func (request Request) Route() Route {

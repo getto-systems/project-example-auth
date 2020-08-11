@@ -12,21 +12,6 @@ type (
 	ExtendLimit  time.Time
 )
 
-func ExpireMinute(minutes int64) ExpireSecond {
-	// 有効期限は短めにするべきなので minute まで提供
-	return ExpireSecond(minutes * 60)
-}
-
-func ExtendMinute(minutes int64) ExtendSecond {
-	return ExtendSecond(minutes * 60)
-}
-func ExtendHour(hours int64) ExtendSecond {
-	return ExtendMinute(hours * 60)
-}
-func ExtendDay(days int64) ExtendSecond {
-	return ExtendHour(days * 24)
-}
-
 func EmptyExpires() (_ Expires) {
 	return
 }
@@ -45,7 +30,7 @@ func addSecond(now time.Time, second int64) time.Time {
 	return time.Time(now).Add(duration)
 }
 
-func Extend(now time.Time, limit ExtendLimit, second ExpireSecond) Expires {
+func (limit ExtendLimit) Extend(now time.Time, second ExpireSecond) Expires {
 	expires := NewExpires(now, second)
 
 	if time.Time(limit).Before(time.Time(expires)) {

@@ -1,8 +1,6 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -19,10 +17,10 @@ type (
 	}
 
 	CreateSessionLogger interface {
-		TryToCreateSession(request.Request, user.User, user.Login, expiration.Expires)
-		FailedToCreateSession(request.Request, user.User, user.Login, expiration.Expires, error)
-		FailedToCreateSessionBecauseDestinationNotFound(request.Request, user.User, user.Login, expiration.Expires, error)
-		CreateSession(request.Request, user.User, user.Login, expiration.Expires, password_reset.Session, password_reset.Destination)
+		TryToCreateSession(request.Request, user.User, user.Login, password_reset.Expires)
+		FailedToCreateSession(request.Request, user.User, user.Login, password_reset.Expires, error)
+		FailedToCreateSessionBecauseDestinationNotFound(request.Request, user.User, user.Login, password_reset.Expires, error)
+		CreateSession(request.Request, user.User, user.Login, password_reset.Expires, password_reset.Session, password_reset.Destination)
 	}
 
 	PushSendTokenJobLogger interface {

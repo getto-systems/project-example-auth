@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -60,7 +58,7 @@ func (handler CredentialHandler) handler() _usecase.CredentialHandler {
 	return handler
 }
 
-func (handler CredentialHandler) GetTicket() (_ credential.TicketToken, err error) {
+func (handler CredentialHandler) GetTicketNonceAndSignature() (_ credential.TicketNonce, _ credential.TicketSignature, err error) {
 	cookie, err := handler.httpRequest.Cookie(COOKIE_TICKET)
 	if err != nil {
 		err = errTicketTokenNotFound
@@ -69,13 +67,13 @@ func (handler CredentialHandler) GetTicket() (_ credential.TicketToken, err erro
 
 	nonce := handler.httpRequest.Header.Get(HEADER_NONCE)
 
-	return credential.NewTicketToken(credential.TicketSignature(cookie.Value), credential.TicketNonce(nonce)), nil
+	return credential.TicketNonce(nonce), credential.TicketSignature(cookie.Value), nil
 }
 
 func (handler CredentialHandler) SetCredential(credential credential.Credential) {
-	handler.setTicket(credential.TicketToken(), credential.Expires())
+	handler.setTicket(credential.TicketToken())
 	handler.setApiToken(credential.ApiToken())
-	handler.setContentToken(credential.ContentToken(), credential.Expires())
+	handler.setContentToken(credential.ContentToken())
 }
 
 func (handler CredentialHandler) ClearCredential() {
@@ -83,11 +81,11 @@ func (handler CredentialHandler) ClearCredential() {
 	handler.clearContentToken()
 }
 
-func (handler CredentialHandler) setTicket(ticket credential.TicketToken, expires expiration.Expires) {
+func (handler CredentialHandler) setTicket(ticket credential.TicketToken) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    COOKIE_TICKET,
 		Value:   string(ticket.Signature()),
-		Expires: time.Time(expires),
+		Expires: time.Time(ticket.Expires()),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -128,11 +126,11 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 	}
 }
 
-func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken, expires expiration.Expires) {
+func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Key-Pair-Id",
 		Value:   string(contentToken.KeyID()),
-		Expires: time.Time(expires),
+		Expires: time.Time(contentToken.Expires()),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -144,7 +142,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Policy",
 		Value:   string(contentToken.Policy()),
-		Expires: time.Time(expires),
+		Expires: time.Time(contentToken.Expires()),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",
@@ -156,7 +154,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    "CloudFront-Signature",
 		Value:   string(contentToken.Signature()),
-		Expires: time.Time(expires),
+		Expires: time.Time(contentToken.Expires()),
 
 		Domain: string(handler.cookie.domain),
 		Path:   "/",

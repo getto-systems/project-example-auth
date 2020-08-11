@@ -94,7 +94,7 @@ func (u PasswordReset) reset(handler PasswordResetHandler) (_ credential.Credent
 		return
 	}
 
-	user, session, exp, err := u.passwordReset.Validate(request, login, token)
+	user, session, extendSecond, err := u.passwordReset.Validate(request, login, token)
 	if err != nil {
 		return
 	}
@@ -109,10 +109,10 @@ func (u PasswordReset) reset(handler PasswordResetHandler) (_ credential.Credent
 		return
 	}
 
-	nonce, expires, err := u.ticket.Register(request, user, exp)
+	ticket, err := u.ticket.Register(request, user, extendSecond)
 	if err != nil {
 		return
 	}
 
-	return u.issueCredential(request, user, nonce, expires)
+	return u.issueCredential(request, ticket)
 }

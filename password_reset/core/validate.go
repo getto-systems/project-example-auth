@@ -2,8 +2,8 @@ package password_reset_core
 
 import (
 	"github.com/getto-systems/project-example-id/_misc/errors"
-	"github.com/getto-systems/project-example-id/_misc/expiration"
 
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -16,7 +16,7 @@ var (
 	errValidateAlreadyClosed    = errors.NewError("PasswordReset.Validate", "AlreadyClosed")
 )
 
-func (action action) Validate(request request.Request, login user.Login, token password_reset.Token) (_ user.User, _ password_reset.Session, _ expiration.ExtendSecond, err error) {
+func (action action) Validate(request request.Request, login user.Login, token password_reset.Token) (_ user.User, _ password_reset.Session, _ credential.TicketExtendSecond, err error) {
 	action.logger.TryToValidateToken(request, login)
 
 	session, data, found, err := action.sessions.FindSession(token)
@@ -45,12 +45,12 @@ func (action action) Validate(request request.Request, login user.Login, token p
 		action.logger.FailedToValidateTokenBecauseLoginMatchFailed(request, login, err)
 		return
 	}
-	if request.Expired(data.Expires()) {
+	if data.Expires().Expired(request) {
 		err = errValidateAlreadyExpired
 		action.logger.FailedToValidateTokenBecauseSessionExpired(request, login, err)
 		return
 	}
 
 	action.logger.AuthByToken(request, login, data.User())
-	return data.User(), session, action.extendSecond, nil
+	return data.User(), session, action.ticketExtendSecond, nil
 }

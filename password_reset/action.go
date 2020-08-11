@@ -1,8 +1,7 @@
 package password_reset
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -13,7 +12,7 @@ type (
 		PushSendTokenJob(request.Request, Session, Destination, Token) error
 		SendToken() error
 		GetStatus(request.Request, user.Login, Session) (Destination, Status, error)
-		Validate(request.Request, user.Login, Token) (user.User, Session, expiration.ExtendSecond, error)
+		Validate(request.Request, user.Login, Token) (user.User, Session, credential.TicketExtendSecond, error)
 		CloseSession(request.Request, Session) error
 	}
 )

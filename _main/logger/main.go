@@ -8,8 +8,6 @@ import (
 
 	"github.com/getto-systems/applog-go/v2"
 
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/_gateway/log"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -79,9 +77,12 @@ type (
 	}
 
 	CredentialEntry struct {
-		ApiRoles    *ApiRolesLog              `json:"roles,omitempty"`
-		Expires     *CredentialExpiresLog     `json:"expires,omitempty"`
-		ExtendLimit *CredentialExtendLimitLog `json:"limit,omitempty"`
+		ApiRoles *ApiRolesLog `json:"roles,omitempty"`
+
+		TicketExpires     *CredentialTicketExpiresLog     `json:"ticket_expires,omitempty"`
+		TicketExtendLimit *CredentialTicketExtendLimitLog `json:"ticket_limit,omitempty"`
+
+		TokenExpires *CredentialTokenExpiresLog `json:"token_expires,omitempty"`
 	}
 
 	PasswordResetEntry struct {
@@ -110,11 +111,15 @@ type (
 		ApiRoles []string `json:"api_roles"`
 	}
 
-	CredentialExpiresLog struct {
+	CredentialTicketExpiresLog struct {
 		Expires string `json:"expires"`
 	}
-	CredentialExtendLimitLog struct {
+	CredentialTicketExtendLimitLog struct {
 		ExtendLimit string `json:"extend_limit"`
+	}
+
+	CredentialTokenExpiresLog struct {
+		Expires string `json:"expires"`
 	}
 
 	ResetSessionLog struct {
@@ -197,12 +202,17 @@ func credentialLog(log *log.CredentialEntry) (entry *CredentialEntry) {
 		entry.ApiRoles = apiRolesLog(log.ApiRoles)
 	}
 
-	if log.Expires != nil {
-		entry.Expires = credentialExpiresLog(log.Expires)
+	if log.TicketExpires != nil {
+		entry.TicketExpires = credentialTicketExpiresLog(log.TicketExpires)
 	}
-	if log.ExtendLimit != nil {
-		entry.ExtendLimit = credentialExtendLimitLog(log.ExtendLimit)
+	if log.TicketExtendLimit != nil {
+		entry.TicketExtendLimit = credentialTicketExtendLimitLog(log.TicketExtendLimit)
 	}
+
+	if log.TokenExpires != nil {
+		entry.TokenExpires = credentialTokenExpiresLog(log.TokenExpires)
+	}
+
 	return
 }
 func apiRolesLog(roles *credential.ApiRoles) (log *ApiRolesLog) {
@@ -211,14 +221,19 @@ func apiRolesLog(roles *credential.ApiRoles) (log *ApiRolesLog) {
 	}
 	return
 }
-func credentialExpiresLog(expires *expiration.Expires) *CredentialExpiresLog {
-	return &CredentialExpiresLog{
+func credentialTicketExpiresLog(expires *credential.TicketExpires) *CredentialTicketExpiresLog {
+	return &CredentialTicketExpiresLog{
 		Expires: time.Time(*expires).String(),
 	}
 }
-func credentialExtendLimitLog(limit *expiration.ExtendLimit) *CredentialExtendLimitLog {
-	return &CredentialExtendLimitLog{
+func credentialTicketExtendLimitLog(limit *credential.TicketExtendLimit) *CredentialTicketExtendLimitLog {
+	return &CredentialTicketExtendLimitLog{
 		ExtendLimit: time.Time(*limit).String(),
+	}
+}
+func credentialTokenExpiresLog(expires *credential.TokenExpires) *CredentialTokenExpiresLog {
+	return &CredentialTokenExpiresLog{
+		Expires: time.Time(*expires).String(),
 	}
 }
 
@@ -250,7 +265,7 @@ func resetDestinationLog(dest *password_reset.Destination) *ResetDestinationLog 
 	// TODO あとでちゃんとする
 	return &ResetDestinationLog{}
 }
-func resetSessionExpiresLog(expires *expiration.Expires) *ResetSessionExpiresLog {
+func resetSessionExpiresLog(expires *password_reset.Expires) *ResetSessionExpiresLog {
 	return &ResetSessionExpiresLog{
 		Expires: time.Time(*expires).String(),
 	}

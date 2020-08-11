@@ -25,7 +25,7 @@ type (
 	}
 
 	CredentialHandler interface {
-		GetTicket() (credential.TicketToken, error)
+		GetTicketNonceAndSignature() (credential.TicketNonce, credential.TicketSignature, error)
 		SetCredential(credential.Credential)
 		ClearCredential()
 	}
@@ -69,6 +69,6 @@ func (u Usecase) handleCredentialError(err error) {
 func (u Usecase) clearCredential() {
 	u.handler.ClearCredential()
 }
-func (u Usecase) getTicket() (credential.TicketToken, error) {
-	return u.handler.GetTicket()
+func (u Usecase) getTicketNonceAndSignature() (credential.TicketNonce, credential.TicketSignature, error) {
+	return u.handler.GetTicketNonceAndSignature()
 }

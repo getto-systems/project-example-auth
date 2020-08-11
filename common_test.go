@@ -7,8 +7,6 @@ import (
 	golog "log"
 	"time"
 
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/_gateway/log"
 
 	"github.com/getto-systems/project-example-id/credential/log"
@@ -61,7 +59,7 @@ type (
 	}
 
 	testExtendSecond struct {
-		password expiration.ExtendSecond
+		password credential.TicketExtendSecond
 	}
 
 	testSession struct {
@@ -156,7 +154,7 @@ func newTestInfra() *testInfra {
 		},
 
 		extend: testExtendSecond{
-			password: expiration.ExtendMinute(8),
+			password: credential.TicketExtendMinute(8),
 		},
 
 		ticket: ticketTestInfra{
@@ -195,7 +193,8 @@ func (backend *testInfra) newBackend() Backend {
 		ticket_core.NewAction(
 			ticket_log.NewLogger(backend.logger),
 
-			expiration.ExpireMinute(5),
+			credential.TicketExpireMinute(5),
+			credential.TokenExpireMinute(5),
 			backend.ticket.nonceGenerator,
 
 			backend.ticket.tickets,
@@ -226,7 +225,7 @@ func (backend *testInfra) newBackend() Backend {
 			password_reset_log.NewLogger(backend.logger),
 
 			backend.extend.password,
-			expiration.ExpireMinute(30),
+			password_reset.ExpireMinute(30),
 
 			backend.passwordReset.sessionGenerator,
 
@@ -293,7 +292,7 @@ type ticketTestSignToken struct {
 	Expires int64  `json:"expires"`
 }
 
-func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.TicketSignature, err error) {
+func (ticketTestSign) Sign(user user.User, nonce credential.TicketNonce, expires credential.TicketExpires) (_ credential.TicketSignature, err error) {
 	data, err := json.Marshal(ticketTestSignToken{
 		UserID:  string(user.ID()),
 		Nonce:   string(nonce),
@@ -320,16 +319,15 @@ func (ticketTestNonceGenerator) GenerateTicketNonce() (_ credential.TicketNonce,
 	return "ticket-nonce", nil
 }
 
-func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires expiration.Expires) (_ credential.ApiToken, err error) {
-	return credential.NewApiToken(roles, []byte("api-token")), nil
+func (credentialTestApiSigner) Sign(user user.User, roles credential.ApiRoles, expires credential.TokenExpires) (_ credential.ApiSignature, err error) {
+	return []byte("api-token"), nil
 }
 
-func (credentialTestContentSigner) Sign(expires expiration.Expires) (_ credential.ContentToken, err error) {
-	return credential.NewContentToken(
-		credential.ContentKeyID("content-key"),
+func (credentialTestContentSigner) Sign(expires credential.TokenExpires) (_ credential.ContentKeyID, _ credential.ContentPolicy, _ credential.ContentSignature, err error) {
+	return credential.ContentKeyID("content-key"),
 		credential.ContentPolicy([]byte("content-policy")),
 		credential.ContentSignature([]byte("content-signature")),
-	), nil
+		nil
 }
 
 func (passwordTestEncrypter) GeneratePassword(raw password.RawPassword) (password.HashedPassword, error) {
@@ -350,17 +348,17 @@ func (generator *passwordResetTestSessionGenerator) another() {
 func (backend *testInfra) credentialHandler() CredentialHandler {
 	return backend
 }
-func (backend *testInfra) GetTicket() (_ credential.TicketToken, err error) {
+func (backend *testInfra) GetTicketNonceAndSignature() (_ credential.TicketNonce, _ credential.TicketSignature, err error) {
 	if backend.session.credential == nil {
 		err = errors.New("credential not set")
 		return
 	}
 
 	if backend.session.nonce == nil {
-		return backend.session.credential.TicketToken(), nil
+		return backend.session.credential.TicketToken().Nonce(), backend.session.credential.TicketToken().Signature(), nil
 	}
 
-	return credential.NewTicketToken(backend.session.credential.TicketToken().Signature(), *backend.session.nonce), nil
+	return *backend.session.nonce, backend.session.credential.TicketToken().Signature(), nil
 }
 func (backend *testInfra) SetCredential(credential credential.Credential) {
 	backend.session.credential = &credential
@@ -375,13 +373,18 @@ func (backend *testInfra) setNonce(nonce credential.TicketNonce) {
 func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 	if backend.session.credential != nil {
 		user, _, _ := backend.credential.ticketSign.Parse(backend.session.credential.TicketToken().Signature())
-		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
+		ticket := credential.NewTicket(
+			user,
+			nonce,
+			backend.session.credential.TicketToken().Expires(),
+			backend.session.credential.ApiToken().Expires(),
+		)
+		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.TicketToken().Expires())
 
 		credential := credential.NewCredential(
-			credential.NewTicketToken(signature, nonce),
+			ticket.NewTicketToken(signature),
 			backend.session.credential.ApiToken(),
 			backend.session.credential.ContentToken(),
-			backend.session.credential.Expires(),
 		)
 		backend.session.credential = &credential
 	}
@@ -389,13 +392,18 @@ func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 func (backend *testInfra) setCredentialUser(user user.User) {
 	if backend.session.credential != nil {
 		_, nonce, _ := backend.credential.ticketSign.Parse(backend.session.credential.TicketToken().Signature())
-		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
+		ticket := credential.NewTicket(
+			user,
+			nonce,
+			backend.session.credential.TicketToken().Expires(),
+			backend.session.credential.ApiToken().Expires(),
+		)
+		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.TicketToken().Expires())
 
 		credential := credential.NewCredential(
-			credential.NewTicketToken(signature, nonce),
+			ticket.NewTicketToken(signature),
 			backend.session.credential.ApiToken(),
 			backend.session.credential.ContentToken(),
-			backend.session.credential.Expires(),
 		)
 		backend.session.credential = &credential
 	}
@@ -505,7 +513,7 @@ func (f testFormatter) printCredential() {
 	} else {
 		fmt.Printf(
 			"credential: expires: \"%s\", roles: %s\n",
-			formatTime(time.Time(f.credential.Expires())),
+			formatTime(time.Time(f.credential.TicketToken().Expires())),
 			f.credential.ApiToken().ApiRoles(),
 		)
 	}

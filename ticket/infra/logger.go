@@ -1,8 +1,7 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -16,9 +15,9 @@ type (
 	}
 
 	RegisterLogger interface {
-		TryToRegister(request.Request, user.User, expiration.Expires, expiration.ExtendLimit)
-		FailedToRegister(request.Request, user.User, expiration.Expires, expiration.ExtendLimit, error)
-		Register(request.Request, user.User, expiration.Expires, expiration.ExtendLimit)
+		TryToRegister(request.Request, user.User, credential.TicketExpires, credential.TicketExtendLimit)
+		FailedToRegister(request.Request, user.User, credential.TicketExpires, credential.TicketExtendLimit, error)
+		Register(request.Request, user.User, credential.TicketExpires, credential.TicketExtendLimit)
 	}
 
 	ValidateLogger interface {
@@ -39,6 +38,6 @@ type (
 	ExtendLogger interface {
 		TryToExtend(request.Request, user.User)
 		FailedToExtend(request.Request, user.User, error)
-		Extend(request.Request, user.User, expiration.Expires, expiration.ExtendLimit)
+		Extend(request.Request, user.User, credential.TicketExpires, credential.TicketExtendLimit)
 	}
 )

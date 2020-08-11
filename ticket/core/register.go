@@ -1,18 +1,15 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Register(request request.Request, user user.User, second expiration.ExtendSecond) (_ credential.TicketNonce, _ expiration.Expires, err error) {
-	limit := request.NewExtendLimit(second)
-	expires := request.NewExpires(action.expireSecond)
-
+func (action action) Register(request request.Request, user user.User, ticketExtendSecond credential.TicketExtendSecond) (_ credential.Ticket, err error) {
+	limit := credential.NewTicketExtendLimit(request, ticketExtendSecond)
+	expires := credential.NewTicketExpires(request, action.ticketExpireSecond)
 	action.logger.TryToRegister(request, user, expires, limit)
 
 	nonce, err := action.tickets.RegisterTicket(action.nonceGenerator, user, expires, limit)
@@ -22,5 +19,5 @@ func (action action) Register(request request.Request, user user.User, second ex
 	}
 
 	action.logger.Register(request, user, expires, limit)
-	return nonce, expires, nil
+	return credential.NewTicket(user, nonce, expires, credential.NewTokenExpires(request, action.tokenExpireSecond)), nil
 }

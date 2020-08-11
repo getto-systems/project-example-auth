@@ -13,6 +13,9 @@ type (
 	SessionID string
 	Token     string
 
+	ExpireSecond expiration.ExpireSecond
+	Expires      expiration.Expires
+
 	Session struct {
 		id SessionID
 	}
@@ -21,7 +24,7 @@ type (
 		user        user.User
 		login       user.Login
 		requestedAt request.RequestedAt
-		expires     expiration.Expires
+		expires     Expires
 	}
 
 	Destination struct {
@@ -67,7 +70,17 @@ func (session Session) ID() SessionID {
 	return session.id
 }
 
-func NewSessionData(user user.User, login user.Login, requestedAt request.RequestedAt, expires expiration.Expires) SessionData {
+func NewExpires(request request.Request, second ExpireSecond) Expires {
+	return Expires(expiration.NewExpires(
+		time.Time(request.RequestedAt()),
+		expiration.ExpireSecond(second),
+	))
+}
+func (expires Expires) Expired(request request.Request) bool {
+	return expiration.Expires(expires).Expired(time.Time(request.RequestedAt()))
+}
+
+func NewSessionData(user user.User, login user.Login, requestedAt request.RequestedAt, expires Expires) SessionData {
 	return SessionData{
 		user:        user,
 		login:       login,
@@ -84,7 +97,7 @@ func (data SessionData) Login() user.Login {
 func (data SessionData) RequestedAt() request.RequestedAt {
 	return data.requestedAt
 }
-func (data SessionData) Expires() expiration.Expires {
+func (data SessionData) Expires() Expires {
 	return data.expires
 }
 
@@ -167,4 +180,9 @@ func (status Status) FailedAtAndReason() (_ FailedAt, _ string) {
 		return
 	}
 	return status.failed.at, status.failed.reason
+}
+
+func ExpireMinute(minutes int64) ExpireSecond {
+	// セッションの有効期限は「分」の単位で設定するべき
+	return ExpireSecond(minutes * 60)
 }

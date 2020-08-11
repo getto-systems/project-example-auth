@@ -7,10 +7,10 @@ import (
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Deactivate(request request.Request, user user.User, ticket credential.TicketToken) (err error) {
+func (action action) Deactivate(request request.Request, user user.User, nonce credential.TicketNonce) (err error) {
 	action.logger.TryToDeactivate(request, user)
 
-	err = action.tickets.DeactivateExpiresAndExtendLimit(ticket.Nonce())
+	err = action.tickets.DeactivateExpiresAndExtendLimit(nonce)
 	if err != nil {
 		action.logger.FailedToDeactivate(request, user, err)
 		return

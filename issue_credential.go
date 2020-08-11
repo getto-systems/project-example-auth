@@ -1,28 +1,25 @@
 package _usecase
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
 )
 
-func (h Backend) issueCredential(request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.Credential, err error) {
-	ticket, err := h.credential.IssueTicket(request, user, nonce, expires)
+func (h Backend) issueCredential(request request.Request, ticket credential.Ticket) (_ credential.Credential, err error) {
+	ticketToken, err := h.credential.IssueTicket(request, ticket)
 	if err != nil {
 		return
 	}
 
-	apiToken, err := h.credential.IssueApiToken(request, user, expires)
+	apiToken, err := h.credential.IssueApiToken(request, ticket)
 	if err != nil {
 		return
 	}
 
-	contentToken, err := h.credential.IssueContentToken(request, user, expires)
+	contentToken, err := h.credential.IssueContentToken(request, ticket)
 	if err != nil {
 		return
 	}
 
-	return credential.NewCredential(ticket, apiToken, contentToken, expires), nil
+	return credential.NewCredential(ticketToken, apiToken, contentToken), nil
 }

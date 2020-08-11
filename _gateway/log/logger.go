@@ -1,8 +1,6 @@
 package log
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
@@ -31,15 +29,18 @@ type (
 	}
 
 	CredentialEntry struct {
-		ApiRoles    *credential.ApiRoles
-		Expires     *expiration.Expires
-		ExtendLimit *expiration.ExtendLimit
+		ApiRoles *credential.ApiRoles
+
+		TicketExpires     *credential.TicketExpires
+		TicketExtendLimit *credential.TicketExtendLimit
+
+		TokenExpires *credential.TokenExpires
 	}
 
 	PasswordResetEntry struct {
 		Session     *password_reset.Session
 		Status      *password_reset.Status
 		Destination *password_reset.Destination
-		Expires     *expiration.Expires
+		Expires     *password_reset.Expires
 	}
 )
