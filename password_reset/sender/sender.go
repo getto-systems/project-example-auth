@@ -6,17 +6,20 @@ import (
 
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/_gateway/message"
 	"github.com/getto-systems/project-example-id/password_reset"
 )
 
 type (
 	TokenSender struct {
-		log message.LogMessage
+		log LogMessage
+	}
+
+	LogMessage interface {
+		Send(message string) error
 	}
 )
 
-func NewTokenSender(log message.LogMessage) TokenSender {
+func NewTokenSender(log LogMessage) TokenSender {
 	return TokenSender{
 		log: log,
 	}
