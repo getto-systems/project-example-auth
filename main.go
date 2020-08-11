@@ -62,7 +62,7 @@ func (u Usecase) handleCredential(credential credential.Credential, err error) {
 	}
 }
 func (u Usecase) handleCredentialError(err error) {
-	if errors.Is(err, ErrTicketValidate) {
+	if errors.Is(err, credential.ErrClearCredential) {
 		u.clearCredential()
 	}
 }

@@ -1,17 +1,10 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/errors"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
-)
-
-var (
-	errValidateNotFoundPassword = errors.NewError("Password.Validate", "NotFound.Password")
-	errValidateMatchFailed      = errors.NewError("Password.Validate", "MatchFailed")
 )
 
 func (action action) Validate(request request.Request, user user.User, raw password.RawPassword) (_ credential.TicketExtendSecond, err error) {
@@ -29,7 +22,7 @@ func (action action) Validate(request request.Request, user user.User, raw passw
 		return
 	}
 	if !found {
-		err = errValidateNotFoundPassword
+		err = password.ErrValidateNotFoundPassword
 		action.logger.FailedToValidateBecausePasswordNotFound(request, user, err)
 		return
 	}
@@ -40,7 +33,7 @@ func (action action) Validate(request request.Request, user user.User, raw passw
 		return
 	}
 	if !matched {
-		err = errValidateMatchFailed
+		err = password.ErrValidateMatchFailed
 		action.logger.FailedToValidateBecausePasswordMatchFailed(request, user, err)
 		return
 	}

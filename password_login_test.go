@@ -559,7 +559,7 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/MatchFailed.Nonce"
+	// err: "Credential.ParseTicket/MatchFailed.Nonce"
 	// credential: nil
 	// log: "Credential/ParseTicket/TryToParseTicket", debug
 	// log: "Credential/ParseTicket/FailedToParseTicketBecauseNonceMatchFailed", audit

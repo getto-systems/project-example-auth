@@ -1,15 +1,10 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/errors"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
-)
-
-var (
-	errExtendNotFoundNonce = errors.NewError("Ticket.Extend", "NotFound.Nonce")
 )
 
 // user が正しいことは確認済みでなければならない
@@ -23,7 +18,7 @@ func (action action) Extend(request request.Request, user user.User, nonce crede
 	}
 	if !found {
 		// ticket は validated のはず。ticket が存在しないのはプログラムがおかしいのでエラーログ
-		err = errExtendNotFoundNonce
+		err = ticket.ErrExtendNotFoundNonce
 		action.logger.FailedToExtend(request, user, err)
 		return
 	}

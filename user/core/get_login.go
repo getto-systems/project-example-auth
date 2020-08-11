@@ -1,31 +1,25 @@
 package user_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/errors"
-
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
 )
 
-var (
-	errGetLoginNotFoundLogin = errors.NewError("User.GetLogin", "NotFound.Login")
-)
+func (action action) GetLogin(request request.Request, target user.User) (_ user.Login, err error) {
+	action.logger.TryToGetLogin(request, target)
 
-func (action action) GetLogin(request request.Request, user user.User) (_ user.Login, err error) {
-	action.logger.TryToGetLogin(request, user)
-
-	login, found, err := action.users.FindLogin(user)
+	login, found, err := action.users.FindLogin(target)
 	if err != nil {
-		action.logger.FailedToGetLogin(request, user, err)
+		action.logger.FailedToGetLogin(request, target, err)
 		return
 	}
 	if !found {
 		// user には必ず Login が存在するはずなのでログはエラーログ
-		err = errGetLoginNotFoundLogin
-		action.logger.FailedToGetLogin(request, user, err)
+		err = user.ErrGetLoginNotFoundLogin
+		action.logger.FailedToGetLogin(request, target, err)
 		return
 	}
 
-	action.logger.GetLogin(request, user, login)
+	action.logger.GetLogin(request, target, login)
 	return login, nil
 }

@@ -1,5 +1,15 @@
 package user
 
+import (
+	"github.com/getto-systems/project-example-id/_misc/errors"
+)
+
+var (
+	ErrGetLoginNotFoundLogin = errors.NewError("User.GetLogin", "NotFound.Login")
+
+	ErrGetUserNotFoundUser = errors.NewError("User.GetUser", "NotFound.User")
+)
+
 type (
 	User struct {
 		id UserID
