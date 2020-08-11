@@ -69,7 +69,7 @@ func (handler CredentialHandler) GetTicket() (_ credential.TicketToken, err erro
 
 	nonce := handler.httpRequest.Header.Get(HEADER_NONCE)
 
-	return credential.NewTicket(credential.TicketSignature(cookie.Value), credential.TicketNonce(nonce)), nil
+	return credential.NewTicketToken(credential.TicketSignature(cookie.Value), credential.TicketNonce(nonce)), nil
 }
 
 func (handler CredentialHandler) SetCredential(credential credential.Credential) {

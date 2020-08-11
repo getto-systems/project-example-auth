@@ -360,7 +360,7 @@ func (backend *testInfra) GetTicket() (_ credential.TicketToken, err error) {
 		return backend.session.credential.TicketToken(), nil
 	}
 
-	return credential.NewTicket(backend.session.credential.TicketToken().Signature(), *backend.session.nonce), nil
+	return credential.NewTicketToken(backend.session.credential.TicketToken().Signature(), *backend.session.nonce), nil
 }
 func (backend *testInfra) SetCredential(credential credential.Credential) {
 	backend.session.credential = &credential
@@ -378,7 +378,7 @@ func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
 
 		credential := credential.NewCredential(
-			credential.NewTicket(signature, nonce),
+			credential.NewTicketToken(signature, nonce),
 			backend.session.credential.ApiToken(),
 			backend.session.credential.ContentToken(),
 			backend.session.credential.Expires(),
@@ -392,7 +392,7 @@ func (backend *testInfra) setCredentialUser(user user.User) {
 		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
 
 		credential := credential.NewCredential(
-			credential.NewTicket(signature, nonce),
+			credential.NewTicketToken(signature, nonce),
 			backend.session.credential.ApiToken(),
 			backend.session.credential.ContentToken(),
 			backend.session.credential.Expires(),
