@@ -323,7 +323,7 @@ func newTicketSigner() signer.TicketSigner {
 	return signer.NewTicketSigner(jwt)
 }
 func newApiTokenSigner() signer.ApiTokenSigner {
-	pem, err := ioutil.ReadFile(os.Getenv("APP_PRIVATE_KEY"))
+	pem, err := ioutil.ReadFile(os.Getenv("API_PRIVATE_KEY"))
 	if err != nil {
 		log.Fatalf("app private key read failed: %s", err)
 	}
