@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id"
-
+	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 )
 
@@ -54,11 +54,11 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 }
 
 func (handler Handler) errorResponse(err error) {
-	if errors.Is(err, _usecase.ErrPasswordCheck) {
+	if errors.Is(err, password.ErrCheck) {
 		handler.badRequest(err)
 		return
 	}
-	if errors.Is(err, _usecase.ErrTicketValidate) {
+	if errors.Is(err, credential.ErrClearCredential) {
 		handler.unauthorized(err)
 		return
 	}

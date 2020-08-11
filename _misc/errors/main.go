@@ -6,8 +6,9 @@ import (
 
 type (
 	Error struct {
-		action  string
-		message string
+		action   string
+		message  string
+		category string
 	}
 )
 
@@ -15,6 +16,18 @@ func NewError(action string, message string) error {
 	return Error{
 		action:  action,
 		message: message,
+	}
+}
+func NewErrorAsCategory(action string, message string, err Error) error {
+	return Error{
+		action:   action,
+		message:  message,
+		category: err.category,
+	}
+}
+func NewCategory(category string) Error {
+	return Error{
+		category: category,
 	}
 }
 
@@ -27,5 +40,8 @@ func (err Error) Is(target error) bool {
 	if !ok {
 		return false
 	}
-	return err.action == t.action
+	if len(t.category) == 0 {
+		return false
+	}
+	return err.category == t.category
 }

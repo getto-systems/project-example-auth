@@ -3,10 +3,23 @@ package password_reset
 import (
 	"time"
 
+	"github.com/getto-systems/project-example-id/_misc/errors"
 	"github.com/getto-systems/project-example-id/_misc/expiration"
 
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
+)
+
+var (
+	ErrCreateSessionNotFoundDestination = errors.NewError("PasswordReset.CreateSession", "NotFound.Destination")
+
+	ErrGetStatusNotFoundSession  = errors.NewError("PasswordReset.GetStatus", "NotFound.Session")
+	ErrGetStatusMatchFailedLogin = errors.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
+
+	ErrValidateNotFoundSession  = errors.NewError("PasswordReset.Validate", "NotFound.Session")
+	ErrValidateMatchFailedLogin = errors.NewError("PasswordReset.Validate", "MatchFailed.Login")
+	ErrValidateAlreadyExpired   = errors.NewError("PasswordReset.Validate", "AlreadyExpired")
+	ErrValidateAlreadyClosed    = errors.NewError("PasswordReset.Validate", "AlreadyClosed")
 )
 
 type (

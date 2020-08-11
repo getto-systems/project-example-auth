@@ -1,18 +1,10 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/errors"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
-)
-
-var (
-	errValidateMatchFailedNonce = errors.NewError("Ticket.Validate", "MatchFailed.Nonce")
-	errValidateNotFoundTicket   = errors.NewError("Ticket.Validate", "NotFound.Ticket")
-	errValidateMatchFailedUser  = errors.NewError("Ticket.Validate", "MatchFailed.User")
-	errValidateAlreadyExpired   = errors.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
 // user が正しいことは確認済みでなければならない
@@ -25,17 +17,17 @@ func (action action) Validate(request request.Request, user user.User, nonce cre
 		return
 	}
 	if !found {
-		err = errValidateNotFoundTicket
+		err = ticket.ErrValidateNotFoundTicket
 		action.logger.FailedToValidateBecauseTicketNotFound(request, user, err)
 		return
 	}
 	if user.ID() != dataUser.ID() {
-		err = errValidateMatchFailedUser
+		err = ticket.ErrValidateMatchFailedUser
 		action.logger.FailedToValidateBecauseUserMatchFailed(request, user, err)
 		return
 	}
 	if expires.Expired(request) {
-		err = errValidateAlreadyExpired
+		err = ticket.ErrValidateAlreadyExpired
 		action.logger.FailedToValidateBecauseExpired(request, user, err)
 		return
 	}

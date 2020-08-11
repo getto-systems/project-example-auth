@@ -3,10 +3,17 @@ package credential
 import (
 	"time"
 
+	"github.com/getto-systems/project-example-id/_misc/errors"
 	"github.com/getto-systems/project-example-id/_misc/expiration"
 
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
+)
+
+var (
+	ErrClearCredential = errors.NewCategory("ClearCredential")
+
+	ErrParseTicketMatchFailedNonce = NewClearCredentialError("Credential.ParseTicket", "MatchFailed.Nonce")
 )
 
 type (
@@ -200,4 +207,8 @@ func TicketExtendWeek(days int64) TicketExtendSecond {
 func TokenExpireMinute(minutes int64) TokenExpireSecond {
 	// トークンの有効期限は「分」の単位で設定するべき
 	return TokenExpireSecond(minutes * 60)
+}
+
+func NewClearCredentialError(action string, message string) error {
+	return errors.NewErrorAsCategory(action, message, ErrClearCredential)
 }
