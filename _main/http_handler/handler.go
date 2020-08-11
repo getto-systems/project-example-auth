@@ -54,11 +54,11 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 }
 
 func (handler Handler) errorResponse(err error) {
-	if errors.Is(err, password.ErrCheck) {
+	if password.ErrCheck.IsSameCategory(err) {
 		handler.badRequest(err)
 		return
 	}
-	if errors.Is(err, credential.ErrClearCredential) {
+	if credential.ErrClearCredential.IsSameCategory(err) {
 		handler.unauthorized(err)
 		return
 	}
