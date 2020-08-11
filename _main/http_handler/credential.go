@@ -60,7 +60,7 @@ func (handler CredentialHandler) handler() _usecase.CredentialHandler {
 	return handler
 }
 
-func (handler CredentialHandler) GetTicket() (_ credential.Ticket, err error) {
+func (handler CredentialHandler) GetTicket() (_ credential.TicketToken, err error) {
 	cookie, err := handler.httpRequest.Cookie(COOKIE_TICKET)
 	if err != nil {
 		err = errTicketTokenNotFound
@@ -73,7 +73,7 @@ func (handler CredentialHandler) GetTicket() (_ credential.Ticket, err error) {
 }
 
 func (handler CredentialHandler) SetCredential(credential credential.Credential) {
-	handler.setTicket(credential.Ticket(), credential.Expires())
+	handler.setTicket(credential.TicketToken(), credential.Expires())
 	handler.setApiToken(credential.ApiToken())
 	handler.setContentToken(credential.ContentToken(), credential.Expires())
 }
@@ -83,7 +83,7 @@ func (handler CredentialHandler) ClearCredential() {
 	handler.clearContentToken()
 }
 
-func (handler CredentialHandler) setTicket(ticket credential.Ticket, expires expiration.Expires) {
+func (handler CredentialHandler) setTicket(ticket credential.TicketToken, expires expiration.Expires) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
 		Name:    COOKIE_TICKET,
 		Value:   string(ticket.Signature()),

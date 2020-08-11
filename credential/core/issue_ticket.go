@@ -8,7 +8,7 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-func (action action) IssueTicket(request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.Ticket, err error) {
+func (action action) IssueTicket(request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.TicketToken, err error) {
 	action.logger.TryToIssueTicket(request, user, expires)
 
 	signature, err := action.ticketSigner.Sign(user, nonce, expires)

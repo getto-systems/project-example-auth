@@ -14,7 +14,7 @@ var (
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Extend(request request.Request, user user.User, ticket credential.Ticket) (_ expiration.Expires, err error) {
+func (action action) Extend(request request.Request, user user.User, ticket credential.TicketToken) (_ expiration.Expires, err error) {
 	action.logger.TryToExtend(request, user)
 
 	limit, found, err := action.tickets.FindExtendLimit(ticket.Nonce())

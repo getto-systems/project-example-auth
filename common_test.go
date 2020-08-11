@@ -350,17 +350,17 @@ func (generator *passwordResetTestSessionGenerator) another() {
 func (backend *testInfra) credentialHandler() CredentialHandler {
 	return backend
 }
-func (backend *testInfra) GetTicket() (_ credential.Ticket, err error) {
+func (backend *testInfra) GetTicket() (_ credential.TicketToken, err error) {
 	if backend.session.credential == nil {
 		err = errors.New("credential not set")
 		return
 	}
 
 	if backend.session.nonce == nil {
-		return backend.session.credential.Ticket(), nil
+		return backend.session.credential.TicketToken(), nil
 	}
 
-	return credential.NewTicket(backend.session.credential.Ticket().Signature(), *backend.session.nonce), nil
+	return credential.NewTicket(backend.session.credential.TicketToken().Signature(), *backend.session.nonce), nil
 }
 func (backend *testInfra) SetCredential(credential credential.Credential) {
 	backend.session.credential = &credential
@@ -374,7 +374,7 @@ func (backend *testInfra) setNonce(nonce credential.TicketNonce) {
 }
 func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 	if backend.session.credential != nil {
-		user, _, _ := backend.credential.ticketSign.Parse(backend.session.credential.Ticket().Signature())
+		user, _, _ := backend.credential.ticketSign.Parse(backend.session.credential.TicketToken().Signature())
 		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
 
 		credential := credential.NewCredential(
@@ -388,7 +388,7 @@ func (backend *testInfra) setCredentialNonce(nonce credential.TicketNonce) {
 }
 func (backend *testInfra) setCredentialUser(user user.User) {
 	if backend.session.credential != nil {
-		_, nonce, _ := backend.credential.ticketSign.Parse(backend.session.credential.Ticket().Signature())
+		_, nonce, _ := backend.credential.ticketSign.Parse(backend.session.credential.TicketToken().Signature())
 		signature, _ := backend.credential.ticketSign.Sign(user, nonce, backend.session.credential.Expires())
 
 		credential := credential.NewCredential(

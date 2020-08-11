@@ -9,8 +9,8 @@ import (
 
 type (
 	Action interface {
-		ParseTicket(request.Request, Ticket) (user.User, error)
-		IssueTicket(request.Request, user.User, TicketNonce, expiration.Expires) (Ticket, error)
+		ParseTicket(request.Request, TicketToken) (user.User, error)
+		IssueTicket(request.Request, user.User, TicketNonce, expiration.Expires) (TicketToken, error)
 		IssueApiToken(request.Request, user.User, expiration.Expires) (ApiToken, error)
 		IssueContentToken(request.Request, user.User, expiration.Expires) (ContentToken, error)
 	}
