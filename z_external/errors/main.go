@@ -35,11 +35,7 @@ func (err Error) Error() string {
 	return fmt.Sprintf("%s/%s", err.action, err.message)
 }
 
-func (err Error) Is(target error) bool {
-	if len(err.category) == 0 {
-		return false
-	}
-
+func (err Error) IsSameCategory(target error) bool {
 	t, ok := target.(Error)
 	if !ok {
 		return false

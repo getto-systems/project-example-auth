@@ -1,8 +1,6 @@
 package _usecase
 
 import (
-	"errors"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
@@ -62,7 +60,7 @@ func (u Usecase) handleCredential(credential credential.Credential, err error) {
 	}
 }
 func (u Usecase) handleCredentialError(err error) {
-	if errors.Is(err, credential.ErrClearCredential) {
+	if credential.ErrClearCredential.IsSameCategory(err) {
 		u.clearCredential()
 	}
 }
