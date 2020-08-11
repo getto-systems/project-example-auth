@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-
-	"github.com/getto-systems/project-example-id/_gateway/message"
 )
 
 type (
@@ -18,10 +16,6 @@ func NewLogMessage() LogMessage {
 	return LogMessage{
 		logger: log.New(os.Stdout, "", 0),
 	}
-}
-
-func (log LogMessage) log(message string) message.LogMessage {
-	return log
 }
 
 func (log LogMessage) Send(message string) (err error) {
