@@ -25,7 +25,7 @@ func (u Renew) Renew(handler RenewHandler) {
 	handler.RenewResponse(err)
 }
 func (u Renew) renew(handler RenewHandler) (_ credential.Credential, err error) {
-	ticket, err := u.getTicket()
+	nonce, signature, err := u.getTicketNonceAndSignature()
 	if err != nil {
 		return
 	}
@@ -35,20 +35,20 @@ func (u Renew) renew(handler RenewHandler) (_ credential.Credential, err error) 
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, ticket)
+	user, err := u.credential.ParseTicket(request, nonce, signature)
 	if err != nil {
 		return
 	}
 
-	err = u.ticket.Validate(request, user, ticket)
+	err = u.ticket.Validate(request, user, nonce)
 	if err != nil {
 		return
 	}
 
-	expires, err := u.ticket.Extend(request, user, ticket)
+	ticket, err := u.ticket.Extend(request, user, nonce)
 	if err != nil {
 		return
 	}
 
-	return u.issueCredential(request, user, ticket.Nonce(), expires)
+	return u.issueCredential(request, ticket)
 }

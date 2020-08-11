@@ -1,19 +1,16 @@
 package credential_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
 )
 
-func (action action) IssueApiToken(request request.Request, user user.User, expires expiration.Expires) (_ credential.ApiToken, err error) {
-	action.logger.TryToIssueApiToken(request, user, expires)
+func (action action) IssueApiToken(request request.Request, ticket credential.Ticket) (_ credential.ApiToken, err error) {
+	action.logger.TryToIssueApiToken(request, ticket.User(), ticket.TokenExpires())
 
-	roles, found, err := action.apiUsers.FindApiRoles(user)
+	roles, found, err := action.apiUsers.FindApiRoles(ticket.User())
 	if err != nil {
-		action.logger.FailedToIssueApiToken(request, user, expires, err)
+		action.logger.FailedToIssueApiToken(request, ticket.User(), ticket.TokenExpires(), err)
 		return
 	}
 	if !found {
@@ -21,12 +18,14 @@ func (action action) IssueApiToken(request request.Request, user user.User, expi
 		roles = credential.EmptyApiRoles()
 	}
 
-	token, err := action.apiTokenSinger.Sign(user, roles, expires)
+	signature, err := action.apiTokenSinger.Sign(ticket.User(), roles, ticket.TokenExpires())
 	if err != nil {
-		action.logger.FailedToIssueApiToken(request, user, expires, err)
+		action.logger.FailedToIssueApiToken(request, ticket.User(), ticket.TokenExpires(), err)
 		return
 	}
 
-	action.logger.IssueApiToken(request, user, roles, expires)
+	token := ticket.NewApiToken(roles, signature)
+
+	action.logger.IssueApiToken(request, ticket.User(), roles, ticket.TokenExpires())
 	return token, nil
 }

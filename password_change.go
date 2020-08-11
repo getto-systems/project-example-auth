@@ -29,7 +29,7 @@ func (u PasswordChange) GetLogin(handler PasswordChangeHandler) {
 	handler.GetLoginResponse(login, err)
 }
 func (u PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Login, err error) {
-	ticket, err := u.getTicket()
+	nonce, signature, err := u.getTicketNonceAndSignature()
 	if err != nil {
 		return
 	}
@@ -39,12 +39,12 @@ func (u PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Login, e
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, ticket)
+	user, err := u.credential.ParseTicket(request, nonce, signature)
 	if err != nil {
 		return
 	}
 
-	err = u.ticket.Validate(request, user, ticket)
+	err = u.ticket.Validate(request, user, nonce)
 	if err != nil {
 		return
 	}
@@ -63,7 +63,7 @@ func (u PasswordChange) Change(handler PasswordChangeHandler) {
 	handler.ChangeResponse(err)
 }
 func (u PasswordChange) change(handler PasswordChangeHandler) (err error) {
-	ticket, err := u.getTicket()
+	nonce, signature, err := u.getTicketNonceAndSignature()
 	if err != nil {
 		return
 	}
@@ -73,12 +73,12 @@ func (u PasswordChange) change(handler PasswordChangeHandler) (err error) {
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, ticket)
+	user, err := u.credential.ParseTicket(request, nonce, signature)
 	if err != nil {
 		return
 	}
 
-	err = u.ticket.Validate(request, user, ticket)
+	err = u.ticket.Validate(request, user, nonce)
 	if err != nil {
 		return
 	}

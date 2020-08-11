@@ -1,10 +1,9 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/ticket/infra"
 
+	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/ticket"
 )
 
@@ -12,7 +11,9 @@ type (
 	action struct {
 		logger infra.Logger
 
-		expireSecond   expiration.ExpireSecond
+		ticketExpireSecond credential.TicketExpireSecond
+		tokenExpireSecond  credential.TokenExpireSecond
+
 		nonceGenerator infra.TicketNonceGenerator
 
 		tickets infra.TicketRepository
@@ -22,7 +23,9 @@ type (
 func NewAction(
 	logger infra.Logger,
 
-	expireSecond expiration.ExpireSecond,
+	ticketExpireSecond credential.TicketExpireSecond,
+	tokenExpireSecond credential.TokenExpireSecond,
+
 	nonceGenerator infra.TicketNonceGenerator,
 
 	tickets infra.TicketRepository,
@@ -30,7 +33,9 @@ func NewAction(
 	return action{
 		logger: logger,
 
-		expireSecond:   expireSecond,
+		ticketExpireSecond: ticketExpireSecond,
+		tokenExpireSecond:  tokenExpireSecond,
+
 		nonceGenerator: nonceGenerator,
 
 		tickets: tickets,

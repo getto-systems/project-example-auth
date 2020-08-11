@@ -37,15 +37,15 @@ func (u PasswordLogin) login(handler PasswordLoginHandler) (_ credential.Credent
 		return
 	}
 
-	exp, err := u.password.Validate(request, user, raw)
+	extendSecond, err := u.password.Validate(request, user, raw)
 	if err != nil {
 		return
 	}
 
-	nonce, expires, err := u.ticket.Register(request, user, exp)
+	ticket, err := u.ticket.Register(request, user, extendSecond)
 	if err != nil {
 		return
 	}
 
-	return u.issueCredential(request, user, nonce, expires)
+	return u.issueCredential(request, ticket)
 }

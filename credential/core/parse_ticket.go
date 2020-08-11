@@ -15,15 +15,15 @@ var (
 	errValidateAlreadyExpired   = errors.NewError("Ticket.Validate", "AlreadyExpired")
 )
 
-func (action action) ParseTicket(request request.Request, ticket credential.TicketToken) (_ user.User, err error) {
+func (action action) ParseTicket(request request.Request, nonce credential.TicketNonce, signature credential.TicketSignature) (_ user.User, err error) {
 	action.logger.TryToParseTicket(request)
 
-	user, nonce, err := action.ticketParser.Parse(ticket.Signature())
+	user, ticketNonce, err := action.ticketParser.Parse(signature)
 	if err != nil {
 		action.logger.FailedToParseTicket(request, err)
 		return
 	}
-	if nonce != ticket.Nonce() {
+	if ticketNonce != nonce {
 		err = errValidateMatchFailedNonce
 		action.logger.FailedToParseTicketBecauseNonceMatchFailed(request, err)
 		return

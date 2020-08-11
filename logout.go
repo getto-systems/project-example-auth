@@ -24,7 +24,7 @@ func (u Logout) Logout(handler LogoutHandler) {
 	handler.LogoutResponse(err)
 }
 func (u Logout) logout(handler LogoutHandler) (err error) {
-	ticket, err := u.getTicket()
+	nonce, signature, err := u.getTicketNonceAndSignature()
 	if err != nil {
 		return
 	}
@@ -34,17 +34,17 @@ func (u Logout) logout(handler LogoutHandler) (err error) {
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, ticket)
+	user, err := u.credential.ParseTicket(request, nonce, signature)
 	if err != nil {
 		return
 	}
 
-	err = u.ticket.Validate(request, user, ticket)
+	err = u.ticket.Validate(request, user, nonce)
 	if err != nil {
 		return
 	}
 
-	err = u.ticket.Deactivate(request, user, ticket)
+	err = u.ticket.Deactivate(request, user, nonce)
 	if err != nil {
 		return
 	}

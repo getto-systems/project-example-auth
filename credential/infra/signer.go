@@ -1,15 +1,13 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/user"
 )
 
 type (
 	TicketSigner interface {
-		Sign(user.User, credential.TicketNonce, expiration.Expires) (credential.TicketSignature, error)
+		Sign(user.User, credential.TicketNonce, credential.TicketExpires) (credential.TicketSignature, error)
 	}
 	TicketParser interface {
 		Parse(credential.TicketSignature) (user.User, credential.TicketNonce, error)
@@ -20,10 +18,10 @@ type (
 	}
 
 	ApiTokenSigner interface {
-		Sign(user.User, credential.ApiRoles, expiration.Expires) (credential.ApiToken, error)
+		Sign(user.User, credential.ApiRoles, credential.TokenExpires) (credential.ApiSignature, error)
 	}
 
 	ContentTokenSigner interface {
-		Sign(expiration.Expires) (credential.ContentToken, error)
+		Sign(credential.TokenExpires) (credential.ContentKeyID, credential.ContentPolicy, credential.ContentSignature, error)
 	}
 )

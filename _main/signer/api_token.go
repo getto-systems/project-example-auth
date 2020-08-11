@@ -5,8 +5,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -27,7 +25,7 @@ func (signer ApiTokenSigner) signer() infra.ApiTokenSigner {
 	return signer
 }
 
-func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, expires expiration.Expires) (_ credential.ApiToken, err error) {
+func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, expires credential.TokenExpires) (_ credential.ApiSignature, err error) {
 	token, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"aud": roles,
@@ -37,5 +35,5 @@ func (signer ApiTokenSigner) Sign(user user.User, roles credential.ApiRoles, exp
 		return
 	}
 
-	return credential.NewApiToken(roles, credential.ApiSignature(token)), nil
+	return credential.ApiSignature(token), nil
 }

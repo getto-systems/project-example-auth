@@ -1,8 +1,6 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
@@ -25,20 +23,20 @@ type (
 	}
 
 	IssueTicketLogger interface {
-		TryToIssueTicket(request.Request, user.User, expiration.Expires)
-		FailedToIssueTicket(request.Request, user.User, expiration.Expires, error)
-		IssueTicket(request.Request, user.User, expiration.Expires)
+		TryToIssueTicket(request.Request, user.User, credential.TicketExpires)
+		FailedToIssueTicket(request.Request, user.User, credential.TicketExpires, error)
+		IssueTicket(request.Request, user.User, credential.TicketExpires)
 	}
 
 	IssueApiTokenLogger interface {
-		TryToIssueApiToken(request.Request, user.User, expiration.Expires)
-		FailedToIssueApiToken(request.Request, user.User, expiration.Expires, error)
-		IssueApiToken(request.Request, user.User, credential.ApiRoles, expiration.Expires)
+		TryToIssueApiToken(request.Request, user.User, credential.TokenExpires)
+		FailedToIssueApiToken(request.Request, user.User, credential.TokenExpires, error)
+		IssueApiToken(request.Request, user.User, credential.ApiRoles, credential.TokenExpires)
 	}
 
 	IssueContentTokenLogger interface {
-		TryToIssueContentToken(request.Request, user.User, expiration.Expires)
-		FailedToIssueContentToken(request.Request, user.User, expiration.Expires, error)
-		IssueContentToken(request.Request, user.User, expiration.Expires)
+		TryToIssueContentToken(request.Request, user.User, credential.TokenExpires)
+		FailedToIssueContentToken(request.Request, user.User, credential.TokenExpires, error)
+		IssueContentToken(request.Request, user.User, credential.TokenExpires)
 	}
 )

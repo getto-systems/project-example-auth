@@ -13,7 +13,7 @@ var (
 )
 
 func (action action) CreateSession(request request.Request, user user.User, login user.Login) (_ password_reset.Session, _ password_reset.Destination, _ password_reset.Token, err error) {
-	expires := request.NewExpires(action.expireSecond)
+	expires := password_reset.NewExpires(request, action.sessionExpireSecond)
 
 	action.logger.TryToCreateSession(request, user, login, expires)
 

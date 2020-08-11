@@ -1,6 +1,8 @@
 package credential_core
 
 import (
+	"github.com/getto-systems/project-example-id/_misc/expiration"
+
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -17,6 +19,11 @@ type (
 		contentTokenSigner infra.ContentTokenSigner
 
 		apiUsers infra.ApiUserRepository
+	}
+
+	Expires struct {
+		ticket expiration.ExpireSecond
+		token  expiration.ExpireSecond
 	}
 )
 

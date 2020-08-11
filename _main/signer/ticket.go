@@ -6,8 +6,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential/infra"
 
 	"github.com/getto-systems/project-example-id/credential"
@@ -56,7 +54,7 @@ func parseUser(raw interface{}) (_ user.User) {
 	return user.NewUser(user.UserID(userID))
 }
 
-func (signer TicketSigner) Sign(user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.TicketSignature, err error) {
+func (signer TicketSigner) Sign(user user.User, nonce credential.TicketNonce, expires credential.TicketExpires) (_ credential.TicketSignature, err error) {
 	signature, err := signer.jwt.Sign(jwt.MapClaims{
 		"sub": user.ID(),
 		"exp": strconv.Itoa(int(time.Time(expires).Unix())),

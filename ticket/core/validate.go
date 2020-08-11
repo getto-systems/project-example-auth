@@ -16,10 +16,10 @@ var (
 )
 
 // user が正しいことは確認済みでなければならない
-func (action action) Validate(request request.Request, user user.User, ticket credential.TicketToken) (err error) {
+func (action action) Validate(request request.Request, user user.User, nonce credential.TicketNonce) (err error) {
 	action.logger.TryToValidate(request, user)
 
-	dataUser, expires, found, err := action.tickets.FindUserAndExpires(ticket.Nonce())
+	dataUser, expires, found, err := action.tickets.FindUserAndExpires(nonce)
 	if err != nil {
 		action.logger.FailedToValidate(request, user, err)
 		return
@@ -34,7 +34,7 @@ func (action action) Validate(request request.Request, user user.User, ticket cr
 		action.logger.FailedToValidateBecauseUserMatchFailed(request, user, err)
 		return
 	}
-	if request.Expired(expires) {
+	if expires.Expired(request) {
 		err = errValidateAlreadyExpired
 		action.logger.FailedToValidateBecauseExpired(request, user, err)
 		return

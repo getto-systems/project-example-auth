@@ -1,22 +1,19 @@
 package credential_core
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/expiration"
-
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
 )
 
-func (action action) IssueTicket(request request.Request, user user.User, nonce credential.TicketNonce, expires expiration.Expires) (_ credential.TicketToken, err error) {
-	action.logger.TryToIssueTicket(request, user, expires)
+func (action action) IssueTicket(request request.Request, ticket credential.Ticket) (_ credential.TicketToken, err error) {
+	action.logger.TryToIssueTicket(request, ticket.User(), ticket.TicketExpires())
 
-	signature, err := action.ticketSigner.Sign(user, nonce, expires)
+	signature, err := action.ticketSigner.Sign(ticket.User(), ticket.Nonce(), ticket.TicketExpires())
 	if err != nil {
-		action.logger.FailedToIssueTicket(request, user, expires, err)
+		action.logger.FailedToIssueTicket(request, ticket.User(), ticket.TicketExpires(), err)
 		return
 	}
 
-	action.logger.IssueTicket(request, user, expires)
-	return credential.NewTicketToken(signature, nonce), nil
+	action.logger.IssueTicket(request, ticket.User(), ticket.TicketExpires())
+	return ticket.NewTicketToken(signature), nil
 }
