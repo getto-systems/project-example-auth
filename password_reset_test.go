@@ -268,8 +268,8 @@ func ExamplePasswordReset_resetLog() {
 	// log: "PasswordReset/CloseSession/CloseSession", info
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssue", debug
-	// log: "Credential/IssueTicket/Issue", info
+	// log: "Credential/IssueTicketToken/TryToIssue", debug
+	// log: "Credential/IssueTicketToken/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -781,8 +781,8 @@ func ExamplePasswordReset_resetSuccessWithTimeLimit() {
 	// log: "PasswordReset/CloseSession/CloseSession", info
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssue", debug
-	// log: "Credential/IssueTicket/Issue", info
+	// log: "Credential/IssueTicketToken/TryToIssue", debug
+	// log: "Credential/IssueTicketToken/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug

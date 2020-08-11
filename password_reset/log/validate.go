@@ -3,8 +3,6 @@ package password_reset_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/_gateway/log"
-
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
 	"github.com/getto-systems/project-example-id/request"
@@ -16,33 +14,58 @@ func (log Logger) validate() infra.ValidateLogger {
 }
 
 func (log Logger) TryToValidateToken(request request.Request, login user.Login) {
-	log.logger.Debug(validateEntry("TryToValidateToken", request, login, nil, nil))
+	log.logger.Debug(validateLog("TryToValidateToken", request, login, nil, nil))
 }
 func (log Logger) FailedToValidateToken(request request.Request, login user.Login, err error) {
-	log.logger.Error(validateEntry("FailedToValidateToken", request, login, nil, err))
+	log.logger.Error(validateLog("FailedToValidateToken", request, login, nil, err))
 }
 func (log Logger) FailedToValidateTokenBecauseSessionNotFound(request request.Request, login user.Login, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateTokenBecauseSessionNotFound", request, login, nil, err))
+	log.logger.Audit(validateLog("FailedToValidateTokenBecauseSessionNotFound", request, login, nil, err))
 }
 func (log Logger) FailedToValidateTokenBecauseSessionClosed(request request.Request, login user.Login, err error) {
-	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionClosed", request, login, nil, err))
+	log.logger.Info(validateLog("FailedToValidateTokenBecauseSessionClosed", request, login, nil, err))
 }
 func (log Logger) FailedToValidateTokenBecauseSessionExpired(request request.Request, login user.Login, err error) {
-	log.logger.Info(validateEntry("FailedToValidateTokenBecauseSessionExpired", request, login, nil, err))
+	log.logger.Info(validateLog("FailedToValidateTokenBecauseSessionExpired", request, login, nil, err))
 }
 func (log Logger) FailedToValidateTokenBecauseLoginMatchFailed(request request.Request, login user.Login, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateTokenBecauseLoginMatchFailed", request, login, nil, err))
+	log.logger.Audit(validateLog("FailedToValidateTokenBecauseLoginMatchFailed", request, login, nil, err))
 }
 func (log Logger) AuthByToken(request request.Request, login user.Login, user user.User) {
-	log.logger.Audit(validateEntry("AuthByToken", request, login, &user, nil))
+	log.logger.Audit(validateLog("AuthByToken", request, login, &user, nil))
 }
 
-func validateEntry(event string, request request.Request, login user.Login, user *user.User, err error) log.Entry {
-	return log.Entry{
-		Message: fmt.Sprintf("PasswordReset/Validate/%s", event),
-		Request: request,
-		User:    user,
-		Login:   &login,
-		Error:   err,
+type (
+	validateEntry struct {
+		Action  string             `json:"action"`
+		Message string             `json:"message"`
+		Request request.RequestLog `json:"request"`
+		Login   user.LoginLog      `json:"login"`
+		User    *user.UserLog      `json:"user,omitempty"`
+		Err     *string            `json:"error,omitempty"`
 	}
+)
+
+func validateLog(message string, request request.Request, login user.Login, user *user.User, err error) validateEntry {
+	entry := validateEntry{
+		Action:  "PasswordReset/Validate",
+		Message: message,
+		Request: request.Log(),
+		Login:   login.Log(),
+	}
+
+	if user != nil {
+		log := user.Log()
+		entry.User = &log
+	}
+	if err != nil {
+		message := err.Error()
+		entry.Err = &message
+	}
+
+	return entry
+}
+
+func (entry validateEntry) String() string {
+	return fmt.Sprintf("%s/%s", entry.Action, entry.Message)
 }

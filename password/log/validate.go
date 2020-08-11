@@ -3,8 +3,6 @@ package password_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/_gateway/log"
-
 	"github.com/getto-systems/project-example-id/password/infra"
 
 	"github.com/getto-systems/project-example-id/request"
@@ -16,29 +14,50 @@ func (log Logger) validate() infra.ValidateLogger {
 }
 
 func (log Logger) TryToValidate(request request.Request, user user.User) {
-	log.logger.Debug(validateEntry("TryToValidate", request, user, nil))
+	log.logger.Debug(validateLog("TryToValidate", request, user, nil))
 }
 func (log Logger) FailedToValidateBecausePasswordCheckFailed(request request.Request, user user.User, err error) {
-	log.logger.Info(validateEntry("FailedToValidateBecausePasswordCheckFailed", request, user, err))
+	log.logger.Info(validateLog("FailedToValidateBecausePasswordCheckFailed", request, user, err))
 }
 func (log Logger) FailedToValidateBecausePasswordNotFound(request request.Request, user user.User, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateBecausePasswordNotFound", request, user, err))
+	log.logger.Audit(validateLog("FailedToValidateBecausePasswordNotFound", request, user, err))
 }
 func (log Logger) FailedToValidateBecausePasswordMatchFailed(request request.Request, user user.User, err error) {
-	log.logger.Audit(validateEntry("FailedToValidateBecausePasswordMatchFailed", request, user, err))
+	log.logger.Audit(validateLog("FailedToValidateBecausePasswordMatchFailed", request, user, err))
 }
 func (log Logger) FailedToValidate(request request.Request, user user.User, err error) {
-	log.logger.Error(validateEntry("FailedToValidate", request, user, err))
+	log.logger.Error(validateLog("FailedToValidate", request, user, err))
 }
 func (log Logger) AuthByPassword(request request.Request, user user.User) {
-	log.logger.Audit(validateEntry("AuthByPassword", request, user, nil))
+	log.logger.Audit(validateLog("AuthByPassword", request, user, nil))
 }
 
-func validateEntry(event string, request request.Request, user user.User, err error) log.Entry {
-	return log.Entry{
-		Message: fmt.Sprintf("Password/Validate/%s", event),
-		Request: request,
-		User:    &user,
-		Error:   err,
+type (
+	validateEntry struct {
+		Action  string             `json:"action"`
+		Message string             `json:"message"`
+		Request request.RequestLog `json:"request"`
+		User    user.UserLog       `json:"user"`
+		Err     *string            `json:"error,omitempty"`
 	}
+)
+
+func validateLog(message string, request request.Request, user user.User, err error) changeEntry {
+	entry := changeEntry{
+		Action:  "Password/Validate",
+		Message: message,
+		Request: request.Log(),
+		User:    user.Log(),
+	}
+
+	if err != nil {
+		message := err.Error()
+		entry.Err = &message
+	}
+
+	return entry
+}
+
+func (entry validateEntry) String() string {
+	return fmt.Sprintf("%s/%s", entry.Action, entry.Message)
 }

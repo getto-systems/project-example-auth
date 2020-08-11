@@ -7,8 +7,6 @@ import (
 	golog "log"
 	"time"
 
-	"github.com/getto-systems/project-example-id/_gateway/log"
-
 	"github.com/getto-systems/project-example-id/credential/log"
 	"github.com/getto-systems/project-example-id/credential/repository/api_user"
 	"github.com/getto-systems/project-example-id/password/log"
@@ -44,7 +42,8 @@ import (
 
 type (
 	testInfra struct {
-		logger  *testLogger
+		logger *testLeveledLogger
+
 		message *testMessage
 
 		extend testExtendSecond
@@ -94,12 +93,12 @@ type (
 		sendTokenQueue password_reset_infra.SendTokenJobQueue
 	}
 
-	testLogger struct {
+	testLeveledLogger struct {
 		log []testLogEntry
 	}
 	testLogEntry struct {
 		level string
-		entry log.Entry
+		entry string
 	}
 
 	testMessage struct {
@@ -134,7 +133,8 @@ type (
 		context    testContext
 		credential *credential.Credential
 
-		logger  *testLogger
+		logger *testLeveledLogger
+
 		message *testMessage
 	}
 
@@ -146,7 +146,8 @@ type (
 
 func newTestInfra() *testInfra {
 	return &testInfra{
-		logger:  newTestLogger(),
+		logger: newTestLeveledLogger(),
+
 		message: newTestMessage(),
 
 		session: testSession{
@@ -246,26 +247,27 @@ func (backend *testInfra) now() request.RequestedAt {
 	return request.RequestedAt(now.Add(time.Duration(backend.session.nowSecond * 1_000_000_000)))
 }
 
-func newTestLogger() *testLogger {
-	return &testLogger{}
+func newTestLeveledLogger() *testLeveledLogger {
+	return &testLeveledLogger{}
 }
-func (logger *testLogger) Audit(entry log.Entry) {
-	logger.log = append(logger.log, logger.entry("audit", entry))
+func (logger *testLeveledLogger) Audit(entry interface{}) {
+	logger.log = append(logger.log, newTestLogEntry("audit", fmt.Sprintf("%s", entry)))
 }
-func (logger *testLogger) Error(entry log.Entry) {
-	logger.log = append(logger.log, logger.entry("error", entry))
+func (logger *testLeveledLogger) Error(entry interface{}) {
+	logger.log = append(logger.log, newTestLogEntry("error", fmt.Sprintf("%s", entry)))
 }
-func (logger *testLogger) Info(entry log.Entry) {
-	logger.log = append(logger.log, logger.entry("info", entry))
+func (logger *testLeveledLogger) Info(entry interface{}) {
+	logger.log = append(logger.log, newTestLogEntry("info", fmt.Sprintf("%s", entry)))
 }
-func (logger *testLogger) Debug(entry log.Entry) {
-	logger.log = append(logger.log, logger.entry("debug", entry))
+func (logger *testLeveledLogger) Debug(entry interface{}) {
+	logger.log = append(logger.log, newTestLogEntry("debug", fmt.Sprintf("%s", entry)))
 }
-func (logger *testLogger) entry(level string, entry log.Entry) testLogEntry {
-	return testLogEntry{level: level, entry: entry}
-}
-func (logger *testLogger) clear() {
+func (logger *testLeveledLogger) clear() {
 	logger.log = []testLogEntry{}
+}
+
+func newTestLogEntry(level string, entry string) testLogEntry {
+	return testLogEntry{level: level, entry: entry}
 }
 
 func newTestMessage() *testMessage {
@@ -547,7 +549,7 @@ func (f testFormatter) printResetToken(token password_reset.Token) {
 
 func (f testFormatter) printLog() {
 	for _, entry := range f.logger.log {
-		fmt.Printf("log: \"%s\", %s\n", entry.entry.Message, entry.level)
+		fmt.Printf("log: \"%s\", %s\n", entry.entry, entry.level)
 	}
 }
 func (f testFormatter) printMessage() {

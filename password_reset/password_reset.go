@@ -32,6 +32,9 @@ type (
 	Session struct {
 		id SessionID
 	}
+	SessionLog struct {
+		ID string `json:"id"`
+	}
 
 	SessionData struct {
 		user        user.User
@@ -41,11 +44,15 @@ type (
 	}
 
 	Destination struct {
-		// TODO 手抜きだ！
+		// TODO ちゃんとする
 		Type string
 
 		//SlackChannel string
 		//MailAddress string
+	}
+	DestinationLog struct {
+		// TODO ちゃんとする
+		Type string `json:"type"`
 	}
 
 	Status struct {
@@ -54,18 +61,41 @@ type (
 		complete *StatusComplete
 		failed   *StatusFailed
 	}
+	StatusLog struct {
+		Waiting  *StatusWaitingLog  `json:"waiting,omitempty"`
+		Sending  *StatusSendingLog  `json:"sending,omitempty"`
+		Complete *StatusCompleteLog `json:"complete,omitempty"`
+		Failed   *StatusFailedLog   `json:"failed,omitempty"`
+	}
+
 	StatusWaiting struct {
 		since WaitingSince
 	}
+	StatusWaitingLog struct {
+		Since string `json:"since"`
+	}
+
 	StatusSending struct {
 		since SendingSince
 	}
+	StatusSendingLog struct {
+		Since string `json:"since"`
+	}
+
 	StatusComplete struct {
 		at CompleteAt
 	}
+	StatusCompleteLog struct {
+		At string `json:"at"`
+	}
+
 	StatusFailed struct {
 		at     FailedAt
 		reason string
+	}
+	StatusFailedLog struct {
+		At     string `json:"at"`
+		Reason string `json:"reason"`
 	}
 
 	WaitingSince time.Time
@@ -81,6 +111,11 @@ func NewSession(id SessionID) Session {
 }
 func (session Session) ID() SessionID {
 	return session.id
+}
+func (session Session) Log() SessionLog {
+	return SessionLog{
+		ID: string(session.id),
+	}
 }
 
 func NewExpires(request request.Request, second ExpireSecond) Expires {
@@ -117,6 +152,12 @@ func (data SessionData) Expires() Expires {
 func NewLogDestination() Destination {
 	return Destination{
 		Type: "Log",
+	}
+}
+
+func (dest Destination) Log() DestinationLog {
+	return DestinationLog{
+		Type: dest.Type,
 	}
 }
 
@@ -193,6 +234,43 @@ func (status Status) FailedAtAndReason() (_ FailedAt, _ string) {
 		return
 	}
 	return status.failed.at, status.failed.reason
+}
+
+func (status Status) Log() (log StatusLog) {
+	if status.waiting != nil {
+		log.Waiting = status.waiting.log()
+	}
+	if status.sending != nil {
+		log.Sending = status.sending.log()
+	}
+	if status.complete != nil {
+		log.Complete = status.complete.log()
+	}
+	if status.failed != nil {
+		log.Failed = status.failed.log()
+	}
+	return log
+}
+func (status StatusWaiting) log() *StatusWaitingLog {
+	return &StatusWaitingLog{
+		Since: time.Time(status.since).String(),
+	}
+}
+func (status StatusSending) log() *StatusSendingLog {
+	return &StatusSendingLog{
+		Since: time.Time(status.since).String(),
+	}
+}
+func (status StatusComplete) log() *StatusCompleteLog {
+	return &StatusCompleteLog{
+		At: time.Time(status.at).String(),
+	}
+}
+func (status StatusFailed) log() *StatusFailedLog {
+	return &StatusFailedLog{
+		At:     time.Time(status.at).String(),
+		Reason: status.reason,
+	}
 }
 
 func ExpireMinute(minutes int64) ExpireSecond {

@@ -71,7 +71,8 @@ type (
 	}
 
 	infra struct {
-		logger logger.Logger
+		logger logger.LeveledLogger
+
 		extend extendSecond
 	}
 	extendSecond struct {
@@ -174,7 +175,7 @@ func newBackend() _usecase.Backend {
 
 func newInfra() infra {
 	return infra{
-		logger: newAppLogger(),
+		logger: newLeveledLogger(),
 		extend: newExtend(),
 	}
 }
@@ -288,8 +289,8 @@ func adminUser() user.User {
 	return user.NewUser(user.UserID(os.Getenv("ADMIN_USER_ID")))
 }
 
-func newAppLogger() logger.Logger {
-	return logger.NewLogger(os.Getenv("LOG_LEVEL"))
+func newLeveledLogger() logger.LeveledLogger {
+	return logger.NewLeveledLogger(os.Getenv("LOG_LEVEL"))
 }
 
 func newExtend() extendSecond {

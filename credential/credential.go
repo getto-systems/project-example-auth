@@ -13,7 +13,7 @@ import (
 var (
 	ErrClearCredential = errors.NewCategory("ClearCredential")
 
-	ErrParseTicketMatchFailedNonce = NewClearCredentialError("Credential.ParseTicket", "MatchFailed.Nonce")
+	ErrParseTicketSignatureMatchFailedNonce = NewClearCredentialError("Credential.ParseTicketSignature", "MatchFailed.Nonce")
 )
 
 type (

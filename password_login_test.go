@@ -117,8 +117,8 @@ func ExamplePasswordLogin_log() {
 	// log: "Password/Validate/AuthByPassword", audit
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssue", debug
-	// log: "Credential/IssueTicket/Issue", info
+	// log: "Credential/IssueTicketToken/TryToIssue", debug
+	// log: "Credential/IssueTicketToken/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -157,14 +157,14 @@ func ExampleRenew_log() {
 	//
 	// Renew
 	// err: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Extend/TryToExtend", debug
 	// log: "Ticket/Extend/Extend", info
-	// log: "Credential/IssueTicket/TryToIssue", debug
-	// log: "Credential/IssueTicket/Issue", info
+	// log: "Credential/IssueTicketToken/TryToIssue", debug
+	// log: "Credential/IssueTicketToken/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -203,8 +203,8 @@ func ExampleLogout_log() {
 	//
 	// Logout
 	// err: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/AuthByTicket", info
 	// log: "Ticket/Deactivate/TryToDeactivate", debug
@@ -373,8 +373,8 @@ func ExamplePasswordLogin_successWithLongPassword() {
 	// log: "Password/Validate/AuthByPassword", audit
 	// log: "Ticket/Register/TryToRegister", debug
 	// log: "Ticket/Register/Register", info
-	// log: "Credential/IssueTicket/TryToIssue", debug
-	// log: "Credential/IssueTicket/Issue", info
+	// log: "Credential/IssueTicketToken/TryToIssue", debug
+	// log: "Credential/IssueTicketToken/Issue", info
 	// log: "Credential/IssueApiToken/TryToIssue", debug
 	// log: "Credential/IssueApiToken/Issue", info
 	// log: "Credential/IssueContentToken/TryToIssue", debug
@@ -456,8 +456,8 @@ func ExampleRenew_failedBecauseAlreadyExpired() {
 	// request: "2020-01-01T00:06:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -516,8 +516,8 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
@@ -559,10 +559,10 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Credential.ParseTicket/MatchFailed.Nonce"
+	// err: "Credential.ParseTicketSignature/MatchFailed.Nonce"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/FailedToParseTicketBecauseNonceMatchFailed", audit
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/FailedToParseBecauseNonceMatchFailed", audit
 	//
 }
 
@@ -605,8 +605,8 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/NotFound.Ticket"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseTicketNotFound", audit
 	//
@@ -650,8 +650,8 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	// request: "2020-01-01T00:02:00Z"
 	// err: "Ticket.Validate/MatchFailed.User"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseUserMatchFailed", audit
 	//
@@ -692,8 +692,8 @@ func ExampleLogout_failedBecauseAlreadyExpired() {
 	// request: "2020-01-01T00:10:00Z"
 	// err: "Ticket.Validate/AlreadyExpired"
 	// credential: nil
-	// log: "Credential/ParseTicket/TryToParseTicket", debug
-	// log: "Credential/ParseTicket/ParseTicket", info
+	// log: "Credential/ParseTicketSignature/TryToParse", debug
+	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
 	// log: "Ticket/Validate/FailedToValidateBecauseExpired", info
 	//
