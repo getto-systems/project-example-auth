@@ -11,13 +11,13 @@ import (
 
 	"github.com/getto-systems/project-example-id"
 
-	"github.com/getto-systems/project-example-id/_main/http_handler"
-	"github.com/getto-systems/project-example-id/_main/logger"
-	"github.com/getto-systems/project-example-id/_main/message"
-	"github.com/getto-systems/project-example-id/_main/nonce_generator"
-	"github.com/getto-systems/project-example-id/_main/password_encrypter"
-	"github.com/getto-systems/project-example-id/_main/reset_session_generator"
-	"github.com/getto-systems/project-example-id/_main/signer"
+	"github.com/getto-systems/project-example-id/x_http_server/http_handler"
+	"github.com/getto-systems/project-example-id/x_http_server/logger"
+	"github.com/getto-systems/project-example-id/x_http_server/message"
+	"github.com/getto-systems/project-example-id/x_http_server/nonce_generator"
+	"github.com/getto-systems/project-example-id/x_http_server/password_encrypter"
+	"github.com/getto-systems/project-example-id/x_http_server/reset_session_generator"
+	"github.com/getto-systems/project-example-id/x_http_server/signer"
 
 	"github.com/getto-systems/project-example-id/credential/log"
 	"github.com/getto-systems/project-example-id/credential/repository/api_user"
