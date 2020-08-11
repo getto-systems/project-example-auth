@@ -39,7 +39,7 @@ func (u PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Login, e
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, nonce, signature)
+	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
 	if err != nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (u PasswordChange) change(handler PasswordChangeHandler) (err error) {
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, nonce, signature)
+	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
 	if err != nil {
 		return
 	}

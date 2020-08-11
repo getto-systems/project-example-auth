@@ -34,7 +34,7 @@ func (u Logout) logout(handler LogoutHandler) (err error) {
 		return
 	}
 
-	user, err := u.credential.ParseTicket(request, nonce, signature)
+	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
 	if err != nil {
 		return
 	}

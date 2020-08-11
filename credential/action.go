@@ -7,8 +7,8 @@ import (
 
 type (
 	Action interface {
-		ParseTicket(request.Request, TicketNonce, TicketSignature) (user.User, error)
-		IssueTicket(request.Request, Ticket) (TicketToken, error)
+		ParseTicketSignature(request.Request, TicketNonce, TicketSignature) (user.User, error)
+		IssueTicketToken(request.Request, Ticket) (TicketToken, error)
 		IssueApiToken(request.Request, Ticket) (ApiToken, error)
 		IssueContentToken(request.Request, Ticket) (ContentToken, error)
 	}

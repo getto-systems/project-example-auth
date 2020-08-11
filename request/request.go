@@ -9,11 +9,18 @@ type (
 		requestedAt RequestedAt
 		route       Route
 	}
+	RequestLog struct {
+		RequestedAt string   `json:"requested_at"`
+		Route       RouteLog `json:"route"`
+	}
 
 	RequestedAt time.Time
 
 	Route struct {
 		remoteAddr RemoteAddr
+	}
+	RouteLog struct {
+		RemoteAddr string `json:"remote_addr"`
 	}
 
 	RemoteAddr string
@@ -42,4 +49,16 @@ func (request Request) Route() Route {
 
 func (route Route) RemoteAddr() RemoteAddr {
 	return route.remoteAddr
+}
+
+func (request Request) Log() RequestLog {
+	return RequestLog{
+		RequestedAt: time.Time(request.RequestedAt()).String(),
+		Route:       request.route.Log(),
+	}
+}
+func (route Route) Log() RouteLog {
+	return RouteLog{
+		RemoteAddr: string(route.remoteAddr),
+	}
 }

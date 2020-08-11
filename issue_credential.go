@@ -6,7 +6,7 @@ import (
 )
 
 func (h Backend) issueCredential(request request.Request, ticket credential.Ticket) (_ credential.Credential, err error) {
-	ticketToken, err := h.credential.IssueTicket(request, ticket)
+	ticketToken, err := h.credential.IssueTicketToken(request, ticket)
 	if err != nil {
 		return
 	}

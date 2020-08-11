@@ -3,8 +3,6 @@ package password_reset_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/_gateway/log"
-
 	"github.com/getto-systems/project-example-id/password_reset/infra"
 
 	"github.com/getto-systems/project-example-id/password_reset"
@@ -16,31 +14,52 @@ func (log Logger) getStatus() infra.GetStatusLogger {
 }
 
 func (log Logger) TryToGetStatus(request request.Request, session password_reset.Session) {
-	log.logger.Debug(getStatusEntry("TryToGetStatus", request, session, nil, nil))
+	log.logger.Debug(getStatusLog("TryToGetStatus", request, session, nil, nil))
 }
 func (log Logger) FailedToGetStatus(request request.Request, session password_reset.Session, err error) {
-	log.logger.Error(getStatusEntry("FailedToGetStatus", request, session, nil, err))
+	log.logger.Error(getStatusLog("FailedToGetStatus", request, session, nil, err))
 }
 func (log Logger) FailedToGetStatusBecauseSessionNotFound(request request.Request, session password_reset.Session, err error) {
-	log.logger.Audit(getStatusEntry("FailedToGetStatusBecauseSessionNotFound", request, session, nil, err))
+	log.logger.Audit(getStatusLog("FailedToGetStatusBecauseSessionNotFound", request, session, nil, err))
 }
 func (log Logger) FailedToGetStatusBecauseLoginMatchFailed(request request.Request, session password_reset.Session, err error) {
-	log.logger.Audit(getStatusEntry("FailedToGetStatusBecauseLoginMatchFailed", request, session, nil, err))
+	log.logger.Audit(getStatusLog("FailedToGetStatusBecauseLoginMatchFailed", request, session, nil, err))
 }
 func (log Logger) GetStatus(request request.Request, session password_reset.Session, status password_reset.Status) {
-	log.logger.Info(getStatusEntry("GetStatus", request, session, &status, nil))
+	log.logger.Info(getStatusLog("GetStatus", request, session, &status, nil))
 }
 
-func getStatusEntry(event string, request request.Request, session password_reset.Session, status *password_reset.Status, err error) log.Entry {
-	return log.Entry{
-		Message: fmt.Sprintf("PasswordReset/GetStatus/%s", event),
-		Request: request,
-
-		PasswordReset: &log.PasswordResetEntry{
-			Session: &session,
-			Status:  status,
-		},
-
-		Error: err,
+type (
+	getStatusEntry struct {
+		Action  string                    `json:"action"`
+		Message string                    `json:"message"`
+		Request request.RequestLog        `json:"request"`
+		Session password_reset.SessionLog `json:"session"`
+		Status  *password_reset.StatusLog `json:"status,omitempty"`
+		Err     *string                   `json:"error,omitempty"`
 	}
+)
+
+func getStatusLog(message string, request request.Request, session password_reset.Session, status *password_reset.Status, err error) getStatusEntry {
+	entry := getStatusEntry{
+		Action:  "PasswordReset/GetStatus",
+		Message: message,
+		Request: request.Log(),
+		Session: session.Log(),
+	}
+
+	if status != nil {
+		log := status.Log()
+		entry.Status = &log
+	}
+	if err != nil {
+		message := err.Error()
+		entry.Err = &message
+	}
+
+	return entry
+}
+
+func (entry getStatusEntry) String() string {
+	return fmt.Sprintf("%s/%s", entry.Action, entry.Message)
 }

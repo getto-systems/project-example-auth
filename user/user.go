@@ -11,14 +11,21 @@ var (
 )
 
 type (
+	UserID  string
+	LoginID string
+
 	User struct {
 		id UserID
 	}
-	UserID string
+	UserLog struct {
+		ID string `json:"id"`
+	}
 
-	LoginID string
-	Login   struct {
+	Login struct {
 		id LoginID
+	}
+	LoginLog struct {
+		ID string `json:"id"`
 	}
 )
 
@@ -40,4 +47,15 @@ func NewLogin(loginID LoginID) Login {
 
 func (login Login) ID() LoginID {
 	return login.id
+}
+
+func (user User) Log() UserLog {
+	return UserLog{
+		ID: string(user.ID()),
+	}
+}
+func (login Login) Log() LoginLog {
+	return LoginLog{
+		ID: string(login.ID()),
+	}
 }

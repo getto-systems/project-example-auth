@@ -3,8 +3,6 @@ package ticket_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/_gateway/log"
-
 	"github.com/getto-systems/project-example-id/ticket/infra"
 
 	"github.com/getto-systems/project-example-id/request"
@@ -16,21 +14,41 @@ func (log Logger) deactivate() infra.DeactivateLogger {
 }
 
 func (log Logger) TryToDeactivate(request request.Request, user user.User) {
-	log.logger.Debug(deactivateEntry("TryToDeactivate", request, user, nil))
+	log.logger.Debug(deactivateLog("TryToDeactivate", request, user, nil))
 }
 func (log Logger) FailedToDeactivate(request request.Request, user user.User, err error) {
-	log.logger.Error(deactivateEntry("FailedToDeactivate", request, user, err))
+	log.logger.Error(deactivateLog("FailedToDeactivate", request, user, err))
 }
 func (log Logger) Deactivate(request request.Request, user user.User) {
-	log.logger.Info(deactivateEntry("Deactivate", request, user, nil))
+	log.logger.Info(deactivateLog("Deactivate", request, user, nil))
 }
 
-func deactivateEntry(event string, request request.Request, user user.User, err error) log.Entry {
-	return log.Entry{
-		Message: fmt.Sprintf("Ticket/Deactivate/%s", event),
-		Request: request,
-		User:    &user,
-
-		Error: err,
+type (
+	deactivateEntry struct {
+		Action  string             `json:"action"`
+		Message string             `json:"message"`
+		Request request.RequestLog `json:"request"`
+		User    user.UserLog       `json:"user"`
+		Err     *string            `json:"error,omitempty"`
 	}
+)
+
+func deactivateLog(message string, request request.Request, user user.User, err error) deactivateEntry {
+	entry := deactivateEntry{
+		Action:  "Ticket/Deactivate",
+		Message: message,
+		Request: request.Log(),
+		User:    user.Log(),
+	}
+
+	if err != nil {
+		message := err.Error()
+		entry.Err = &message
+	}
+
+	return entry
+}
+
+func (entry deactivateEntry) String() string {
+	return fmt.Sprintf("%s/%s", entry.Action, entry.Message)
 }
