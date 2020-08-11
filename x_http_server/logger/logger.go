@@ -2,7 +2,7 @@ package logger
 
 import (
 	"encoding/json"
-	golog "log"
+	"log"
 	"os"
 	"time"
 
@@ -27,7 +27,7 @@ func NewLeveledLogger(level string) LeveledLogger {
 	}
 }
 func leveledLogger(level string) applog.Logger {
-	logger := golog.New(os.Stdout, "", 0)
+	logger := log.New(os.Stdout, "", 0)
 
 	switch level {
 	case "QUIET":
