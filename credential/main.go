@@ -3,7 +3,7 @@ package credential
 type (
 	TicketSignature []byte
 	TicketNonce     string
-	Ticket          struct {
+	TicketToken     struct {
 		signature TicketSignature
 		nonce     TicketNonce
 	}
@@ -25,16 +25,16 @@ type (
 	}
 )
 
-func NewTicket(signature TicketSignature, nonce TicketNonce) Ticket {
-	return Ticket{
+func NewTicket(signature TicketSignature, nonce TicketNonce) TicketToken {
+	return TicketToken{
 		signature: signature,
 		nonce:     nonce,
 	}
 }
-func (ticket Ticket) Signature() TicketSignature {
+func (ticket TicketToken) Signature() TicketSignature {
 	return ticket.signature
 }
-func (ticket Ticket) Nonce() TicketNonce {
+func (ticket TicketToken) Nonce() TicketNonce {
 	return ticket.nonce
 }
 

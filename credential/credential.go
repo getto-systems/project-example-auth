@@ -6,14 +6,14 @@ import (
 
 type (
 	Credential struct {
-		ticket       Ticket
+		ticket       TicketToken
 		apiToken     ApiToken
 		contentToken ContentToken
 		expires      expiration.Expires
 	}
 )
 
-func NewCredential(ticket Ticket, apiToken ApiToken, contentToken ContentToken, expires expiration.Expires) Credential {
+func NewCredential(ticket TicketToken, apiToken ApiToken, contentToken ContentToken, expires expiration.Expires) Credential {
 	return Credential{
 		ticket:       ticket,
 		apiToken:     apiToken,
@@ -21,7 +21,7 @@ func NewCredential(ticket Ticket, apiToken ApiToken, contentToken ContentToken, 
 		expires:      expires,
 	}
 }
-func (credential Credential) Ticket() Ticket {
+func (credential Credential) TicketToken() TicketToken {
 	return credential.ticket
 }
 func (credential Credential) ApiToken() ApiToken {
