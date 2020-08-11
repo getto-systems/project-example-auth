@@ -3,8 +3,8 @@ package credential
 import (
 	"time"
 
-	"github.com/getto-systems/project-example-id/_misc/errors"
-	"github.com/getto-systems/project-example-id/_misc/expiration"
+	"github.com/getto-systems/project-example-id/z_external/errors"
+	"github.com/getto-systems/project-example-id/z_external/expiration"
 
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"

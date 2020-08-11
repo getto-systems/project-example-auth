@@ -1,7 +1,7 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/_misc/errors"
+	"github.com/getto-systems/project-example-id/z_external/errors"
 
 	"github.com/getto-systems/project-example-id/credential"
 )
