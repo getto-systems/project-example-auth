@@ -36,6 +36,10 @@ func (err Error) Error() string {
 }
 
 func (err Error) Is(target error) bool {
+	if len(err.category) == 0 {
+		return false
+	}
+
 	t, ok := target.(Error)
 	if !ok {
 		return false
