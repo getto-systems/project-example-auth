@@ -4,6 +4,7 @@ import (
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
 )
@@ -69,4 +70,23 @@ func (u Usecase) clearCredential() {
 }
 func (u Usecase) getTicketNonceAndSignature() (credential.TicketNonce, credential.TicketSignature, error) {
 	return u.handler.GetTicketNonceAndSignature()
+}
+
+func (h Backend) issueCredential(request request.Request, ticket credential.Ticket) (_ credential.Credential, err error) {
+	ticketToken, err := h.credential.IssueTicketToken(request, ticket)
+	if err != nil {
+		return
+	}
+
+	apiToken, err := h.credential.IssueApiToken(request, ticket)
+	if err != nil {
+		return
+	}
+
+	contentToken, err := h.credential.IssueContentToken(request, ticket)
+	if err != nil {
+		return
+	}
+
+	return credential.NewCredential(ticketToken, apiToken, contentToken), nil
 }
