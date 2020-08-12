@@ -18,7 +18,7 @@ var (
 
 type (
 	Credential struct {
-		ticket       TicketToken
+		ticketToken  TicketToken
 		apiToken     ApiToken
 		contentToken ContentToken
 	}
@@ -68,15 +68,15 @@ type (
 	}
 )
 
-func NewCredential(ticket TicketToken, apiToken ApiToken, contentToken ContentToken) Credential {
+func NewCredential(ticketToken TicketToken, apiToken ApiToken, contentToken ContentToken) Credential {
 	return Credential{
-		ticket:       ticket,
+		ticketToken:  ticketToken,
 		apiToken:     apiToken,
 		contentToken: contentToken,
 	}
 }
 func (credential Credential) TicketToken() TicketToken {
-	return credential.ticket
+	return credential.ticketToken
 }
 func (credential Credential) ApiToken() ApiToken {
 	return credential.apiToken
