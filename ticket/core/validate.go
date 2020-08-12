@@ -7,7 +7,6 @@ import (
 	"github.com/getto-systems/project-example-id/user"
 )
 
-// user が正しいことは確認済みでなければならない
 func (action action) Validate(request request.Request, user user.User, nonce credential.TicketNonce) (err error) {
 	action.logger.TryToValidate(request, user)
 
