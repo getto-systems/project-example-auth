@@ -55,45 +55,46 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 
 func (handler Handler) errorResponse(err error) {
 	if password.ErrCheck.IsSameCategory(err) {
-		handler.badRequest(err)
+		handler.invalidPassword()
 		return
 	}
 	if credential.ErrClearCredential.IsSameCategory(err) {
-		handler.unauthorized(err)
+		handler.invalidCredential()
 		return
 	}
 
 	switch err {
 	case errEmptyBody,
-		errBodyParseFailed:
+		errBodyParseFailed,
+		errTicketTokenNotFound:
 
-		handler.badRequest(err)
-		return
-
-	case errTicketTokenNotFound:
-		handler.unauthorized(err)
+		handler.badRequest()
 		return
 	}
 
-	handler.internalServerError(err)
+	handler.internalServerError()
 }
 
 func (handler Handler) ok(body interface{}) {
 	handler.jsonResponse(http.StatusOK, body)
 }
-func (handler Handler) badRequest(err error) {
-	handler.jsonResponse(http.StatusBadRequest, newErrorResponseBody(err))
+
+func (handler Handler) invalidPassword() {
+	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody("invalid-password"))
 }
-func (handler Handler) unauthorized(err error) {
-	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody(err))
+func (handler Handler) invalidCredential() {
+	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody("invalid-credential"))
 }
-func (handler Handler) internalServerError(err error) {
-	handler.jsonResponse(http.StatusInternalServerError, newErrorResponseBody(err))
+func (handler Handler) badRequest() {
+	handler.jsonResponse(http.StatusBadRequest, newErrorResponseBody("bad-request"))
+}
+func (handler Handler) internalServerError() {
+	handler.jsonResponse(http.StatusInternalServerError, newErrorResponseBody("internal-server-error"))
 }
 
-func newErrorResponseBody(err error) errorResponseBody {
+func newErrorResponseBody(message string) errorResponseBody {
 	return errorResponseBody{
-		Message: err.Error(),
+		Message: message,
 	}
 }
 
