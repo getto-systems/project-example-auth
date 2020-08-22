@@ -1,13 +1,20 @@
+DOCKER_WRAPPER_IMAGE_nginx(){ echo "1.19.1"; }
 DOCKER_WRAPPER_IMAGE_golang(){ head -1 Dockerfile | sed "s/.*golang:\(.*\) as.*/\1/"; }
 
+DOCKER_WRAPPER_SERVER_OPTS_http(){ echo "-p ${LABO_PORT_PREFIX}${APP_PORT}:8080"; }
+DOCKER_WRAPPER_SERVER_OPTS_nginx(){ echo "-p ${LABO_PORT_PREFIX}${WEB_PORT}:8443 -v /docker-volumes${APP_ROOT}/.nginx:/etc/nginx/templates"; }
+
 DOCKER_WRAPPER_APP(){
+  nginx-server nginx $1 nginx -g "daemon off;"
   go-server http $1 go run $(head -1 go.mod | cut -d' ' -f2)/x_http_server
 }
 DOCKER_WRAPPER_LOGS(){
-  service=$1
-  if [ -z "$service" ]; then
-    service=http
-  fi
-  go-server $service logs
+  case "$1" in
+    nginx)
+      nginx-server nginx logs
+      ;;
+    *)
+      go-server http logs
+      ;;
+  esac
 }
-DOCKER_WRAPPER_SERVER_OPTS_http(){ echo "-p ${LABO_PORT_PREFIX}${APP_PORT}:8080"; }
