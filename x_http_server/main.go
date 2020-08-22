@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/rs/cors"
-
 	"github.com/getto-systems/project-example-id"
 
 	"github.com/getto-systems/project-example-id/x_http_server/http_handler"
@@ -58,16 +56,9 @@ const (
 type (
 	server struct {
 		port string
-		cors cors.Options
-		tls  tls
 
 		cookieDomain http_handler.CookieDomain
 		backend      _usecase.Backend
-	}
-
-	tls struct {
-		cert string
-		key  string
 	}
 
 	infra struct {
@@ -84,21 +75,10 @@ func main() {
 	log.Fatal(newServer().listen())
 }
 func (server server) listen() error {
-	mux := server.mux()
-
-	if os.Getenv("SERVER_MODE") == "backend" {
-		return http.ListenAndServe(
-			server.port,
-			mux,
-		)
-	} else {
-		return http.ListenAndServeTLS(
-			server.port,
-			server.tls.cert,
-			server.tls.key,
-			cors.New(server.cors).Handler(mux),
-		)
-	}
+	return http.ListenAndServe(
+		server.port,
+		server.mux(),
+	)
 }
 func (server server) mux() *http.ServeMux {
 	mux := http.NewServeMux()
@@ -143,18 +123,6 @@ func (server server) handle(w http.ResponseWriter, r *http.Request) {
 func newServer() server {
 	return server{
 		port: ":8080",
-
-		cors: cors.Options{
-			AllowedOrigins:   []string{os.Getenv("ORIGIN")},
-			AllowedMethods:   []string{"POST"},
-			AllowedHeaders:   []string{HEADER_HANDLER},
-			AllowCredentials: true,
-		},
-
-		tls: tls{
-			cert: os.Getenv("TLS_CERT"),
-			key:  os.Getenv("TLS_KEY"),
-		},
 
 		cookieDomain: http_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
 		backend:      newBackend(),
