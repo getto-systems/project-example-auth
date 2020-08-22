@@ -58,7 +58,7 @@ type (
 		port string
 
 		cookieDomain http_handler.CookieDomain
-		backend      _usecase.Backend
+		backend      auth.Backend
 	}
 
 	infra struct {
@@ -88,30 +88,30 @@ func (server server) mux() *http.ServeMux {
 
 func (server server) handle(w http.ResponseWriter, r *http.Request) {
 	h := http_handler.NewHandler(w, r)
-	u := _usecase.NewUsecase(server.backend, http_handler.NewCredentialHandler(server.cookieDomain, w, r))
+	u := auth.NewUsecase(server.backend, http_handler.NewCredentialHandler(server.cookieDomain, w, r))
 
 	switch r.Header.Get(HEADER_HANDLER) {
 	case "Renew":
-		_usecase.NewRenew(u).Renew(http_handler.NewRenew(h))
+		auth.NewRenew(u).Renew(http_handler.NewRenew(h))
 	case "Logout":
-		_usecase.NewLogout(u).Logout(http_handler.NewLogout(h))
+		auth.NewLogout(u).Logout(http_handler.NewLogout(h))
 
 	case "PasswordLogin":
-		_usecase.NewPasswordLogin(u).Login(http_handler.NewPasswordLogin(h))
+		auth.NewPasswordLogin(u).Login(http_handler.NewPasswordLogin(h))
 
 	case "PasswordChange/GetLogin":
-		_usecase.NewPasswordChange(u).GetLogin(http_handler.NewPasswordChange(h))
+		auth.NewPasswordChange(u).GetLogin(http_handler.NewPasswordChange(h))
 	case "PasswordChange/Change":
-		_usecase.NewPasswordChange(u).Change(http_handler.NewPasswordChange(h))
+		auth.NewPasswordChange(u).Change(http_handler.NewPasswordChange(h))
 
 	case "PasswordReset/CreateSession":
-		_usecase.NewPasswordReset(u).CreateSession(http_handler.NewPasswordReset(h))
+		auth.NewPasswordReset(u).CreateSession(http_handler.NewPasswordReset(h))
 	case "PasswordReset/SendToken":
-		_usecase.NewPasswordReset(u).SendToken(http_handler.NewPasswordReset(h))
+		auth.NewPasswordReset(u).SendToken(http_handler.NewPasswordReset(h))
 	case "PasswordReset/GetStatus":
-		_usecase.NewPasswordReset(u).GetStatus(http_handler.NewPasswordReset(h))
+		auth.NewPasswordReset(u).GetStatus(http_handler.NewPasswordReset(h))
 	case "PasswordReset/Reset":
-		_usecase.NewPasswordReset(u).Reset(http_handler.NewPasswordReset(h))
+		auth.NewPasswordReset(u).Reset(http_handler.NewPasswordReset(h))
 
 	default:
 		w.Header().Set("Content-Type", "application/json")
@@ -129,10 +129,10 @@ func newServer() server {
 	}
 }
 
-func newBackend() _usecase.Backend {
+func newBackend() auth.Backend {
 	infra := newInfra()
 
-	return _usecase.NewBackend(
+	return auth.NewBackend(
 		infra.newTicketAction(),
 		infra.newCredentialAction(),
 		infra.newUserAction(),

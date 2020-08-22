@@ -54,7 +54,7 @@ func newCookie(domain CookieDomain) Cookie {
 	}
 }
 
-func (handler CredentialHandler) handler() _usecase.CredentialHandler {
+func (handler CredentialHandler) handler() auth.CredentialHandler {
 	return handler
 }
 

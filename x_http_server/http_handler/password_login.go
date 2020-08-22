@@ -16,7 +16,7 @@ func NewPasswordLogin(handler Handler) PasswordLogin {
 	return PasswordLogin{Handler: handler}
 }
 
-func (handler PasswordLogin) handler() _usecase.PasswordLoginHandler {
+func (handler PasswordLogin) handler() auth.PasswordLoginHandler {
 	return handler
 }
 
@@ -40,10 +40,10 @@ func (handler PasswordLogin) LoginRequest() (_ request.Request, _ user.Login, _ 
 func (handler PasswordLogin) LoginResponse(err error) {
 	if err != nil {
 		switch err {
-		case _usecase.ErrBadRequest:
+		case auth.ErrBadRequest:
 			handler.badRequest()
 
-		case _usecase.ErrInvalidPasswordLogin:
+		case auth.ErrInvalidPasswordLogin:
 			handler.unauthorized("invalid-password-login")
 
 		default:
