@@ -1,7 +1,7 @@
 package password_log
 
 import (
-	"github.com/getto-systems/project-example-id/password/infra"
+	"github.com/getto-systems/project-example-auth/password/infra"
 )
 
 type (

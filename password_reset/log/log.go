@@ -1,7 +1,7 @@
 package password_reset_log
 
 import (
-	"github.com/getto-systems/project-example-id/password_reset/infra"
+	"github.com/getto-systems/project-example-auth/password_reset/infra"
 )
 
 type (

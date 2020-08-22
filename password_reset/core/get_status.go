@@ -1,9 +1,9 @@
 package password_reset_core
 
 import (
-	"github.com/getto-systems/project-example-id/password_reset"
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/password_reset"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (action action) GetStatus(request request.Request, login user.Login, session password_reset.Session) (_ password_reset.Destination, _ password_reset.Status, err error) {

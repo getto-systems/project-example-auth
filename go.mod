@@ -1,4 +1,4 @@
-module github.com/getto-systems/project-example-id
+module github.com/getto-systems/project-example-auth
 
 go 1.14
 

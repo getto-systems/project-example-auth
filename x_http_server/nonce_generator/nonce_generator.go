@@ -3,9 +3,9 @@ package nonce_generator
 import (
 	"github.com/google/uuid"
 
-	"github.com/getto-systems/project-example-id/ticket/infra"
+	"github.com/getto-systems/project-example-auth/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-auth/credential"
 )
 
 type NonceGenerator struct {

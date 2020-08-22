@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/getto-systems/project-example-id"
+	"github.com/getto-systems/project-example-auth"
 
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-auth/credential"
 )
 
 var (

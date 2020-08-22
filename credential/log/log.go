@@ -1,7 +1,7 @@
 package credential_log
 
 import (
-	"github.com/getto-systems/project-example-id/credential/infra"
+	"github.com/getto-systems/project-example-auth/credential/infra"
 )
 
 type (

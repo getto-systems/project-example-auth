@@ -1,10 +1,10 @@
 package ticket_core
 
 import (
-	"github.com/getto-systems/project-example-id/ticket/infra"
+	"github.com/getto-systems/project-example-auth/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/ticket"
+	"github.com/getto-systems/project-example-auth/credential"
+	"github.com/getto-systems/project-example-auth/ticket"
 )
 
 type (

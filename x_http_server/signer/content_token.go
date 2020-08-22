@@ -5,9 +5,9 @@ import (
 
 	"github.com/getto-systems/aws_cloudfront_token-go"
 
-	"github.com/getto-systems/project-example-id/credential/infra"
+	"github.com/getto-systems/project-example-auth/credential/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-auth/credential"
 )
 
 type ContentTokenSigner struct {

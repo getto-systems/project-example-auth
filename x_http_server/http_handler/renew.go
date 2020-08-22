@@ -1,9 +1,9 @@
 package http_handler
 
 import (
-	"github.com/getto-systems/project-example-id"
+	"github.com/getto-systems/project-example-auth"
 
-	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-auth/request"
 )
 
 type Renew struct {

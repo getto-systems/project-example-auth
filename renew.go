@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-auth/request"
 )
 
 type (

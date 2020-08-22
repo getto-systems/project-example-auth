@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-auth/password_reset"
 )
 
 type (

@@ -3,11 +3,11 @@ package password_reset_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/password_reset/infra"
+	"github.com/getto-systems/project-example-auth/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/password_reset"
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/password_reset"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (log Logger) createSession() infra.CreateSessionLogger {

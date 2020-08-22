@@ -3,10 +3,10 @@ package user_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/user/infra"
+	"github.com/getto-systems/project-example-auth/user/infra"
 
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (log Logger) getUser() infra.GetUserLogger {

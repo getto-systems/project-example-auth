@@ -3,10 +3,10 @@ package password_reset_repository_session
 import (
 	"errors"
 
-	"github.com/getto-systems/project-example-id/password_reset/infra"
+	"github.com/getto-systems/project-example-auth/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/password_reset"
-	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-auth/password_reset"
+	"github.com/getto-systems/project-example-auth/request"
 )
 
 const (
