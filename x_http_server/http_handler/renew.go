@@ -14,7 +14,7 @@ func NewRenew(handler Handler) Renew {
 	return Renew{Handler: handler}
 }
 
-func (handler Renew) handler() _usecase.RenewHandler {
+func (handler Renew) handler() auth.RenewHandler {
 	return handler
 }
 
@@ -25,10 +25,10 @@ func (handler Renew) RenewRequest() (request.Request, error) {
 func (handler Renew) RenewResponse(err error) {
 	if err != nil {
 		switch err {
-		case _usecase.ErrBadRequest:
+		case auth.ErrBadRequest:
 			handler.badRequest()
 
-		case _usecase.ErrInvalidTicket:
+		case auth.ErrInvalidTicket:
 			handler.invalidTicket()
 
 		default:

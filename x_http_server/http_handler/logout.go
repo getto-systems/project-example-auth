@@ -14,7 +14,7 @@ func NewLogout(handler Handler) Logout {
 	return Logout{Handler: handler}
 }
 
-func (handler Logout) handler() _usecase.LogoutHandler {
+func (handler Logout) handler() auth.LogoutHandler {
 	return handler
 }
 
@@ -25,10 +25,10 @@ func (handler Logout) LogoutRequest() (request.Request, error) {
 func (handler Logout) LogoutResponse(err error) {
 	if err != nil {
 		switch err {
-		case _usecase.ErrBadRequest:
+		case auth.ErrBadRequest:
 			handler.badRequest()
 
-		case _usecase.ErrInvalidTicket:
+		case auth.ErrInvalidTicket:
 			handler.invalidTicket()
 
 		default:
