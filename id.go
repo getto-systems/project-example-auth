@@ -1,12 +1,20 @@
 package _usecase
 
 import (
+	"errors"
+
 	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/password_reset"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/ticket"
 	"github.com/getto-systems/project-example-id/user"
+)
+
+var (
+	ErrBadRequest    = errors.New("bad-request")
+	ErrInvalidTicket = errors.New("invalid-ticket")
+	ErrServerError   = errors.New("server-error")
 )
 
 type (
@@ -53,40 +61,80 @@ func NewUsecase(backend Backend, handler CredentialHandler) Usecase {
 	}
 }
 
-func (u Usecase) handleCredential(credential credential.Credential, err error) {
+func (u Usecase) validateTicket(request request.Request) (_ user.User, _ credential.TicketNonce, err error) {
+	nonce, signature, err := u.handler.GetTicketNonceAndSignature()
 	if err != nil {
-		u.handleCredentialError(err)
-	} else {
-		u.handler.SetCredential(credential)
+		switch err {
+		default:
+			err = ErrInvalidTicket
+		}
+		return
 	}
+
+	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
+	if err != nil {
+		switch err {
+		case credential.ErrParseTicketSignatureMatchFailedNonce:
+			err = ErrInvalidTicket
+			u.clearCredential()
+
+		default:
+			err = ErrServerError
+		}
+		return
+	}
+
+	err = u.ticket.Validate(request, user, nonce)
+	if err != nil {
+		switch err {
+		case ticket.ErrValidateAlreadyExpired,
+			ticket.ErrValidateMatchFailedUser,
+			ticket.ErrValidateNotFoundTicket:
+
+			err = ErrInvalidTicket
+			u.clearCredential()
+
+		default:
+			err = ErrServerError
+		}
+		return
+	}
+
+	return user, nonce, nil
 }
-func (u Usecase) handleCredentialError(err error) {
-	if credential.ErrClearCredential.IsSameCategory(err) {
-		u.clearCredential()
+
+func (u Usecase) issueCredential(request request.Request, ticket credential.Ticket) (err error) {
+	ticketToken, err := u.credential.IssueTicketToken(request, ticket)
+	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+		}
+		return
 	}
+
+	apiToken, err := u.credential.IssueApiToken(request, ticket)
+	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+		}
+		return
+	}
+
+	contentToken, err := u.credential.IssueContentToken(request, ticket)
+	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+		}
+		return
+	}
+
+	u.handler.SetCredential(credential.NewCredential(ticketToken, apiToken, contentToken))
+
+	return nil
 }
 func (u Usecase) clearCredential() {
 	u.handler.ClearCredential()
-}
-func (u Usecase) getTicketNonceAndSignature() (credential.TicketNonce, credential.TicketSignature, error) {
-	return u.handler.GetTicketNonceAndSignature()
-}
-
-func (h Backend) issueCredential(request request.Request, ticket credential.Ticket) (_ credential.Credential, err error) {
-	ticketToken, err := h.credential.IssueTicketToken(request, ticket)
-	if err != nil {
-		return
-	}
-
-	apiToken, err := h.credential.IssueApiToken(request, ticket)
-	if err != nil {
-		return
-	}
-
-	contentToken, err := h.credential.IssueContentToken(request, ticket)
-	if err != nil {
-		return
-	}
-
-	return credential.NewCredential(ticketToken, apiToken, contentToken), nil
 }

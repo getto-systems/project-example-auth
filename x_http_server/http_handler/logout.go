@@ -24,7 +24,16 @@ func (handler Logout) LogoutRequest() (request.Request, error) {
 
 func (handler Logout) LogoutResponse(err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidTicket:
+			handler.invalidTicket()
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 

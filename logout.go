@@ -19,35 +19,34 @@ func NewLogout(u Usecase) Logout {
 }
 
 func (u Logout) Logout(handler LogoutHandler) {
-	err := u.logout(handler)
-	u.clearCredential()
-	handler.LogoutResponse(err)
+	handler.LogoutResponse(u.logout(handler))
 }
 func (u Logout) logout(handler LogoutHandler) (err error) {
-	nonce, signature, err := u.getTicketNonceAndSignature()
-	if err != nil {
-		return
-	}
-
 	request, err := handler.LogoutRequest()
 	if err != nil {
+		switch err {
+		default:
+			err = ErrBadRequest
+		}
 		return
 	}
 
-	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
-	if err != nil {
-		return
-	}
-
-	err = u.ticket.Validate(request, user, nonce)
+	user, nonce, err := u.validateTicket(request)
 	if err != nil {
 		return
 	}
 
 	err = u.ticket.Deactivate(request, user, nonce)
 	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+			u.clearCredential()
+		}
 		return
 	}
+
+	u.clearCredential()
 
 	return nil
 }

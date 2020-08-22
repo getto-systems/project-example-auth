@@ -1,15 +1,13 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/z_external/errors"
-
-	"github.com/getto-systems/project-example-id/credential"
+	"errors"
 )
 
 var (
-	ErrExtendNotFoundNonce = errors.NewError("Ticket.Extend", "NotFound.Nonce")
+	ErrExtendNotFoundNonce = errors.New("Ticket.Extend/NotFound.Nonce")
 
-	ErrValidateNotFoundTicket  = credential.NewClearCredentialError("Ticket.Validate", "NotFound.Ticket")
-	ErrValidateMatchFailedUser = credential.NewClearCredentialError("Ticket.Validate", "MatchFailed.User")
-	ErrValidateAlreadyExpired  = credential.NewClearCredentialError("Ticket.Validate", "AlreadyExpired")
+	ErrValidateNotFoundTicket  = errors.New("Ticket.Validate/NotFound.Ticket")
+	ErrValidateMatchFailedUser = errors.New("Ticket.Validate/MatchFailed.User")
+	ErrValidateAlreadyExpired  = errors.New("Ticket.Validate/AlreadyExpired")
 )

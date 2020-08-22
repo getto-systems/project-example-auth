@@ -10,9 +10,6 @@ server {
       add_header 'Access-Control-Allow-Origin' '$ORIGIN';
       add_header 'Access-Control-Allow-Methods' 'POST, OPTIONS';
 
-      #
-      # Custom headers and headers various browsers *should* be OK with but aren't
-      #
       add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
 
       add_header 'Access-Control-Max-Age' 3600;
@@ -23,10 +20,10 @@ server {
     }
 
     if ($request_method = 'POST') {
-        add_header 'Access-Control-Allow-Origin' '$ORIGIN';
-        add_header 'Access-Control-Allow-Methods' 'POST, OPTIONS';
-        add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
-        add_header 'Access-Control-Expose-Headers' 'X-GETTO-EXAMPLE-ID-TicketNonce,X-GETTO-EXAMPLE-ID-ApiToken,X-GETTO-EXAMPLE-ID-ApiRoles';
+      add_header 'Access-Control-Allow-Origin' '$ORIGIN' always;
+      add_header 'Access-Control-Allow-Methods' 'POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
+      add_header 'Access-Control-Expose-Headers' 'X-GETTO-EXAMPLE-ID-TicketNonce,X-GETTO-EXAMPLE-ID-ApiToken,X-GETTO-EXAMPLE-ID-ApiRoles';
     }
 
     proxy_pass http://$LABO_IP:${LABO_PORT_PREFIX}${APP_PORT};

@@ -25,7 +25,16 @@ func (handler PasswordChange) GetLoginRequest() (request.Request, error) {
 }
 func (handler PasswordChange) GetLoginResponse(login user.Login, err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidTicket:
+			handler.invalidTicket()
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 
@@ -59,7 +68,19 @@ func (handler PasswordChange) ChangeRequest() (_ request.Request, _ password.Cha
 }
 func (handler PasswordChange) ChangeResponse(err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidTicket:
+			handler.invalidTicket()
+
+		case _usecase.ErrInvalidOldPassword:
+			handler.unauthorized("invalid-old-password")
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 

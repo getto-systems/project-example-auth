@@ -1,13 +1,13 @@
 package user
 
 import (
-	"github.com/getto-systems/project-example-id/z_external/errors"
+	"errors"
 )
 
 var (
-	ErrGetLoginNotFoundLogin = errors.NewError("User.GetLogin", "NotFound.Login")
+	ErrGetLoginNotFoundLogin = errors.New("User.GetLogin/NotFound.Login")
 
-	ErrGetUserNotFoundUser = errors.NewError("User.GetUser", "NotFound.User")
+	ErrGetUserNotFoundUser = errors.New("User.GetUser/NotFound.User")
 )
 
 type (

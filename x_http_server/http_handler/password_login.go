@@ -39,7 +39,16 @@ func (handler PasswordLogin) LoginRequest() (_ request.Request, _ user.Login, _ 
 }
 func (handler PasswordLogin) LoginResponse(err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidPasswordLogin:
+			handler.unauthorized("invalid-password-login")
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 

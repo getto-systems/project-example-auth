@@ -189,7 +189,7 @@ func ExamplePasswordChange_disableOldPassword() {
 	// err: nil
 	//
 	// PasswordLogin
-	// err: "Password.Validate/MatchFailed"
+	// err: "invalid-password-login"
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -231,7 +231,7 @@ func ExamplePasswordChange_getLoginFailedBecauseTicketExpired() {
 	//
 	// PasswordChange/GetLogin
 	// request: "2020-01-01T00:10:00Z"
-	// err: "Ticket.Validate/AlreadyExpired"
+	// err: "invalid-ticket"
 	// login: {}
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
@@ -273,7 +273,7 @@ func ExamplePasswordChange_changeFailedBecauseTicketExpired() {
 	//
 	// PasswordChange/Change
 	// request: "2020-01-01T00:10:00Z"
-	// err: "Ticket.Validate/AlreadyExpired"
+	// err: "invalid-ticket"
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
@@ -314,7 +314,7 @@ func ExamplePasswordChange_changeFailedBecauseDifferentPassword() {
 	//
 	// PasswordChange/Change
 	// request: "2020-01-01T00:01:00Z"
-	// err: "Password.Validate/MatchFailed"
+	// err: "invalid-old-password"
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug
@@ -357,7 +357,7 @@ func ExamplePasswordChange_changeFailedBecauseEmptyPassword() {
 	//
 	// PasswordChange/Change
 	// request: "2020-01-01T00:01:00Z"
-	// err: "Password.Check/Length.Empty"
+	// err: "invalid-new-password"
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
 	// log: "Ticket/Validate/TryToValidate", debug

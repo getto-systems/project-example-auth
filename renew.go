@@ -1,7 +1,6 @@
 package _usecase
 
 import (
-	"github.com/getto-systems/project-example-id/credential"
 	"github.com/getto-systems/project-example-id/request"
 )
 
@@ -20,35 +19,36 @@ func NewRenew(u Usecase) Renew {
 }
 
 func (u Renew) Renew(handler RenewHandler) {
-	credential, err := u.renew(handler)
-	u.handleCredential(credential, err)
-	handler.RenewResponse(err)
+	handler.RenewResponse(u.renew(handler))
 }
-func (u Renew) renew(handler RenewHandler) (_ credential.Credential, err error) {
-	nonce, signature, err := u.getTicketNonceAndSignature()
-	if err != nil {
-		return
-	}
-
+func (u Renew) renew(handler RenewHandler) (err error) {
 	request, err := handler.RenewRequest()
 	if err != nil {
+		switch err {
+		default:
+			err = ErrBadRequest
+		}
 		return
 	}
 
-	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
-	if err != nil {
-		return
-	}
-
-	err = u.ticket.Validate(request, user, nonce)
+	user, nonce, err := u.validateTicket(request)
 	if err != nil {
 		return
 	}
 
 	ticket, err := u.ticket.Extend(request, user, nonce)
 	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+		}
 		return
 	}
 
-	return u.issueCredential(request, ticket)
+	err = u.issueCredential(request, ticket)
+	if err != nil {
+		return
+	}
+
+	return nil
 }

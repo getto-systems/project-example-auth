@@ -235,7 +235,7 @@ func ExamplePasswordLogin_failedBecausePasswordNotFound() {
 	// Output:
 	// PasswordLogin
 	// request: "2020-01-01T00:00:00Z"
-	// err: "Password.Validate/NotFound.Password"
+	// err: "invalid-password-login"
 	// credential: nil
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
@@ -267,7 +267,7 @@ func ExamplePasswordLogin_failedBecauseDifferentPassword() {
 	// Output:
 	// PasswordLogin
 	// request: "2020-01-01T00:00:00Z"
-	// err: "Password.Validate/MatchFailed"
+	// err: "invalid-password-login"
 	// credential: nil
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
@@ -299,7 +299,7 @@ func ExamplePasswordLogin_failedBecauseEmptyPassword() {
 	// Output:
 	// PasswordLogin
 	// request: "2020-01-01T00:00:00Z"
-	// err: "Password.Check/Length.Empty"
+	// err: "invalid-password-login"
 	// credential: nil
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
@@ -333,7 +333,7 @@ func ExamplePasswordLogin_failedBecauseTooLongPassword() {
 	// Output:
 	// PasswordLogin
 	// request: "2020-01-01T00:00:00Z"
-	// err: "Password.Check/Length.TooLong"
+	// err: "invalid-password-login"
 	// credential: nil
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
@@ -454,7 +454,7 @@ func ExampleRenew_failedBecauseAlreadyExpired() {
 	//
 	// Renew
 	// request: "2020-01-01T00:06:00Z"
-	// err: "Ticket.Validate/AlreadyExpired"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
@@ -514,7 +514,7 @@ func ExampleRenew_failedBecauseAlreadyLogout() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/AlreadyExpired"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
@@ -559,7 +559,7 @@ func ExampleRenew_failedBecauseDifferentNonce() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Credential.ParseTicketSignature/MatchFailed.Nonce"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/FailedToParseBecauseNonceMatchFailed", audit
@@ -603,7 +603,7 @@ func ExampleRenew_failedBecauseTicketNotFound() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/NotFound.Ticket"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
@@ -648,7 +648,7 @@ func ExampleRenew_failedBecauseDifferentUser() {
 	//
 	// Renew
 	// request: "2020-01-01T00:02:00Z"
-	// err: "Ticket.Validate/MatchFailed.User"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info
@@ -690,7 +690,7 @@ func ExampleLogout_failedBecauseAlreadyExpired() {
 	//
 	// Logout
 	// request: "2020-01-01T00:10:00Z"
-	// err: "Ticket.Validate/AlreadyExpired"
+	// err: "invalid-ticket"
 	// credential: nil
 	// log: "Credential/ParseTicketSignature/TryToParse", debug
 	// log: "Credential/ParseTicketSignature/Parse", info

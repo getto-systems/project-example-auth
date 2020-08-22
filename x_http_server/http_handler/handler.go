@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 )
 
@@ -53,43 +51,22 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 	return nil
 }
 
-func (handler Handler) errorResponse(err error) {
-	if password.ErrCheck.IsSameCategory(err) {
-		handler.invalidPassword()
-		return
-	}
-	if credential.ErrClearCredential.IsSameCategory(err) {
-		handler.invalidCredential()
-		return
-	}
-
-	switch err {
-	case errEmptyBody,
-		errBodyParseFailed,
-		errTicketTokenNotFound:
-
-		handler.badRequest()
-		return
-	}
-
-	handler.internalServerError()
-}
-
 func (handler Handler) ok(body interface{}) {
 	handler.jsonResponse(http.StatusOK, body)
 }
 
-func (handler Handler) invalidPassword() {
-	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody("invalid-password"))
-}
-func (handler Handler) invalidCredential() {
-	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody("invalid-credential"))
-}
 func (handler Handler) badRequest() {
 	handler.jsonResponse(http.StatusBadRequest, newErrorResponseBody("bad-request"))
 }
+func (handler Handler) invalidTicket() {
+	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody("invalid-ticket"))
+}
 func (handler Handler) internalServerError() {
 	handler.jsonResponse(http.StatusInternalServerError, newErrorResponseBody("internal-server-error"))
+}
+
+func (handler Handler) unauthorized(message string) {
+	handler.jsonResponse(http.StatusUnauthorized, newErrorResponseBody(message))
 }
 
 func newErrorResponseBody(message string) errorResponseBody {

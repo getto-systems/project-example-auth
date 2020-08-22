@@ -1,17 +1,15 @@
 package password
 
 import (
-	"github.com/getto-systems/project-example-id/z_external/errors"
+	"errors"
 )
 
 var (
-	ErrCheck = errors.NewCategory("PasswordCheck")
+	ErrCheckLengthEmpty   = errors.New("Password.Check/Length.Empty")
+	ErrCheckLengthTooLong = errors.New("Password.Check/Length.TooLong")
 
-	ErrCheckLengthEmpty   = errors.NewErrorAsCategory("Password.Check", "Length.Empty", ErrCheck)
-	ErrCheckLengthTooLong = errors.NewErrorAsCategory("Password.Check", "Length.TooLong", ErrCheck)
-
-	ErrValidateNotFoundPassword = errors.NewError("Password.Validate", "NotFound.Password")
-	ErrValidateMatchFailed      = errors.NewError("Password.Validate", "MatchFailed")
+	ErrValidateNotFoundPassword = errors.New("Password.Validate/NotFound.Password")
+	ErrValidateMatchFailed      = errors.New("Password.Validate/MatchFailed")
 )
 
 type (
