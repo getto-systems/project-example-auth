@@ -1,9 +1,9 @@
 package password_reset
 
 import (
+	"errors"
 	"time"
 
-	"github.com/getto-systems/project-example-id/z_external/errors"
 	"github.com/getto-systems/project-example-id/z_external/expiration"
 
 	"github.com/getto-systems/project-example-id/request"
@@ -11,15 +11,15 @@ import (
 )
 
 var (
-	ErrCreateSessionNotFoundDestination = errors.NewError("PasswordReset.CreateSession", "NotFound.Destination")
+	ErrCreateSessionNotFoundDestination = errors.New("PasswordReset.CreateSession/NotFound.Destination")
 
-	ErrGetStatusNotFoundSession  = errors.NewError("PasswordReset.GetStatus", "NotFound.Session")
-	ErrGetStatusMatchFailedLogin = errors.NewError("PasswordReset.GetStatus", "MatchFailed.Login")
+	ErrGetStatusNotFoundSession  = errors.New("PasswordReset.GetStatus/NotFound.Session")
+	ErrGetStatusMatchFailedLogin = errors.New("PasswordReset.GetStatus/MatchFailed.Login")
 
-	ErrValidateNotFoundSession  = errors.NewError("PasswordReset.Validate", "NotFound.Session")
-	ErrValidateMatchFailedLogin = errors.NewError("PasswordReset.Validate", "MatchFailed.Login")
-	ErrValidateAlreadyExpired   = errors.NewError("PasswordReset.Validate", "AlreadyExpired")
-	ErrValidateAlreadyClosed    = errors.NewError("PasswordReset.Validate", "AlreadyClosed")
+	ErrValidateNotFoundSession  = errors.New("PasswordReset.Validate/NotFound.Session")
+	ErrValidateMatchFailedLogin = errors.New("PasswordReset.Validate/MatchFailed.Login")
+	ErrValidateAlreadyExpired   = errors.New("PasswordReset.Validate/AlreadyExpired")
+	ErrValidateAlreadyClosed    = errors.New("PasswordReset.Validate/AlreadyClosed")
 )
 
 type (

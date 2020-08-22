@@ -38,7 +38,16 @@ func (handler PasswordReset) CreateSessionRequest() (_ request.Request, _ user.L
 }
 func (handler PasswordReset) CreateSessionResponse(session password_reset.Session, err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidPasswordReset:
+			handler.unauthorized("invalid-password-reset")
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 
@@ -53,7 +62,10 @@ func (handler PasswordReset) CreateSessionResponse(session password_reset.Sessio
 
 func (handler PasswordReset) SendTokenResponse(err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 
@@ -79,7 +91,16 @@ func (handler PasswordReset) GetStatusRequest() (_ request.Request, _ user.Login
 }
 func (handler PasswordReset) GetStatusResponse(dest password_reset.Destination, status password_reset.Status, err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrInvalidPasswordReset:
+			handler.unauthorized("invalid-password-reset")
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 
@@ -109,7 +130,19 @@ func (handler PasswordReset) ResetRequest() (_ request.Request, _ user.Login, _ 
 }
 func (handler PasswordReset) ResetResponse(err error) {
 	if err != nil {
-		handler.errorResponse(err)
+		switch err {
+		case _usecase.ErrBadRequest:
+			handler.badRequest()
+
+		case _usecase.ErrClosedPasswordReset:
+			handler.unauthorized("closed-password-reset")
+
+		case _usecase.ErrInvalidPasswordReset:
+			handler.unauthorized("invalid-password-reset")
+
+		default:
+			handler.internalServerError()
+		}
 		return
 	}
 

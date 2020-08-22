@@ -331,7 +331,7 @@ func ExamplePasswordReset_disableOldPassword() {
 	// err: nil
 	//
 	// PasswordLogin
-	// err: "Password.Validate/MatchFailed"
+	// err: "invalid-password-login"
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "Password/Validate/TryToValidate", debug
@@ -391,7 +391,7 @@ func ExamplePasswordReset_disableResetSession() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/AlreadyClosed"
+	// err: "closed-password-reset"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseSessionClosed", info
 	//
@@ -418,7 +418,7 @@ func ExamplePasswordReset_createSessionFailedBecauseLoginNotFound() {
 
 	// Output:
 	// PasswordReset/CreateSession
-	// err: "User.GetUser/NotFound.User"
+	// err: "invalid-password-reset"
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/FailedToGetUserBecauseUserNotFound", info
 	//
@@ -445,7 +445,7 @@ func ExamplePasswordReset_createSessionFailedBecauseDestinationNotFound() {
 
 	// Output:
 	// PasswordReset/CreateSession
-	// err: "PasswordReset.CreateSession/NotFound.Destination"
+	// err: "invalid-password-reset"
 	// log: "User/GetUser/TryToGetUser", debug
 	// log: "User/GetUser/GetUser", info
 	// log: "PasswordReset/CreateSession/TryToCreateSession", debug
@@ -535,7 +535,7 @@ func ExamplePasswordReset_getStatusFailedBecauseSessionNotFound() {
 	// err: nil
 	//
 	// PasswordReset/GetStatus
-	// err: "PasswordReset.GetStatus/NotFound.Session"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
 	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseSessionNotFound", audit
 	//
@@ -574,7 +574,7 @@ func ExamplePasswordReset_getStatusFailedBecauseUnknownLogin() {
 	// err: nil
 	//
 	// PasswordReset/GetStatus
-	// err: "PasswordReset.GetStatus/MatchFailed.Login"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
 	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseLoginMatchFailed", audit
 	//
@@ -628,7 +628,7 @@ func ExamplePasswordReset_getStatusFailedBecauseDifferentLogin() {
 	// err: nil
 	//
 	// PasswordReset/GetStatus
-	// err: "PasswordReset.GetStatus/MatchFailed.Login"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/GetStatus/TryToGetStatus", debug
 	// log: "PasswordReset/GetStatus/FailedToGetStatusBecauseLoginMatchFailed", audit
 	//
@@ -676,7 +676,7 @@ func ExamplePasswordReset_resetFailedBecauseSessionNotFound() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/NotFound.Session"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseSessionNotFound", audit
 	//
@@ -724,7 +724,7 @@ func ExamplePasswordReset_resetFailedBecauseSessionExpired() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/AlreadyExpired"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseSessionExpired", info
 	//
@@ -834,7 +834,7 @@ func ExamplePasswordReset_resetFailedBecauseUnknownLogin() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/MatchFailed.Login"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginMatchFailed", audit
 	//
@@ -899,7 +899,7 @@ func ExamplePasswordReset_resetFailedBecauseDifferentLogin() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "PasswordReset.Validate/MatchFailed.Login"
+	// err: "invalid-password-reset"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/FailedToValidateTokenBecauseLoginMatchFailed", audit
 	//
@@ -946,7 +946,7 @@ func ExamplePasswordReset_resetFailedBecauseEmptyPassword() {
 	// err: nil
 	//
 	// PasswordReset/Reset
-	// err: "Password.Check/Length.Empty"
+	// err: "invalid-new-password"
 	// log: "PasswordReset/Validate/TryToValidateToken", debug
 	// log: "PasswordReset/Validate/AuthByToken", audit
 	// log: "Password/Change/TryToChange", debug

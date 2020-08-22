@@ -1,9 +1,16 @@
 package _usecase
 
 import (
+	"errors"
+
 	"github.com/getto-systems/project-example-id/password"
 	"github.com/getto-systems/project-example-id/request"
 	"github.com/getto-systems/project-example-id/user"
+)
+
+var (
+	ErrInvalidOldPassword = errors.New("invalid-old-password")
+	ErrInvalidNewPassword = errors.New("invalid-new-password")
 )
 
 type (
@@ -24,33 +31,29 @@ func NewPasswordChange(u Usecase) PasswordChange {
 }
 
 func (u PasswordChange) GetLogin(handler PasswordChangeHandler) {
-	login, err := u.getLogin(handler)
-	u.handleCredentialError(err)
-	handler.GetLoginResponse(login, err)
+	handler.GetLoginResponse(u.getLogin(handler))
 }
 func (u PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Login, err error) {
-	nonce, signature, err := u.getTicketNonceAndSignature()
-	if err != nil {
-		return
-	}
-
 	request, err := handler.GetLoginRequest()
 	if err != nil {
+		switch err {
+		default:
+			err = ErrBadRequest
+		}
 		return
 	}
 
-	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
-	if err != nil {
-		return
-	}
-
-	err = u.ticket.Validate(request, user, nonce)
+	user, _, err := u.validateTicket(request)
 	if err != nil {
 		return
 	}
 
 	login, err := u.user.GetLogin(request, user)
 	if err != nil {
+		switch err {
+		default:
+			err = ErrServerError
+		}
 		return
 	}
 
@@ -58,38 +61,50 @@ func (u PasswordChange) getLogin(handler PasswordChangeHandler) (_ user.Login, e
 }
 
 func (u PasswordChange) Change(handler PasswordChangeHandler) {
-	err := u.change(handler)
-	u.handleCredentialError(err)
-	handler.ChangeResponse(err)
+	handler.ChangeResponse(u.change(handler))
 }
 func (u PasswordChange) change(handler PasswordChangeHandler) (err error) {
-	nonce, signature, err := u.getTicketNonceAndSignature()
-	if err != nil {
-		return
-	}
-
 	request, param, err := handler.ChangeRequest()
 	if err != nil {
+		switch err {
+		default:
+			err = ErrBadRequest
+		}
 		return
 	}
 
-	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
-	if err != nil {
-		return
-	}
-
-	err = u.ticket.Validate(request, user, nonce)
+	user, _, err := u.validateTicket(request)
 	if err != nil {
 		return
 	}
 
 	_, err = u.password.Validate(request, user, param.OldPassword)
 	if err != nil {
+		switch err {
+		case password.ErrCheckLengthEmpty,
+			password.ErrCheckLengthTooLong,
+			password.ErrValidateMatchFailed,
+			password.ErrValidateNotFoundPassword:
+
+			err = ErrInvalidOldPassword
+
+		default:
+			err = ErrServerError
+		}
 		return
 	}
 
 	err = u.password.Change(request, user, param.NewPassword)
 	if err != nil {
+		switch err {
+		case password.ErrCheckLengthEmpty,
+			password.ErrCheckLengthTooLong:
+
+			err = ErrInvalidNewPassword
+
+		default:
+			err = ErrServerError
+		}
 		return
 	}
 
