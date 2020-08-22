@@ -17,11 +17,11 @@ var (
 )
 
 const (
-	COOKIE_TICKET = "GETTO-EXAMPLE-ID.TicketToken"
+	COOKIE_TICKET    = "GETTO-EXAMPLE-ID-TicketToken"
+	COOKIE_API_TOKEN = "GETTO-EXAMPLE-ID-ApiToken"
 
-	HEADER_NONCE     = "X-GETTO-EXAMPLE-ID.TicketNonce"
-	HEADER_API_TOKEN = "X-GETTO-EXAMPLE-ID.ApiToken"
-	HEADER_API_ROLES = "X-GETTO-EXAMPLE-ID.ApiRoles"
+	HEADER_NONCE     = "X-GETTO-EXAMPLE-ID-TicketNonce"
+	HEADER_API_ROLES = "X-GETTO-EXAMPLE-ID-ApiRoles"
 )
 
 type (
@@ -94,6 +94,11 @@ func (handler CredentialHandler) setTicket(ticket credential.TicketToken) {
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
+
+	handler.httpResponseWriter.Header().Set(
+		HEADER_NONCE,
+		string(ticket.Nonce()),
+	)
 }
 
 func (handler CredentialHandler) clearTicket() {
@@ -112,18 +117,28 @@ func (handler CredentialHandler) clearTicket() {
 }
 
 func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
-	handler.httpResponseWriter.Header().Set(
-		HEADER_API_TOKEN,
-		string(apiToken.Signature()),
-	)
+	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
+		Name:    COOKIE_API_TOKEN,
+		Value:   string(apiToken.Signature()),
+		Expires: time.Time(apiToken.Expires()),
+
+		Domain: string(handler.cookie.domain),
+		Path:   "/",
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 
 	jsonData, err := json.Marshal(apiToken.ApiRoles())
 	if err != nil {
-		handler.httpResponseWriter.Header().Set(
-			HEADER_API_ROLES,
-			base64.StdEncoding.EncodeToString(jsonData),
-		)
+		return
 	}
+
+	handler.httpResponseWriter.Header().Set(
+		HEADER_API_ROLES,
+		base64.StdEncoding.EncodeToString(jsonData),
+	)
 }
 
 func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken) {
