@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/getto-systems/project-example-id/z_external/expiration"
+	"github.com/getto-systems/project-example-auth/z_external/expiration"
 
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 var (

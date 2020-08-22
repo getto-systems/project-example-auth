@@ -1,10 +1,10 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/password/infra"
+	"github.com/getto-systems/project-example-auth/password/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-auth/credential"
+	"github.com/getto-systems/project-example-auth/password"
 )
 
 type (

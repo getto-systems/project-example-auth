@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-auth/request"
 )
 
 var (

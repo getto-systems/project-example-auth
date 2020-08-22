@@ -1,8 +1,8 @@
 package user_core
 
 import (
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (action action) GetUser(request request.Request, login user.Login) (_ user.User, err error) {

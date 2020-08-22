@@ -1,10 +1,10 @@
 package credential_repository_apiUser
 
 import (
-	"github.com/getto-systems/project-example-id/credential/infra"
+	"github.com/getto-systems/project-example-auth/credential/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/credential"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 type (

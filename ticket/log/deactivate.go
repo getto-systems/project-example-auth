@@ -3,10 +3,10 @@ package ticket_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/ticket/infra"
+	"github.com/getto-systems/project-example-auth/ticket/infra"
 
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (log Logger) deactivate() infra.DeactivateLogger {

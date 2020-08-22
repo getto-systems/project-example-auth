@@ -1,9 +1,9 @@
 package ticket
 
 import (
-	"github.com/getto-systems/project-example-id/credential"
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/credential"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 type (

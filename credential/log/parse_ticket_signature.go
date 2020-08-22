@@ -3,10 +3,10 @@ package credential_log
 import (
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/credential/infra"
+	"github.com/getto-systems/project-example-auth/credential/infra"
 
-	"github.com/getto-systems/project-example-id/request"
-	"github.com/getto-systems/project-example-id/user"
+	"github.com/getto-systems/project-example-auth/request"
+	"github.com/getto-systems/project-example-auth/user"
 )
 
 func (log Logger) parseTicketSignature() infra.ParseTicketSignatureLogger {

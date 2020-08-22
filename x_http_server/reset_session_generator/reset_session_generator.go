@@ -3,9 +3,9 @@ package reset_session_generator
 import (
 	"github.com/google/uuid"
 
-	"github.com/getto-systems/project-example-id/password_reset/infra"
+	"github.com/getto-systems/project-example-auth/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-auth/password_reset"
 )
 
 type Generator struct {

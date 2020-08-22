@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/getto-systems/project-example-id/password_reset/infra"
+	"github.com/getto-systems/project-example-auth/password_reset/infra"
 
-	"github.com/getto-systems/project-example-id/password_reset"
+	"github.com/getto-systems/project-example-auth/password_reset"
 )
 
 type (

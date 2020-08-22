@@ -1,7 +1,7 @@
 package password_core
 
 import (
-	"github.com/getto-systems/project-example-id/password"
+	"github.com/getto-systems/project-example-auth/password"
 )
 
 const (

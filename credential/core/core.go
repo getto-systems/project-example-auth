@@ -1,9 +1,9 @@
 package credential_core
 
 import (
-	"github.com/getto-systems/project-example-id/credential/infra"
+	"github.com/getto-systems/project-example-auth/credential/infra"
 
-	"github.com/getto-systems/project-example-id/credential"
+	"github.com/getto-systems/project-example-auth/credential"
 )
 
 type (

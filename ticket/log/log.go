@@ -1,7 +1,7 @@
 package ticket_log
 
 import (
-	"github.com/getto-systems/project-example-id/ticket/infra"
+	"github.com/getto-systems/project-example-auth/ticket/infra"
 )
 
 type (

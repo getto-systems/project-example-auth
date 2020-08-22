@@ -1,8 +1,8 @@
 package password_reset_core
 
 import (
-	"github.com/getto-systems/project-example-id/password_reset"
-	"github.com/getto-systems/project-example-id/request"
+	"github.com/getto-systems/project-example-auth/password_reset"
+	"github.com/getto-systems/project-example-auth/request"
 )
 
 func (action action) PushSendTokenJob(request request.Request, session password_reset.Session, dest password_reset.Destination, token password_reset.Token) (err error) {

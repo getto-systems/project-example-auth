@@ -1,7 +1,7 @@
 package user_log
 
 import (
-	"github.com/getto-systems/project-example-id/user/infra"
+	"github.com/getto-systems/project-example-auth/user/infra"
 )
 
 type (
