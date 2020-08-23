@@ -1,13 +1,13 @@
 server {
   listen      8443 ssl;
-  server_name $DOMAIN;
+  server_name dev-example-auth.$DOMAIN;
 
-  ssl_certificate     $TLS_CERT;
-  ssl_certificate_key $TLS_KEY;
+  ssl_certificate     ${TLS_CERT};
+  ssl_certificate_key ${TLS_KEY};
 
   location / {
     if ($request_method = 'OPTIONS') {
-      add_header 'Access-Control-Allow-Origin' '$ORIGIN';
+      add_header 'Access-Control-Allow-Origin' 'https://dev-example-ui.$DOMAIN';
       add_header 'Access-Control-Allow-Methods' 'POST, OPTIONS';
       add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
       add_header 'Access-Control-Allow-Credentials' 'true';
@@ -20,12 +20,12 @@ server {
     }
 
     if ($request_method = 'POST') {
-      add_header 'Access-Control-Allow-Origin' '$ORIGIN' always;
+      add_header 'Access-Control-Allow-Origin' 'https://dev-example-ui.$DOMAIN' always;
       add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
       add_header 'Access-Control-Allow-Credentials' 'true' always;
       add_header 'Access-Control-Expose-Headers' 'X-GETTO-EXAMPLE-ID-TicketNonce,X-GETTO-EXAMPLE-ID-ApiRoles';
     }
 
-    proxy_pass http://$LABO_IP:${LABO_PORT_PREFIX}${APP_PORT};
+    proxy_pass http://${LABO_IP}:${GETTO_EXAMPLE_AUTH_PORT};
   }
 }
