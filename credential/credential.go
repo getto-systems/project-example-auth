@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	ErrParseTicketSignatureParseFailed      = errors.New("Credential.ParseTicketSignature/ParseFailed")
 	ErrParseTicketSignatureMatchFailedNonce = errors.New("Credential.ParseTicketSignature/MatchFailed.Nonce")
 )
 

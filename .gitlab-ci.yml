@@ -3,6 +3,7 @@ stages:
   - bump_version
   - release
   - release_build
+  - release_deploy
   - release_notify
 
 variables:
@@ -83,6 +84,23 @@ release_build:
 
   services:
     - docker:dind
+
+  script:
+    - ./.ci/build.sh
+
+release_deploy:
+  stage: release_deploy
+  only:
+    refs:
+      - release@getto-systems-base/projects/example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+
+  image: google/cloud-sdk:latest
 
   script:
     - ./.ci/deploy.sh

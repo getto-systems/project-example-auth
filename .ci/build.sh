@@ -5,12 +5,6 @@ deploy_main() {
     echo "key file : GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON is not exists"
     exit 1
   fi
-  if [ ! -f "${GOOGLE_CLOUD_SERVICE_ACCOUNT_NAME}" ]; then
-    echo "key file : GOOGLE_CLOUD_SERVICE_ACCOUNT_NAME is not exists"
-    exit 1
-  fi
-
-  export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}
 
   local host
   local project
@@ -27,8 +21,6 @@ deploy_main() {
   version=$(cat .release-version)
 
   tag=${host}/${project}/${image}:${version}
-
-  gcloud run deploy --image="$tag" --platform=managed --service-account="${GOOGLE_CLOUD_SERVICE_ACCOUNT_NAME}"
 
   docker build -t $tag . &&
   docker push $tag

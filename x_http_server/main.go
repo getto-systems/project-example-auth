@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/getto-systems/project-example-auth"
 
@@ -30,6 +28,8 @@ import (
 	"github.com/getto-systems/project-example-auth/ticket/repository/ticket"
 	"github.com/getto-systems/project-example-auth/user/log"
 	"github.com/getto-systems/project-example-auth/user/repository/user"
+	"github.com/getto-systems/project-example-auth/y_static/repository/env"
+	"github.com/getto-systems/project-example-auth/y_static/repository/secret"
 
 	credential_infra "github.com/getto-systems/project-example-auth/credential/infra"
 	password_infra "github.com/getto-systems/project-example-auth/password/infra"
@@ -41,12 +41,14 @@ import (
 	"github.com/getto-systems/project-example-auth/password_reset"
 	"github.com/getto-systems/project-example-auth/ticket"
 	"github.com/getto-systems/project-example-auth/user"
+	"github.com/getto-systems/project-example-auth/y_static"
 
 	"github.com/getto-systems/project-example-auth/credential/core"
 	"github.com/getto-systems/project-example-auth/password/core"
 	"github.com/getto-systems/project-example-auth/password_reset/core"
 	"github.com/getto-systems/project-example-auth/ticket/core"
 	"github.com/getto-systems/project-example-auth/user/core"
+	"github.com/getto-systems/project-example-auth/y_static/core"
 )
 
 const (
@@ -61,10 +63,44 @@ type (
 		backend      auth.Backend
 	}
 
+	env struct {
+		logLevel   string
+		secretName string
+	}
+	secret struct {
+		admin      adminSecret
+		cookie     cookieSecret
+		ticket     ticketSecret
+		api        apiSecret
+		cloudfront cloudfrontSecret
+	}
+	adminSecret struct {
+		userID   string
+		loginID  string
+		password string
+	}
+	cookieSecret struct {
+		domain string
+	}
+	ticketSecret struct {
+		privateKey []byte
+		publicKey  []byte
+	}
+	apiSecret struct {
+		privateKey []byte
+	}
+	cloudfrontSecret struct {
+		keyPairID   string
+		privateKey  []byte
+		resourceURL string
+	}
+
 	infra struct {
 		logger logger.LeveledLogger
-
 		extend extendSecond
+
+		env    static.Env
+		secret static.Secret
 	}
 	extendSecond struct {
 		password credential.TicketExtendSecond
@@ -121,17 +157,17 @@ func (server server) handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func newServer() server {
+	infra := newInfra()
+
 	return server{
 		port: ":8080",
 
-		cookieDomain: http_handler.CookieDomain(os.Getenv("COOKIE_DOMAIN")),
-		backend:      newBackend(),
+		cookieDomain: http_handler.CookieDomain(infra.secret.Cookie.Domain),
+		backend:      newBackend(infra),
 	}
 }
 
-func newBackend() auth.Backend {
-	infra := newInfra()
-
+func newBackend(infra infra) auth.Backend {
 	return auth.NewBackend(
 		infra.newTicketAction(),
 		infra.newCredentialAction(),
@@ -142,11 +178,39 @@ func newBackend() auth.Backend {
 }
 
 func newInfra() infra {
+	staticAction := static_core.NewAction(
+		static_repository_env.NewOSEnv(),
+		static_repository_secret.NewSecretManager(),
+	)
+
+	env, err := staticAction.GetEnv()
+	if err != nil {
+		log.Fatalf("failed to get env: %s", err)
+	}
+
+	secret, err := staticAction.GetSecret(env.SecretName)
+	if err != nil {
+		log.Fatalf("failed to get secret: %s", err)
+	}
+
 	return infra{
-		logger: newLeveledLogger(),
+		logger: newLeveledLogger(env.LogLevel),
 		extend: newExtend(),
+
+		env:    env,
+		secret: secret,
 	}
 }
+func newLeveledLogger(level string) logger.LeveledLogger {
+	return logger.NewLeveledLogger(level)
+}
+func newExtend() extendSecond {
+	// パスワードで認証した場合、有効期限 5分、最大延長 14日
+	return extendSecond{
+		password: credential.TicketExtendWeek(2),
+	}
+}
+
 func (infra infra) newTicketAction() ticket.Action {
 	return ticket_core.NewAction(
 		ticket_log.NewLogger(infra.logger),
@@ -162,14 +226,14 @@ func (infra infra) newTicketAction() ticket.Action {
 func (infra infra) newCredentialAction() credential.Action {
 	apiUsers := credential_repository_apiUser.NewMemoryStore()
 
-	initApiUserRepository(apiUsers)
+	infra.initApiUserRepository(apiUsers)
 
 	return credential_core.NewAction(
 		credential_log.NewLogger(infra.logger),
 
-		newTicketSigner(),
-		newApiTokenSigner(),
-		newContentTokenSigner(),
+		infra.newTicketSigner(),
+		infra.newApiTokenSigner(),
+		infra.newContentTokenSigner(),
 
 		apiUsers,
 	)
@@ -177,7 +241,7 @@ func (infra infra) newCredentialAction() credential.Action {
 func (infra infra) newUserAction() user.Action {
 	users := user_repository_user.NewMemoryStore()
 
-	initUserRepository(users)
+	infra.initUserRepository(users)
 
 	return user_core.NewAction(
 		user_log.NewLogger(infra.logger),
@@ -189,7 +253,7 @@ func (infra infra) newPasswordAction() password.Action {
 	encrypter := password_encrypter.NewEncrypter(10) // bcrypt.DefaultCost
 	passwords := password_repository_password.NewMemoryStore()
 
-	initPasswordRepository(passwords, encrypter)
+	infra.initPasswordRepository(passwords, encrypter)
 
 	return password_core.NewAction(
 		password_log.NewLogger(infra.logger),
@@ -203,7 +267,7 @@ func (infra infra) newPasswordAction() password.Action {
 func (infra infra) newPasswordResetAction() password_reset.Action {
 	destinations := password_reset_repository_destination.NewMemoryStore()
 
-	initPasswordResetDestinationRepository(destinations)
+	infra.initPasswordResetDestinationRepository(destinations)
 
 	return password_reset_core.NewAction(
 		password_reset_log.NewLogger(infra.logger),
@@ -222,66 +286,44 @@ func (infra infra) newPasswordResetAction() password_reset.Action {
 	)
 }
 
-func initUserRepository(users user_infra.UserRepository) {
-	login := user.NewLogin(user.LoginID(os.Getenv("ADMIN_LOGIN_ID")))
+func (infra infra) initUserRepository(users user_infra.UserRepository) {
+	login := user.NewLogin(user.LoginID(infra.secret.Admin.LoginID))
 
-	err := users.RegisterUser(adminUser(), login)
+	err := users.RegisterUser(infra.adminUser(), login)
 	if err != nil {
 		log.Fatalf("failed to register admin user: %s", err)
 	}
 }
-func initApiUserRepository(apiUsers credential_infra.ApiUserRepository) {
-	err := apiUsers.RegisterApiRoles(adminUser(), credential.ApiRoles([]string{"admin"}))
+func (infra infra) initApiUserRepository(apiUsers credential_infra.ApiUserRepository) {
+	err := apiUsers.RegisterApiRoles(infra.adminUser(), credential.ApiRoles([]string{"admin"}))
 	if err != nil {
 		log.Fatalf("failed to register admin user api roles: %s", err)
 	}
 }
-func initPasswordRepository(passwords password_infra.PasswordRepository, gen password_infra.PasswordGenerator) {
-	raw := password.RawPassword(os.Getenv("ADMIN_PASSWORD"))
+func (infra infra) initPasswordRepository(passwords password_infra.PasswordRepository, gen password_infra.PasswordGenerator) {
+	raw := password.RawPassword(infra.secret.Admin.Password)
 
 	hashed, err := gen.GeneratePassword(raw)
 	if err != nil {
 		log.Fatalf("failed to generate admin user password: %s", err)
 	}
 
-	passwords.ChangePassword(adminUser(), hashed)
+	passwords.ChangePassword(infra.adminUser(), hashed)
 }
-func initPasswordResetDestinationRepository(destinations password_reset_infra.DestinationRepository) {
-	err := destinations.RegisterDestination(adminUser(), password_reset.NewLogDestination())
+func (infra infra) initPasswordResetDestinationRepository(destinations password_reset_infra.DestinationRepository) {
+	err := destinations.RegisterDestination(infra.adminUser(), password_reset.NewLogDestination())
 	if err != nil {
 		log.Fatalf("failed to register admin user destination: %s", err)
 	}
 }
-
-func adminUser() user.User {
-	return user.NewUser(user.UserID(os.Getenv("ADMIN_USER_ID")))
+func (infra infra) adminUser() user.User {
+	return user.NewUser(user.UserID(infra.secret.Admin.UserID))
 }
 
-func newLeveledLogger() logger.LeveledLogger {
-	return logger.NewLeveledLogger(os.Getenv("LOG_LEVEL"))
-}
-
-func newExtend() extendSecond {
-	// パスワードで認証した場合、有効期限 5分、最大延長 14日
-	return extendSecond{
-		password: credential.TicketExtendWeek(2),
-	}
-}
-
-func newTicketSigner() signer.TicketSigner {
-	privateKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PRIVATE_KEY"))
-	if err != nil {
-		log.Fatalf("ticket private key read failed: %s", err)
-	}
-
-	publicKeyPem, err := ioutil.ReadFile(os.Getenv("TICKET_PUBLIC_KEY"))
-	if err != nil {
-		log.Fatalf("ticket public key read failed: %s", err)
-	}
-
+func (infra infra) newTicketSigner() signer.TicketSigner {
 	key, err := signer.NewJWT_ES_512_Key(signer.JWT_Pem{
-		PrivateKey: privateKeyPem,
-		PublicKey:  publicKeyPem,
+		PrivateKey: infra.secret.Ticket.PrivateKey,
+		PublicKey:  infra.secret.Ticket.PublicKey,
 	})
 	if err != nil {
 		log.Fatalf("ticket key parse failed: %s", err)
@@ -290,14 +332,9 @@ func newTicketSigner() signer.TicketSigner {
 	jwt := signer.NewJWTSigner(key)
 	return signer.NewTicketSigner(jwt)
 }
-func newApiTokenSigner() signer.ApiTokenSigner {
-	pem, err := ioutil.ReadFile(os.Getenv("API_PRIVATE_KEY"))
-	if err != nil {
-		log.Fatalf("app private key read failed: %s", err)
-	}
-
+func (infra infra) newApiTokenSigner() signer.ApiTokenSigner {
 	key, err := signer.NewJWT_ES_512_Key(signer.JWT_Pem{
-		PrivateKey: pem,
+		PrivateKey: infra.secret.Api.PrivateKey,
 	})
 	if err != nil {
 		log.Fatalf("app key parse failed: %s", err)
@@ -306,15 +343,10 @@ func newApiTokenSigner() signer.ApiTokenSigner {
 	jwt := signer.NewJWTSigner(key)
 	return signer.NewApiTokenSigner(jwt)
 }
-func newContentTokenSigner() signer.ContentTokenSigner {
-	pem, err := ioutil.ReadFile(os.Getenv("AWS_CLOUDFRONT_PEM"))
-	if err != nil {
-		log.Fatalf("aws cloudfront private key read failed: %s", err)
-	}
-
+func (infra infra) newContentTokenSigner() signer.ContentTokenSigner {
 	return signer.NewContentTokenSigner(
-		credential.ContentKeyID(os.Getenv("AWS_CLOUDFRONT_KEY_PAIR_ID")),
-		pem,
-		os.Getenv("AWS_CLOUDFRONT_SECURE_URL"),
+		credential.ContentKeyID(infra.secret.Cloudfront.KeyPairID),
+		infra.secret.Cloudfront.PrivateKey,
+		infra.secret.Cloudfront.ResourceURL,
 	)
 }

@@ -1,4 +1,6 @@
-DOCKER_WRAPPER_IMAGE_golang(){ head -1 Dockerfile | sed "s/.*golang:\(.*\) as.*/\1/"; }
+DOCKER_WRAPPER_IMAGE_golang(){ head -1 $APP_ROOT/Dockerfile | sed "s/.*golang:\(.*\) as.*/\1/"; }
+DOCKER_WRAPPER_IMAGE_node(){ echo "14.8.0-buster-slim"; }
+DOCKER_WRAPPER_IMAGE_google/cloud-sdk(){ echo "307.0.0-slim"; }
 
 DOCKER_WRAPPER_SERVER_OPTS_http(){ echo "-p ${LABO_PORT_PREFIX}${APP_PORT}:8080"; }
 
