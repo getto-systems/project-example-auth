@@ -8,6 +8,6 @@ RUN : && \
   go build -a -o app $(head -1 go.mod | cut -d' ' -f2)/x_http_server && \
   :
 
-FROM scratch
+FROM gcr.io/distroless/static-debian10
 COPY --from=builder /build/app /app
 CMD ["/app"]
