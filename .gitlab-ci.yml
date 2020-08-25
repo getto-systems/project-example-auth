@@ -51,7 +51,7 @@ release:
   stage: release
   only:
     refs:
-      - release@getto-systems-base/projects/example/id
+      - release@getto-systems-base/projects/example/auth
     changes:
       - .release-version
   except:
@@ -68,7 +68,7 @@ release_build:
   stage: release_build
   only:
     refs:
-      - release@getto-systems-base/projects/example/id
+      - release@getto-systems-base/projects/example/auth
     changes:
       - .release-version
   except:
@@ -92,7 +92,7 @@ release_deploy:
   stage: release_deploy
   only:
     refs:
-      - release@getto-systems-base/projects/example/id
+      - release@getto-systems-base/projects/example/auth
     changes:
       - .release-version
   except:
@@ -109,7 +109,7 @@ release_success:
   stage: release_notify
   only:
     refs:
-      - release@getto-systems-base/projects/example/id
+      - release@getto-systems-base/projects/example/auth
     changes:
       - .release-version
   except:
@@ -123,7 +123,7 @@ release_success:
   before_script:
     - export url=$GETTO_PSYCHER_URL?$GETTO_PSYCHER_TOKEN=true
     - export channel=$SLACK_CHANNEL
-    - export version=id:$(cat .release-version)
+    - export version=auth:$(cat .release-version)
   script:
     - curl $TRELLIS_PSYCHER_GETTO/notify-release-success.sh | sh -s -- $url $channel $version
 
@@ -131,7 +131,7 @@ release_failure:
   stage: release_notify
   only:
     refs:
-      - release@getto-systems-base/projects/example/id
+      - release@getto-systems-base/projects/example/auth
     changes:
       - .release-version
   except:
@@ -145,6 +145,6 @@ release_failure:
   before_script:
     - export url=$GETTO_PSYCHER_URL?$GETTO_PSYCHER_TOKEN=true
     - export channel=$SLACK_CHANNEL
-    - export version=id:$(cat .release-version)
+    - export version=auth:$(cat .release-version)
   script:
     - curl $TRELLIS_PSYCHER_GETTO/notify-release-failure.sh | sh -s -- $url $channel $version
