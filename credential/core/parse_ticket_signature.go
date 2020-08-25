@@ -12,6 +12,7 @@ func (action action) ParseTicketSignature(request request.Request, nonce credent
 	user, ticketNonce, err := action.ticketParser.Parse(signature)
 	if err != nil {
 		action.logger.FailedToParseTicketSignature(request, err)
+		err = credential.ErrParseTicketSignatureParseFailed
 		return
 	}
 	if ticketNonce != nonce {

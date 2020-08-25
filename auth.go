@@ -74,7 +74,9 @@ func (u Usecase) validateTicket(request request.Request) (_ user.User, _ credent
 	user, err := u.credential.ParseTicketSignature(request, nonce, signature)
 	if err != nil {
 		switch err {
-		case credential.ErrParseTicketSignatureMatchFailedNonce:
+		case credential.ErrParseTicketSignatureParseFailed,
+			credential.ErrParseTicketSignatureMatchFailedNonce:
+
 			err = ErrInvalidTicket
 			u.clearCredential()
 

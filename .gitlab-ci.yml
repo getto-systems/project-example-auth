@@ -85,6 +85,23 @@ release_build:
     - docker:dind
 
   script:
+    - ./.ci/build.sh
+
+release_deploy:
+  stage: release_deploy
+  only:
+    refs:
+      - release@getto-systems-base/projects/example/id
+    changes:
+      - .release-version
+  except:
+    refs:
+      - triggers
+      - schedules
+
+  image: google/cloud-sdk:latest
+
+  script:
     - ./.ci/deploy.sh
 
 release_success:
