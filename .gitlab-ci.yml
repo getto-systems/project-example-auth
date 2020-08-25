@@ -2,7 +2,7 @@ stages:
   - test
   - bump_version
   - release
-  - release_build
+  - release_deploy
   - release_notify
 
 variables:
