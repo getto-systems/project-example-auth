@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 0.5.3
+
+- fix: base image : See merge request getto-systems-base/projects/example/auth!224
+
+
 ## Version : 0.5.2
 
 
