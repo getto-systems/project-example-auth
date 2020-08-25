@@ -1,6 +1,6 @@
 #!/bin/sh
 
-deploy_main() {
+build_main() {
   if [ ! -f "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" ]; then
     echo "key file : GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON is not exists"
     exit 1
@@ -17,7 +17,7 @@ deploy_main() {
   cat $GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON | docker login -u _json_key --password-stdin https://${host}
 
   project=getto-projects
-  image=example/id
+  image=example/auth
   version=$(cat .release-version)
 
   tag=${host}/${project}/${image}:${version}
@@ -26,4 +26,4 @@ deploy_main() {
   docker push $tag
 }
 
-deploy_main
+build_main
