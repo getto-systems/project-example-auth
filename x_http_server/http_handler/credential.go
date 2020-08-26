@@ -20,9 +20,9 @@ const (
 	COOKIE_TICKET    = "__Secure-GETTO-EXAMPLE-ID-TicketToken"
 	COOKIE_API_TOKEN = "__Secure-GETTO-EXAMPLE-ID-ApiToken"
 
-	COOKIE_CLOUDFRONT_KEY_PAIR_ID = "__Secure-CloudFront-Key-Pair-Id"
-	COOKIE_CLOUDFRONT_POLICY      = "__Secure-CloudFront-Policy"
-	COOKIE_CLOUDFRONT_SIGNATURE   = "__Secure-CloudFront-Signature"
+	COOKIE_CLOUDFRONT_KEY_PAIR_ID = "CloudFront-Key-Pair-Id"
+	COOKIE_CLOUDFRONT_POLICY      = "CloudFront-Policy"
+	COOKIE_CLOUDFRONT_SIGNATURE   = "CloudFront-Signature"
 
 	HEADER_NONCE     = "X-GETTO-EXAMPLE-ID-TicketNonce"
 	HEADER_API_ROLES = "X-GETTO-EXAMPLE-ID-ApiRoles"
