@@ -22,7 +22,7 @@ deploy_main() {
 
   tag=${host}/${project}/${image}:${version}
 
-  echo gcloud run deploy example-auth --image="$tag" --platform=managed --region=asia-northeast1 --project=getto-projects
+  gcloud run deploy example-auth --image="$tag" --platform=managed --region=asia-northeast1 --project=getto-projects
 }
 
 deploy_main
