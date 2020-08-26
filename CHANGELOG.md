@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 0.8.0
+
+- fix: deploy : See merge request getto-systems-base/projects/example/auth!231
+
+
 ## Version : 0.7.0
 
 - fix: credential : See merge request getto-systems-base/projects/example/auth!229
