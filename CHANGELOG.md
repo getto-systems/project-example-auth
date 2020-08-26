@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version : 0.11.0
+
+- fix: deploy : See merge request getto-systems-base/projects/example/auth!236
+
+
+
 ## Version : 0.10.0
 
 - fix: deploy : See merge request getto-systems-base/projects/example/auth!234
