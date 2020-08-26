@@ -20,6 +20,10 @@ const (
 	COOKIE_TICKET    = "__Secure-GETTO-EXAMPLE-ID-TicketToken"
 	COOKIE_API_TOKEN = "__Secure-GETTO-EXAMPLE-ID-ApiToken"
 
+	COOKIE_CLOUDFRONT_KEY_PAIR_ID = "__Secure-CloudFront-Key-Pair-Id"
+	COOKIE_CLOUDFRONT_POLICY      = "__Secure-CloudFront-Policy"
+	COOKIE_CLOUDFRONT_SIGNATURE   = "__Secure-CloudFront-Signature"
+
 	HEADER_NONCE     = "X-GETTO-EXAMPLE-ID-TicketNonce"
 	HEADER_API_ROLES = "X-GETTO-EXAMPLE-ID-ApiRoles"
 )
@@ -143,7 +147,7 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 
 func (handler CredentialHandler) setContentToken(contentToken credential.ContentToken) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:    "CloudFront-Key-Pair-Id",
+		Name:    COOKIE_CLOUDFRONT_KEY_PAIR_ID,
 		Value:   string(contentToken.KeyID()),
 		Expires: time.Time(contentToken.Expires()),
 
@@ -155,7 +159,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 		SameSite: http.SameSiteStrictMode,
 	})
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:    "CloudFront-Policy",
+		Name:    COOKIE_CLOUDFRONT_POLICY,
 		Value:   string(contentToken.Policy()),
 		Expires: time.Time(contentToken.Expires()),
 
@@ -167,7 +171,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 		SameSite: http.SameSiteStrictMode,
 	})
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:    "CloudFront-Signature",
+		Name:    COOKIE_CLOUDFRONT_SIGNATURE,
 		Value:   string(contentToken.Signature()),
 		Expires: time.Time(contentToken.Expires()),
 
@@ -182,7 +186,7 @@ func (handler CredentialHandler) setContentToken(contentToken credential.Content
 
 func (handler CredentialHandler) clearContentToken() {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:   "CloudFront-Key-Pair-Id",
+		Name:   COOKIE_CLOUDFRONT_KEY_PAIR_ID,
 		Value:  "",
 		MaxAge: -1,
 
@@ -194,7 +198,7 @@ func (handler CredentialHandler) clearContentToken() {
 		SameSite: http.SameSiteStrictMode,
 	})
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:   "CloudFront-Policy",
+		Name:   COOKIE_CLOUDFRONT_POLICY,
 		Value:  "",
 		MaxAge: -1,
 
@@ -206,7 +210,7 @@ func (handler CredentialHandler) clearContentToken() {
 		SameSite: http.SameSiteStrictMode,
 	})
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:   "CloudFront-Signature",
+		Name:   COOKIE_CLOUDFRONT_SIGNATURE,
 		Value:  "",
 		MaxAge: -1,
 
