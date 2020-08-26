@@ -6,8 +6,6 @@ deploy_main() {
     exit 1
   fi
 
-  export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}
-
   local host
   local project
   local image
@@ -22,6 +20,7 @@ deploy_main() {
 
   tag=${host}/${project}/${image}:${version}
 
+  echo "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | gcloud auth activate-service-account --key-file=-
   gcloud run deploy example-auth --image="$tag" --platform=managed --region=asia-northeast1 --project=getto-projects
 }
 
