@@ -25,9 +25,11 @@ deploy_main() {
 
   export HOME=$(pwd)
 
+  cp "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" .ci/google_cloud_service_account_key.json
   account=$(cat "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | grep "client_email" | cut -d'"' -f4)
 
-  echo "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | gcloud auth activate-service-account "$account" --key-file=-
+  echo gcloud auth activate-service-account "$account" --key-file=.ci/google_cloud_service_account_key.json
+  gcloud auth activate-service-account "$account" --key-file=.ci/google_cloud_service_account_key.json
   gcloud run deploy example-auth --image="$tag" --platform=managed --region="$region" --project="$project"
 }
 
