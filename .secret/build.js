@@ -3,7 +3,7 @@ const path = require("path");
 
 function adminSecret(cwd) {
   try {
-    return JSON.parse(fs.readFileSync(path.join(cwd, "admin.json")));
+    return JSON.parse(fs.readFileSync(path.join(cwd, "admin.json"), "utf8"));
   } catch (err) {
     console.error(`failed to create admin secret: ${err}`);
   }
@@ -11,7 +11,7 @@ function adminSecret(cwd) {
 
 function cookieSecret(cwd) {
   try {
-    return JSON.parse(fs.readFileSync(path.join(cwd, "cookie.json")));
+    return JSON.parse(fs.readFileSync(path.join(cwd, "cookie.json"), "utf8"));
   } catch (err) {
     console.error(`failed to create cookie secret: ${err}`);
   }
@@ -20,8 +20,8 @@ function cookieSecret(cwd) {
 function ticketSecret(cwd) {
   try {
     return {
-      private_key: fs.readFileSync(path.join(cwd, "ticket/ecdsa-p521-private.pem")).toString(),
-      public_key: fs.readFileSync(path.join(cwd, "ticket/ecdsa-p521-public.pem")).toString(),
+      private_key: fs.readFileSync(path.join(cwd, "ticket/ecdsa-p521-private.pem"), "utf8"),
+      public_key: fs.readFileSync(path.join(cwd, "ticket/ecdsa-p521-public.pem"), "utf8"),
     }
   } catch (err) {
     console.error(`failed to create ticket secret: ${err}`);
@@ -31,7 +31,7 @@ function ticketSecret(cwd) {
 function apiSecret(cwd) {
   try {
     return {
-      private_key: fs.readFileSync(path.join(cwd, "api/ecdsa-p521-private.pem")).toString(),
+      private_key: fs.readFileSync(path.join(cwd, "api/ecdsa-p521-private.pem"), "utf8"),
     }
   } catch (err) {
     console.error(`failed to create api secret: ${err}`);
@@ -40,8 +40,8 @@ function apiSecret(cwd) {
 
 function cloudfrontSecret(cwd) {
   try {
-    const secret = JSON.parse(fs.readFileSync(path.join(cwd, "cloudfront.json")));
-    secret.private_key = fs.readFileSync(path.join(cwd, "cloudfront/pk.pem")).toString();
+    const secret = JSON.parse(fs.readFileSync(path.join(cwd, "cloudfront.json"), "utf8"));
+    secret.private_key = fs.readFileSync(path.join(cwd, "cloudfront/pk.pem"), "utf8");
     return secret;
   } catch (err) {
     console.error(`failed to create cloudfront secret: ${err}`);

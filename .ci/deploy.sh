@@ -7,12 +7,15 @@ deploy_main() {
   fi
 
   local host
+  local region
   local project
   local image
   local version
   local tag
+  local account
 
   host=asia.gcr.io
+  region=asia-northeast1
 
   project=getto-projects
   image=example/auth
@@ -20,8 +23,12 @@ deploy_main() {
 
   tag=${host}/${project}/${image}:${version}
 
-  echo "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | gcloud auth activate-service-account --key-file=-
-  gcloud run deploy example-auth --image="$tag" --platform=managed --region=asia-northeast1 --project=getto-projects
+  export HOME=$(pwd)
+
+  account=$(cat "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | grep "client_email" | cut -d'"' -f4)
+
+  echo "${GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_JSON}" | gcloud auth activate-service-account "$account" --key-file=-
+  gcloud run deploy example-auth --image="$tag" --platform=managed --region="$region" --project="$project"
 }
 
 deploy_main
