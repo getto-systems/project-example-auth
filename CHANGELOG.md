@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 0.7.0
+
+- fix: credential : See merge request getto-systems-base/projects/example/auth!229
+
+
 ## Version : 0.6.0
 
 - fix: credential : See merge request getto-systems-base/projects/example/auth!227
