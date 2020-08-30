@@ -9,7 +9,7 @@ server {
     if ($request_method = 'OPTIONS') {
       add_header 'Access-Control-Allow-Origin' 'https://dev-example-ui.$DOMAIN';
       add_header 'Access-Control-Allow-Methods' 'POST, OPTIONS';
-      add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
+      add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-HANDLER,X-GETTO-EXAMPLE-ID-TICKET_NONCE';
       add_header 'Access-Control-Allow-Credentials' 'true';
       add_header 'Access-Control-Max-Age' 3600;
 
@@ -21,9 +21,9 @@ server {
 
     if ($request_method = 'POST') {
       add_header 'Access-Control-Allow-Origin' 'https://dev-example-ui.$DOMAIN' always;
-      add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-Handler,X-GETTO-EXAMPLE-ID-TicketNonce';
+      add_header 'Access-Control-Allow-Headers' 'Content-Type,X-GETTO-EXAMPLE-ID-HANDLER,X-GETTO-EXAMPLE-ID-TICKET_NONCE';
       add_header 'Access-Control-Allow-Credentials' 'true' always;
-      add_header 'Access-Control-Expose-Headers' 'X-GETTO-EXAMPLE-ID-TicketNonce,X-GETTO-EXAMPLE-ID-ApiRoles';
+      add_header 'Access-Control-Expose-Headers' 'X-GETTO-EXAMPLE-ID-TICKET_NONCE,X-GETTO-EXAMPLE-ID-API_CREDENTIAL';
     }
 
     proxy_pass http://${LABO_IP}:${GETTO_EXAMPLE_AUTH_PORT};
