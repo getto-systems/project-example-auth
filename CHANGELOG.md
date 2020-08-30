@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version : 0.15.0
+
+- use: protocol buffers : See merge request getto-systems-base/projects/example/auth!249
+
+
+
 ## Version : 0.14.0
 
 - fix: credential : See merge request getto-systems-base/projects/example/auth!247
