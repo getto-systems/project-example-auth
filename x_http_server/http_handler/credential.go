@@ -137,7 +137,7 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	apiCredential := credential_pb.ApiCredential{
+	apiCredential := credential_pb.ApiCredentialMessage{
 		Roles: apiToken.ApiRoles(),
 	}
 
