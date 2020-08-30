@@ -7,7 +7,6 @@ stages:
   - release_notify
 
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
   TRELLIS_GIT_POST: https://trellis.getto.systems/git/post/1.5.2
   TRELLIS_CI_BUMP_VERSION: https://trellis.getto.systems/ci/bump-version/1.10.2
   TRELLIS_PSYCHER_GETTO: https://trellis.getto.systems/psycher/getto/2.7.2
@@ -22,6 +21,8 @@ test:
 
   image: golang:1.15.0-buster
 
+  before_script:
+    - git submodule update --init
   script:
     - "go build -o app $(head -1 go.mod | cut -d' ' -f2)/x_http_server"
     - go test .
@@ -86,6 +87,8 @@ release_build:
   services:
     - docker:dind
 
+  before_script:
+    - git submodule update --init
   script:
     - ./.ci/build.sh
 
