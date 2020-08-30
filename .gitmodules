@@ -1,0 +1,3 @@
+[submodule "auth-protocol_buffers"]
+	path = auth-protocol_buffers
+	url = git@gitlab.com:getto-systems-base/projects/example/auth-protocol_buffers.git

@@ -7,6 +7,7 @@ stages:
   - release_notify
 
 variables:
+  GIT_SUBMODULE_STRATEGY: recursive
   TRELLIS_GIT_POST: https://trellis.getto.systems/git/post/1.5.2
   TRELLIS_CI_BUMP_VERSION: https://trellis.getto.systems/ci/bump-version/1.10.2
   TRELLIS_PSYCHER_GETTO: https://trellis.getto.systems/psycher/getto/2.7.2
