@@ -1,10 +1,15 @@
 package http_handler
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"github.com/getto-systems/project-example-auth/request"
 )
@@ -45,6 +50,31 @@ func (handler Handler) parseBody(input interface{}) (err error) {
 	err = json.NewDecoder(handler.httpRequest.Body).Decode(&input)
 	if err != nil {
 		err = errBodyParseFailed
+		return
+	}
+
+	return nil
+}
+func (handler Handler) parseBodyProto(input protoreflect.ProtoMessage) (err error) {
+	if handler.httpRequest.Body == nil {
+		err = errEmptyBody
+		return
+	}
+
+	body, err := ioutil.ReadAll(handler.httpRequest.Body)
+	if err != nil {
+		err = errBodyParseFailed
+		return
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(string(body))
+	if err != nil {
+		err = errBodyParseFailed
+		return
+	}
+
+	err = proto.Unmarshal(decoded, input)
+	if err != nil {
 		return
 	}
 

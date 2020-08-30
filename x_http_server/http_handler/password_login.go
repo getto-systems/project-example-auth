@@ -1,6 +1,10 @@
 package http_handler
 
 import (
+	"log"
+
+	"github.com/getto-systems/project-example-auth/y_static/protocol_buffers/password_login_pb"
+
 	"github.com/getto-systems/project-example-auth"
 
 	"github.com/getto-systems/project-example-auth/password"
@@ -21,19 +25,15 @@ func (handler PasswordLogin) handler() auth.PasswordLoginHandler {
 }
 
 func (handler PasswordLogin) LoginRequest() (_ request.Request, _ user.Login, _ password.RawPassword, err error) {
-	type body struct {
-		LoginID  string `json:"login_id"`
-		Password string `json:"password"`
-	}
-
-	var input body
-	err = handler.parseBody(&input)
+	var passwordLogin password_login_pb.PasswordLoginMessage
+	err = handler.parseBodyProto(&passwordLogin)
 	if err != nil {
+		log.Printf("body parse failed: %s", err)
 		return
 	}
 
-	login := user.NewLogin(user.LoginID(input.LoginID))
-	raw := password.RawPassword(input.Password)
+	login := user.NewLogin(user.LoginID(passwordLogin.LoginId))
+	raw := password.RawPassword(passwordLogin.Password)
 
 	return handler.newRequest(), login, raw, nil
 }
