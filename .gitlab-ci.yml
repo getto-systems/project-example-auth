@@ -20,7 +20,7 @@ test:
     changes:
       - "**/*.go"
 
-  image: golang:1.14.4-buster
+  image: golang:1.15.0-buster
 
   script:
     - "go build -o app $(head -1 go.mod | cut -d' ' -f2)/x_http_server"

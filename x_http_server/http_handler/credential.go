@@ -2,10 +2,13 @@ package http_handler
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
+
+	"google.golang.org/protobuf/proto"
+
+	"github.com/getto-systems/project-example-auth/y_static/protocol_buffers/credential_pb"
 
 	"github.com/getto-systems/project-example-auth"
 
@@ -24,8 +27,8 @@ const (
 	COOKIE_CLOUDFRONT_POLICY      = "CloudFront-Policy"
 	COOKIE_CLOUDFRONT_SIGNATURE   = "CloudFront-Signature"
 
-	HEADER_NONCE     = "X-GETTO-EXAMPLE-ID-TicketNonce"
-	HEADER_API_ROLES = "X-GETTO-EXAMPLE-ID-ApiRoles"
+	HEADER_NONCE          = "X-GETTO-EXAMPLE-ID-TICKET_NONCE"
+	HEADER_API_CREDENTIAL = "X-GETTO-EXAMPLE-ID-API_CREDENTIAL"
 )
 
 type (
@@ -134,14 +137,18 @@ func (handler CredentialHandler) setApiToken(apiToken credential.ApiToken) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	jsonData, err := json.Marshal(apiToken.ApiRoles())
+	apiCredential := credential_pb.ApiCredential{
+		Roles: apiToken.ApiRoles(),
+	}
+
+	pbData, err := proto.Marshal(&apiCredential)
 	if err != nil {
 		return
 	}
 
 	handler.httpResponseWriter.Header().Set(
-		HEADER_API_ROLES,
-		base64.StdEncoding.EncodeToString(jsonData),
+		HEADER_API_CREDENTIAL,
+		base64.StdEncoding.EncodeToString(pbData),
 	)
 }
 
