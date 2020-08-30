@@ -20,15 +20,15 @@ var (
 )
 
 const (
-	COOKIE_TICKET    = "__Secure-GETTO-EXAMPLE-ID-TicketToken"
-	COOKIE_API_TOKEN = "__Secure-GETTO-EXAMPLE-ID-ApiToken"
+	COOKIE_TICKET_TOKEN = "__Secure-GETTO-EXAMPLE-ID-TICKET-TOKEN"
+	COOKIE_API_TOKEN    = "__Secure-GETTO-EXAMPLE-ID-API-TOKEN"
 
 	COOKIE_CLOUDFRONT_KEY_PAIR_ID = "CloudFront-Key-Pair-Id"
 	COOKIE_CLOUDFRONT_POLICY      = "CloudFront-Policy"
 	COOKIE_CLOUDFRONT_SIGNATURE   = "CloudFront-Signature"
 
-	HEADER_NONCE          = "X-GETTO-EXAMPLE-ID-TICKET_NONCE"
-	HEADER_API_CREDENTIAL = "X-GETTO-EXAMPLE-ID-API_CREDENTIAL"
+	HEADER_TICKET_NONCE   = "X-GETTO-EXAMPLE-ID-TICKET-NONCE"
+	HEADER_API_CREDENTIAL = "X-GETTO-EXAMPLE-ID-API-CREDENTIAL"
 )
 
 type (
@@ -66,13 +66,13 @@ func (handler CredentialHandler) handler() auth.CredentialHandler {
 }
 
 func (handler CredentialHandler) GetTicketNonceAndSignature() (_ credential.TicketNonce, _ credential.TicketSignature, err error) {
-	cookie, err := handler.httpRequest.Cookie(COOKIE_TICKET)
+	cookie, err := handler.httpRequest.Cookie(COOKIE_TICKET_TOKEN)
 	if err != nil {
 		err = errTicketTokenNotFound
 		return
 	}
 
-	nonce := handler.httpRequest.Header.Get(HEADER_NONCE)
+	nonce := handler.httpRequest.Header.Get(HEADER_TICKET_NONCE)
 
 	return credential.TicketNonce(nonce), credential.TicketSignature(cookie.Value), nil
 }
@@ -90,7 +90,7 @@ func (handler CredentialHandler) ClearCredential() {
 
 func (handler CredentialHandler) setTicket(ticket credential.TicketToken) {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:    COOKIE_TICKET,
+		Name:    COOKIE_TICKET_TOKEN,
 		Value:   string(ticket.Signature()),
 		Expires: time.Time(ticket.Expires()),
 
@@ -103,14 +103,14 @@ func (handler CredentialHandler) setTicket(ticket credential.TicketToken) {
 	})
 
 	handler.httpResponseWriter.Header().Set(
-		HEADER_NONCE,
+		HEADER_TICKET_NONCE,
 		string(ticket.Nonce()),
 	)
 }
 
 func (handler CredentialHandler) clearTicket() {
 	http.SetCookie(handler.httpResponseWriter, &http.Cookie{
-		Name:   COOKIE_TICKET,
+		Name:   COOKIE_TICKET_TOKEN,
 		Value:  "",
 		MaxAge: -1,
 
