@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Version : 0.14.0
+
+- fix: credential : See merge request getto-systems-base/projects/example/auth!247
+- fix: pb : See merge request getto-systems-base/projects/example/auth!246
+- fix: credential pb : See merge request getto-systems-base/projects/example/auth!245
+- use: protocol buffers : See merge request getto-systems-base/projects/example/auth!244
+- add: protocol buffers submodule : See merge request getto-systems-base/projects/example/auth!243
+
+
 ## Version : 0.13.1
 
 
